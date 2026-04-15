@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import ServiceWorkerRegistration from "./sw-register";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,12 +20,29 @@ export const metadata: Metadata = {
   title:       "Zuva.TV — African & Caribbean Stories. Free Forever.",
   description: "Watch and support African and Caribbean creators. Tip with Suns, earn real money, cash out to mobile money. No subscription.",
   keywords:    ["African streaming", "Caribbean stories", "creator economy", "Nollywood", "African diaspora"],
+  manifest:    "/manifest.json",
+  appleWebApp: {
+    capable:         true,
+    title:           "Zuva",
+    statusBarStyle:  "black-translucent",
+  },
+  icons: {
+    icon:  [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor:   "#000000",
-  width:        "device-width",
-  initialScale: 1,
+  themeColor:        "#000000",
+  width:             "device-width",
+  initialScale:      1,
+  minimumScale:      1,
+  viewportFit:       "cover",  // respect iPhone notch / Dynamic Island
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -32,6 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-foreground min-h-screen`}>
+          <ServiceWorkerRegistration />
           <Navbar />
           <main className="pt-14 pb-20 md:pb-0 min-h-screen">
             {children}
