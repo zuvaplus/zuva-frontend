@@ -17,7 +17,7 @@ import type {
 // Server (SSR/ISR): relative fetch doesn't work, so use the absolute backend URL.
 const BASE_URL =
   typeof window === "undefined"
-    ? (process.env.BACKEND_URL ?? "http://localhost:3000")
+    ? (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000")
     : "";
 
 async function apiFetch<T>(
