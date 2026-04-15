@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" fill="none">
+  <rect width="56" height="56" rx="12" fill="#000000"/>
+  <!-- Squiggly rays -->
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(45, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(90, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(135, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(180, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(225, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(270, 28, 28)"/>
+  <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#F5A623" stroke-width="2.4" stroke-linecap="round" transform="rotate(315, 28, 28)"/>
+  <!-- Amber disk -->
+  <circle cx="28" cy="28" r="10" fill="#F5A623"/>
+</svg>

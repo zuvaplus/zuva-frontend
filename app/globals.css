@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand — Vibrant African Amber */
+  --amber:        #F5A623;
+  --amber-light:  #F9B748;
+  --amber-dark:   #D4831A;
+
+  /* Canvas — absolute black */
+  --background: #000000;
+  --foreground: #F0F0F0;
+
+  /* Surfaces — barely-there lifts off pure black */
+  --surface:   #080808;
+  --surface-2: #0D0D0D;
+  --surface-3: #141414;
+
+  /* Borders */
+  --border:    rgba(245, 166, 35, 0.18);
+  --border-dim: rgba(245, 166, 35, 0.08);
+
+  --muted: #555555;
+}
+
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  color:      var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ─────────────────────────────────────── */
+.scrollbar-hide              { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* ── Amber shimmer text ────────────────────────────── */
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #F5A623 0%,
+    #F9B748 30%,
+    #FBEAA0 50%,
+    #F9B748 70%,
+    #F5A623 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Sun glow on icon ──────────────────────────────── */
+.sun-glow {
+  filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.7));
+}
+
+/* ── Card hover lift ───────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+/* ── Video overlay gradient ────────────────────────── */
+.video-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.92) 0%,
+    rgba(0,0,0,0.35) 40%,
+    transparent 70%
+  );
+}
+
+/* ── Custom range input ────────────────────────────── */
+input[type="range"].gold-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: linear-gradient(to right, #F5A623, #F9B748);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"].gold-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px; height: 20px;
+  background: #F5A623;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(245,166,35,0.6);
+}
+
+/* ── Skeleton loading ──────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.5;  }
+}
+.skeleton {
+  background: #111111;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* ── Aspect ratios ─────────────────────────────────── */
+.aspect-portrait  { aspect-ratio: 9 / 16; }
+.aspect-landscape { aspect-ratio: 16 / 9; }
