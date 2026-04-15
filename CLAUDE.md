@@ -61,12 +61,17 @@ In dev `BACKEND_URL` defaults to `http://localhost:3000`. No CORS issues.
 - Gold primary: `#D4AF37`
 - Custom Tailwind scales: `gold-*`, `surface-*` (see `tailwind.config.ts`)
 
-### Auth (Clerk)
-Clerk is installed. To wire it up:
-1. Wrap `RootLayout` in `<ClerkProvider>` in `app/layout.tsx`
-2. Add `middleware.ts` at repo root using `clerkMiddleware()` to protect routes
-3. Replace the sign-in page shim with `<SignIn>` component
-4. Replace `req.user` shim in backend with JWT from Clerk session token
+### Auth (Clerk) — fully wired
+- `app/layout.tsx` wraps everything in `<ClerkProvider>`
+- `middleware.ts` uses `clerkMiddleware` + `createRouteMatcher` to protect `/feed`, `/wallet`, `/creator`
+- `app/sign-in/[[...sign-in]]/page.tsx` — Clerk `<SignIn>` with Zuva branding wrapper
+- `app/sign-up/[[...sign-up]]/page.tsx` — Clerk `<SignUp>` with Zuva branding wrapper
+- `lib/clerk-appearance.ts` — shared appearance config (vantablack `#000000` bg, amber `#F5A623` primary)
+
+Catch-all routes (`[[...sign-in]]` / `[[...sign-up]]`) are required for Clerk's multi-step auth flows (MFA, email verification, etc.).
+
+**To go live:** add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to Railway env vars.
+**Backend:** replace the `req.user` shim in `server.js` with JWT verification from Clerk session tokens.
 
 ### Turbopack
 Dev server uses Turbopack for fast HMR: `npm run dev` → `next dev --turbopack`
