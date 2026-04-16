@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Fredoka_One } from "next/font/google";
+import { Fredoka } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -16,7 +16,7 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
-const fredokaOne = Fredoka_One({
+const fredokaOne = Fredoka({
   weight:  "400",
   subsets: ["latin"],
   variable: "--font-fredoka-one",

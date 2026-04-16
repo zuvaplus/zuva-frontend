@@ -77,7 +77,7 @@ export default function ZuvaLogo({
       {showText && (
         <span
           style={{
-            fontFamily:    "var(--font-fredoka-one), 'Fredoka', system-ui, sans-serif",
+            fontFamily:    "var(--font-fredoka-one), 'Fredoka One', system-ui, sans-serif",
             fontWeight:    400,
             fontSize:      Math.round(diskSize * 0.62) + "px",
             letterSpacing: "0.14em",
