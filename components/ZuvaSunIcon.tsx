@@ -1,14 +1,15 @@
 // Server component — no client-side APIs used.
-// Mirrors ZuvaLogo geometry scaled to viewBox 0 0 200 200, centre (100,100).
-// Long rays: 2-segment S-curve stroked path (strokeWidth 6).
-// Short rays: single cubic C-arc stroked path (strokeWidth 5).
+// Mirrors ZuvaLogo geometry: all rays are wavy S-curve flames, alternating tall/short.
+// ViewBox 0 0 200 200, centre (100,100).
 
-const AMBER = "#D4920A";
+const AMBER = "#C17820";
 
-const LONG_RAY  = "M 100,65 C 90,59 90,50 100,44 C 110,38 110,30 100,22";
-const SHORT_RAY = "M 97,62 C 82,60 82,46 97,44";
+// Tall wavy S-curve: two cubic bezier segments
+const TALL_RAY  = "M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22";
+// Short wavy S-curve: same shape, shorter reach
+const SHORT_RAY = "M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34";
 
-const LONG_ANGLES  = [0, 45, 90, 135, 180, 225, 270, 315];
+const TALL_ANGLES  = [0, 45, 90, 135, 180, 225, 270, 315];
 const SHORT_ANGLES = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
 
 interface ZuvaSunIconProps {
@@ -37,11 +38,11 @@ export default function ZuvaSunIcon({
         className,
       ].filter(Boolean).join(" ")}
     >
-      {/* ── Long wavy S-curve rays ───────────────────────── */}
-      {LONG_ANGLES.map((deg) => (
+      {/* ── Tall wavy S-curve rays ───────────────────────── */}
+      {TALL_ANGLES.map((deg) => (
         <path
-          key={`l${deg}`}
-          d={LONG_RAY}
+          key={`t${deg}`}
+          d={TALL_RAY}
           stroke={AMBER}
           strokeWidth="6"
           strokeLinecap="round"
@@ -50,7 +51,7 @@ export default function ZuvaSunIcon({
         />
       ))}
 
-      {/* ── Short C-hook rays ────────────────────────────── */}
+      {/* ── Short wavy S-curve rays ──────────────────────── */}
       {SHORT_ANGLES.map((deg) => (
         <path
           key={`s${deg}`}

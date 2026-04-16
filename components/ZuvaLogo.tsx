@@ -2,24 +2,26 @@
 //
 // Sun geometry — viewBox 0 0 200 200, centre (100, 100)
 //
-// Long rays  (8, every 45°, starting at 0° = pointing up):
-//   Two-segment S-curve stroked path.
-//   Segment 1 bows LEFT  (x≈90), segment 2 bows RIGHT (x≈110).
+// All rays are the same wavy S-curve flame shape, alternating TALL and SHORT.
+// Both segments bow: first LEFT (x≈89), then RIGHT (x≈111).
+//
+// Tall rays (8, every 45°, starting at 0° = pointing up):
 //   r=35 at base (y=65) → r=78 at tip (y=22).
 //
-// Short rays (8, every 45°, offset +22.5° between each long ray):
-//   Single cubic bezier, bows LEFT (x≈82), giving a "(" / C-hook shape.
-//   r≈38 at base (y=62) → r≈56 at tip (y=44).
+// Short rays (8, every 45°, offset +22.5° between each tall ray):
+//   r=37 at base (y=63) → r=60 at tip (y=40).
 //
 // Stroke width 6 / 5, strokeLinecap round, no fill.
 // Centre disk: r=33, filled.
 
-const AMBER = "#D4920A";
+const AMBER = "#C17820";
 
-const LONG_RAY  = "M 100,65 C 90,59 90,50 100,44 C 110,38 110,30 100,22";
-const SHORT_RAY = "M 97,62 C 82,60 82,46 97,44";
+// Tall wavy S-curve: two cubic bezier segments
+const TALL_RAY  = "M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22";
+// Short wavy S-curve: same shape, shorter reach
+const SHORT_RAY = "M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34";
 
-const LONG_ANGLES  = [0, 45, 90, 135, 180, 225, 270, 315] as const;
+const TALL_ANGLES  = [0, 45, 90, 135, 180, 225, 270, 315] as const;
 const SHORT_ANGLES = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5] as const;
 
 interface ZuvaLogoProps {
@@ -51,11 +53,11 @@ export default function ZuvaLogo({
         fill="none"
         aria-label="Zuva sun logo"
       >
-        {/* ── Long wavy S-curve rays ───────────────────────── */}
-        {LONG_ANGLES.map((deg) => (
+        {/* ── Tall wavy S-curve rays ───────────────────────── */}
+        {TALL_ANGLES.map((deg) => (
           <path
-            key={`l${deg}`}
-            d={LONG_RAY}
+            key={`t${deg}`}
+            d={TALL_RAY}
             stroke={AMBER}
             strokeWidth="6"
             strokeLinecap="round"
@@ -64,7 +66,7 @@ export default function ZuvaLogo({
           />
         ))}
 
-        {/* ── Short C-hook rays ────────────────────────────── */}
+        {/* ── Short wavy S-curve rays ──────────────────────── */}
         {SHORT_ANGLES.map((deg) => (
           <path
             key={`s${deg}`}
@@ -84,10 +86,10 @@ export default function ZuvaLogo({
       {showText && (
         <span
           style={{
-            fontFamily:    "var(--font-fredoka-one), 'Fredoka One', system-ui, sans-serif",
+            fontFamily:    "var(--font-lilita-one), 'Lilita One', system-ui, sans-serif",
             fontWeight:    400,
             fontSize:      Math.round(diskSize * 0.62) + "px",
-            letterSpacing: "0.14em",
+            letterSpacing: "0.08em",
             color:         AMBER,
             lineHeight:    1,
           }}
