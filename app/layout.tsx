@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Fredoka_One } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -14,6 +15,12 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+});
+const fredokaOne = Fredoka_One({
+  weight:  "400",
+  subsets: ["latin"],
+  variable: "--font-fredoka-one",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -49,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-foreground min-h-screen`}>
+        <body className={`${geistSans.variable} ${geistMono.variable} ${fredokaOne.variable} antialiased bg-black text-foreground min-h-screen`}>
           <ServiceWorkerRegistration />
           <Navbar />
           <main className="pt-14 pb-20 md:pb-0 min-h-screen">

@@ -60,7 +60,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" aria-label="Zuva home">
-            <ZuvaLogo diskSize={28} showText={true} />
+            <ZuvaLogo diskSize={36} showText={true} />
           </Link>
 
           {/* Desktop nav — hidden on landing page to keep it minimal */}

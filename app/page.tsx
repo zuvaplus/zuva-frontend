@@ -1,6 +1,7 @@
 import Link from "next/link";
 import ZuvaLogo from "@/components/ZuvaLogo";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
+import SiteFooter from "@/components/SiteFooter";
 
 export default function LandingPage() {
   return (
@@ -13,7 +14,7 @@ export default function LandingPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 40% at 50% 45%, rgba(245,166,35,0.10) 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 40% at 50% 45%, rgba(212,146,10,0.10) 0%, transparent 70%)",
           }}
         />
 
@@ -91,20 +92,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ───────────────────────────────────────── */}
-      <footer className="border-t border-white/5 py-8 px-6">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <ZuvaLogo diskSize={20} showText={true} />
-          </div>
-          <nav className="flex items-center gap-6 text-zinc-600 text-xs">
-            <Link href="/about"    className="hover:text-gold-400 transition-colors">About</Link>
-            <Link href="/privacy"  className="hover:text-gold-400 transition-colors">Privacy</Link>
-            <Link href="/terms"    className="hover:text-gold-400 transition-colors">Terms</Link>
-            <Link href="/creators" className="hover:text-gold-400 transition-colors">Creators</Link>
-          </nav>
-          <p className="text-zinc-700 text-xs">© 2026 Zuva.TV</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
@@ -122,8 +110,8 @@ const FEATURES = [
         <path d="M3 12h34M3 28h34" stroke="#F5A623" strokeWidth="1" strokeOpacity="0.4" />
       </svg>
     ),
-    title: "Diaspora-First",
-    body:  "Made for African & Caribbean communities worldwide. Watch in your language, on your schedule.",
+    title: "Bridges Two Worlds",
+    body:  "Watch the creators who keep you connected to home — and support them directly.",
   },
   {
     icon: (
