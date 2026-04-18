@@ -24,7 +24,7 @@ export default function LandingPage() {
             src="/zuva-logo.svg"
             alt="Zuva"
             width={320}
-            height={200}
+            height={180}
             unoptimized
             priority
           />

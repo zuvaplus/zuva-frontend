@@ -63,7 +63,7 @@ export default function Navbar() {
             <Image
               src="/zuva-logo.svg"
               alt="Zuva"
-              width={160}
+              width={180}
               height={55}
               unoptimized
               priority
