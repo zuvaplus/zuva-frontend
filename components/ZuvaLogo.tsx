@@ -14,7 +14,7 @@
 // Stroke width 6 / 5, strokeLinecap round, no fill.
 // Centre disk: r=33, filled.
 
-const AMBER = "#C17820";
+const AMBER = "#ff8a00";
 
 // Tall wavy S-curve: two cubic bezier segments
 const TALL_RAY  = "M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22";

@@ -11,18 +11,18 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Vibrant African Amber — primary brand color #F5A623
+        // Vibrant African Amber — primary brand color #ff8a00
         gold: {
-          50:  "#FFF8F0",
-          100: "#FEE9C8",
-          200: "#FDD08A",
-          300: "#F9B748",
-          400: "#F5A623",   // ← PRIMARY brand amber
-          500: "#D4831A",
-          600: "#A86510",
-          700: "#7C4A0C",
-          800: "#513008",
-          900: "#261703",
+          50:  "#FFF4E5",
+          100: "#FFE0B2",
+          200: "#FFCC80",
+          300: "#FFB74D",
+          400: "#ff8a00",   // ← PRIMARY brand amber
+          500: "#CC6E00",
+          600: "#995300",
+          700: "#663700",
+          800: "#331C00",
+          900: "#1A0E00",
         },
         // Near-pure-black surfaces (500 = true #000000)
         surface: {
@@ -47,8 +47,8 @@ const config: Config = {
       },
       keyframes: {
         "sun-pulse": {
-          "0%, 100%": { transform: "scale(1)",    filter: "drop-shadow(0 0 6px rgba(245,166,35,0.5))" },
-          "50%":      { transform: "scale(1.08)", filter: "drop-shadow(0 0 18px rgba(245,166,35,0.9))" },
+          "0%, 100%": { transform: "scale(1)",    filter: "drop-shadow(0 0 6px rgba(255,138,0,0.5))" },
+          "50%":      { transform: "scale(1.08)", filter: "drop-shadow(0 0 18px rgba(255,138,0,0.9))" },
         },
         "slide-up": {
           "0%":   { transform: "translateY(20px)", opacity: "0" },
@@ -64,8 +64,8 @@ const config: Config = {
         },
       },
       boxShadow: {
-        gold:    "0 0 20px rgba(245,166,35,0.35)",
-        "gold-lg": "0 0 48px rgba(245,166,35,0.45)",
+        gold:    "0 0 20px rgba(255,138,0,0.35)",
+        "gold-lg": "0 0 48px rgba(255,138,0,0.45)",
       },
     },
   },

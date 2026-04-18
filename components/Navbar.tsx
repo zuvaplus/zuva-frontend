@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ZuvaLogo from "./ZuvaLogo";
 
-const AMBER = "#F5A623";
+const AMBER = "#ff8a00";
 const MUTED = "#555555";
 
 const NAV_LINKS = [
@@ -49,8 +49,8 @@ function UserIcon({ active }: { active: boolean }) {
 }
 
 export default function Navbar() {
-  const pathname    = usePathname();
-  const isLanding   = pathname === "/";
+  const pathname  = usePathname();
+  const isLanding = pathname === "/";
 
   return (
     <>
@@ -60,7 +60,14 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" aria-label="Zuva home">
-            <ZuvaLogo diskSize={36} showText={true} />
+            <Image
+              src="/zuva-logo.svg"
+              alt="Zuva"
+              width={60}
+              height={60}
+              unoptimized
+              priority
+            />
           </Link>
 
           {/* Desktop nav — hidden on landing page to keep it minimal */}
