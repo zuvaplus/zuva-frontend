@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import SiteFooter from "@/components/SiteFooter";
@@ -19,14 +18,11 @@ export default function LandingPage() {
         />
 
         {/* Logo */}
-        <div className="relative mb-8 animate-fade-in">
-          <Image
+        <div className="mb-8 animate-fade-in">
+          <img
             src="/zuva-logo.svg"
             alt="Zuva"
-            width={320}
-            height={180}
-            unoptimized
-            priority
+            style={{ width: "280px", height: "auto", background: "transparent" }}
           />
         </div>
 

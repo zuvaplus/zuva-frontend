@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function SiteFooter() {
@@ -6,12 +5,10 @@ export default function SiteFooter() {
     <footer className="border-t border-white/5 py-8 px-6">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <Link href="/" aria-label="Zuva home">
-          <Image
+          <img
             src="/zuva-logo.svg"
             alt="Zuva"
-            width={48}
-            height={48}
-            unoptimized
+            style={{ width: "80px", height: "auto", background: "transparent" }}
           />
         </Link>
         <nav className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-zinc-600 text-xs">

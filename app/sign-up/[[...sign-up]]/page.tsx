@@ -1,6 +1,5 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
-import ZuvaLogo from "@/components/ZuvaLogo";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 
 export default function SignUpPage() {
@@ -10,7 +9,7 @@ export default function SignUpPage() {
 
         {/* Brand header */}
         <div className="text-center mb-8">
-          <ZuvaLogo diskSize={52} showText={true} className="mx-auto mb-2" />
+          <img src="/zuva-logo.svg" alt="Zuva" style={{ width: "140px", height: "auto", background: "transparent", margin: "0 auto" }} />
           <p className="text-zinc-600 text-sm mt-3">Join the creator economy</p>
         </div>
 

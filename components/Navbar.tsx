@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -60,13 +59,10 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" aria-label="Zuva home">
-            <Image
+            <img
               src="/zuva-logo.svg"
               alt="Zuva"
-              width={180}
-              height={55}
-              unoptimized
-              priority
+              style={{ width: "160px", height: "auto", background: "transparent" }}
             />
           </Link>
 
