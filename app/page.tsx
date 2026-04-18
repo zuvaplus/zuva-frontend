@@ -14,7 +14,7 @@ export default function LandingPage() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 40% at 50% 45%, rgba(255,138,0,0.12) 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 40% at 50% 45%, rgba(243,123,13,0.12) 0%, transparent 70%)",
           }}
         />
 
@@ -23,8 +23,8 @@ export default function LandingPage() {
           <Image
             src="/zuva-logo.svg"
             alt="Zuva"
-            width={180}
-            height={180}
+            width={320}
+            height={200}
             unoptimized
             priority
           />
@@ -109,11 +109,11 @@ const FEATURES = [
   {
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
-        <circle cx="20" cy="20" r="19" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.3" />
-        <path d="M20 1C20 1 12 10 12 20s8 19 8 19" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M20 1C20 1 28 10 28 20s-8 19-8 19" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M1 20h38" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M3 12h34M3 28h34" stroke="#ff8a00" strokeWidth="1" strokeOpacity="0.4" />
+        <circle cx="20" cy="20" r="19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.3" />
+        <path d="M20 1C20 1 12 10 12 20s8 19 8 19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
+        <path d="M20 1C20 1 28 10 28 20s-8 19-8 19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
+        <path d="M1 20h38" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
+        <path d="M3 12h34M3 28h34" stroke="#f37b0d" strokeWidth="1" strokeOpacity="0.4" />
       </svg>
     ),
     title: "Bridges Two Worlds",
@@ -122,11 +122,11 @@ const FEATURES = [
   {
     icon: (
       <svg viewBox="0 0 56 56" width="40" height="40" fill="none">
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#ff8a00" strokeWidth="2.4" strokeLinecap="round"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#ff8a00" strokeWidth="2.4" strokeLinecap="round" transform="rotate(90, 28, 28)"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#ff8a00" strokeWidth="2.4" strokeLinecap="round" transform="rotate(180, 28, 28)"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#ff8a00" strokeWidth="2.4" strokeLinecap="round" transform="rotate(270, 28, 28)"/>
-        <circle cx="28" cy="28" r="10" fill="#ff8a00"/>
+        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round"/>
+        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(90, 28, 28)"/>
+        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(180, 28, 28)"/>
+        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(270, 28, 28)"/>
+        <circle cx="28" cy="28" r="10" fill="#f37b0d"/>
       </svg>
     ),
     title: "Earn Real Money",
@@ -135,10 +135,10 @@ const FEATURES = [
   {
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
-        <rect x="2" y="8" width="36" height="24" rx="4" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.6"/>
-        <path d="M2 16h36" stroke="#ff8a00" strokeWidth="1.5" strokeOpacity="0.6"/>
-        <rect x="7" y="22" width="10" height="3" rx="1.5" fill="#ff8a00" fillOpacity="0.5"/>
-        <rect x="23" y="22" width="10" height="3" rx="1.5" fill="#ff8a00" fillOpacity="0.3"/>
+        <rect x="2" y="8" width="36" height="24" rx="4" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.6"/>
+        <path d="M2 16h36" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.6"/>
+        <rect x="7" y="22" width="10" height="3" rx="1.5" fill="#f37b0d" fillOpacity="0.5"/>
+        <rect x="23" y="22" width="10" height="3" rx="1.5" fill="#f37b0d" fillOpacity="0.3"/>
       </svg>
     ),
     title: "Free Forever",

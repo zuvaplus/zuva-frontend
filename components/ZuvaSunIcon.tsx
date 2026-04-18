@@ -2,7 +2,7 @@
 // Mirrors ZuvaLogo geometry: all rays are wavy S-curve flames, alternating tall/short.
 // ViewBox 0 0 200 200, centre (100,100).
 
-const AMBER = "#ff8a00";
+const AMBER = "#f37b0d";
 
 // Tall wavy S-curve: two cubic bezier segments
 const TALL_RAY  = "M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22";

@@ -4,7 +4,7 @@
 
 :root {
   /* Brand — Vibrant African Amber */
-  --amber:        #ff8a00;
+  --amber:        #f37b0d;
   --amber-light:  #FFB74D;
   --amber-dark:   #CC6E00;
 
@@ -18,8 +18,8 @@
   --surface-3: #141414;
 
   /* Borders */
-  --border:    rgba(255, 138, 0, 0.18);
-  --border-dim: rgba(255, 138, 0, 0.08);
+  --border:    rgba(243, 123, 13, 0.18);
+  --border-dim: rgba(243, 123, 13, 0.08);
 
   --muted: #555555;
 }
@@ -45,11 +45,11 @@ body {
 .gold-shimmer {
   background: linear-gradient(
     90deg,
-    #ff8a00 0%,
+    #f37b0d 0%,
     #FFB74D 30%,
     #FFE0B2 50%,
     #FFB74D 70%,
-    #ff8a00 100%
+    #f37b0d 100%
   );
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -60,7 +60,7 @@ body {
 
 /* ── Sun glow on icon ──────────────────────────────── */
 .sun-glow {
-  filter: drop-shadow(0 0 8px rgba(255, 138, 0, 0.7));
+  filter: drop-shadow(0 0 8px rgba(243, 123, 13, 0.7));
 }
 
 /* ── Card hover lift ───────────────────────────────── */
@@ -87,7 +87,7 @@ input[type="range"].gold-range {
   -webkit-appearance: none;
   appearance: none;
   height: 4px;
-  background: linear-gradient(to right, #ff8a00, #FFB74D);
+  background: linear-gradient(to right, #f37b0d, #FFB74D);
   border-radius: 2px;
   outline: none;
 }
@@ -95,10 +95,10 @@ input[type="range"].gold-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px; height: 20px;
-  background: #ff8a00;
+  background: #f37b0d;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(255,138,0,0.6);
+  box-shadow: 0 0 10px rgba(243,123,13,0.6);
 }
 
 /* ── Skeleton loading ──────────────────────────────── */

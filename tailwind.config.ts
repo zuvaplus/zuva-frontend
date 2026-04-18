@@ -11,13 +11,13 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Vibrant African Amber — primary brand color #ff8a00
+        // Vibrant African Amber — primary brand color #f37b0d
         gold: {
           50:  "#FFF4E5",
           100: "#FFE0B2",
           200: "#FFCC80",
           300: "#FFB74D",
-          400: "#ff8a00",   // ← PRIMARY brand amber
+          400: "#f37b0d",   // ← PRIMARY brand amber
           500: "#CC6E00",
           600: "#995300",
           700: "#663700",
@@ -47,8 +47,8 @@ const config: Config = {
       },
       keyframes: {
         "sun-pulse": {
-          "0%, 100%": { transform: "scale(1)",    filter: "drop-shadow(0 0 6px rgba(255,138,0,0.5))" },
-          "50%":      { transform: "scale(1.08)", filter: "drop-shadow(0 0 18px rgba(255,138,0,0.9))" },
+          "0%, 100%": { transform: "scale(1)",    filter: "drop-shadow(0 0 6px rgba(243,123,13,0.5))" },
+          "50%":      { transform: "scale(1.08)", filter: "drop-shadow(0 0 18px rgba(243,123,13,0.9))" },
         },
         "slide-up": {
           "0%":   { transform: "translateY(20px)", opacity: "0" },
@@ -64,8 +64,8 @@ const config: Config = {
         },
       },
       boxShadow: {
-        gold:    "0 0 20px rgba(255,138,0,0.35)",
-        "gold-lg": "0 0 48px rgba(255,138,0,0.45)",
+        gold:    "0 0 20px rgba(243,123,13,0.35)",
+        "gold-lg": "0 0 48px rgba(243,123,13,0.45)",
       },
     },
   },

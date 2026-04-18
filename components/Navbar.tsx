@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const AMBER = "#ff8a00";
+const AMBER = "#f37b0d";
 const MUTED = "#555555";
 
 const NAV_LINKS = [
@@ -63,8 +63,8 @@ export default function Navbar() {
             <Image
               src="/zuva-logo.svg"
               alt="Zuva"
-              width={60}
-              height={60}
+              width={160}
+              height={55}
               unoptimized
               priority
             />
