@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Tall wavy S-curve rays (8, every 45°) -->
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(0,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(45,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(90,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(135,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(180,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(225,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(270,100,100)"/>
+  <path d="M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22" stroke="#f37b0d" stroke-width="6" stroke-linecap="round" fill="none" transform="rotate(315,100,100)"/>
+  <!-- Short wavy S-curve rays (8, offset +22.5°) -->
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(22.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(67.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(112.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(157.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(202.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(247.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(292.5,100,100)"/>
+  <path d="M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34" stroke="#f37b0d" stroke-width="5" stroke-linecap="round" fill="none" transform="rotate(337.5,100,100)"/>
+  <!-- Centre disk -->
+  <circle cx="100" cy="100" r="33" fill="#f37b0d"/>
+</svg>

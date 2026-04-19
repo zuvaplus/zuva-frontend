@@ -22,7 +22,7 @@ export default function LandingPage() {
           <img
             src="/zuva-logo.svg"
             alt="Zuva"
-            style={{ width: "280px", height: "auto", background: "transparent" }}
+            style={{ width: "380px", height: "auto", background: "transparent" }}
           />
         </div>
 

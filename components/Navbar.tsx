@@ -60,9 +60,9 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" aria-label="Zuva home">
             <img
-              src="/zuva-logo.svg"
+              src="/zuva-sun.svg"
               alt="Zuva"
-              style={{ width: "160px", height: "auto", background: "transparent" }}
+              style={{ width: "48px", height: "48px", background: "transparent" }}
             />
           </Link>
 
