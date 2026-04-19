@@ -57,13 +57,27 @@ export default function Navbar() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gold-400/10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
-          {/* Logo */}
+          {/* Logo — inline SVG crops zuva-logo.svg to sun only.
+               viewBox="300 100 900 900" derived from SVG geometry:
+               sun raster at x=351–1149, y=150–947 (matrix-scaled);
+               ZUVA text starts at y=1272 — safely excluded. */}
           <Link href="/" aria-label="Zuva home">
-            <img
-              src="/zuva-sun.svg"
-              alt="Zuva"
-              style={{ width: "48px", height: "48px", background: "transparent" }}
-            />
+            <svg
+              viewBox="300 100 900 900"
+              width="48"
+              height="48"
+              xmlns="http://www.w3.org/2000/svg"
+              role="img"
+              aria-label="Zuva sun"
+            >
+              <image
+                href="/zuva-logo.svg"
+                x="0"
+                y="0"
+                width="1500"
+                height="1500"
+              />
+            </svg>
           </Link>
 
           {/* Desktop nav — hidden on landing page to keep it minimal */}
