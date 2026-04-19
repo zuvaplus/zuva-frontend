@@ -17,13 +17,14 @@ export default function LandingPage() {
           }}
         />
 
-        {/* Logo */}
+        {/* Logo — responsive: 280px mobile, 480px desktop */}
         <div className="mb-8 animate-fade-in">
-          <img
-            src="/zuva-logo.svg"
-            alt="Zuva"
-            style={{ width: "380px", height: "auto", background: "transparent" }}
-          />
+          <img src="/zuva-logo.svg" alt="Zuva"
+            className="block md:hidden"
+            style={{ width: "280px", height: "auto", background: "transparent" }} />
+          <img src="/zuva-logo.svg" alt="Zuva"
+            className="hidden md:block"
+            style={{ width: "480px", height: "auto", background: "transparent" }} />
         </div>
 
         {/* Tagline */}
