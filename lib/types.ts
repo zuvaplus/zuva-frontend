@@ -177,3 +177,28 @@ export interface ViewCompletePayload {
   watchDurationSeconds: number;
   totalDurationSeconds: number;
 }
+
+// ─── Search ──────────────────────────────────────────────────
+export interface SearchCreator {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  follower_count: number;
+}
+
+export interface SearchVideo {
+  id: string;
+  orientation: Orientation;
+  title: string;
+  thumbnail_url: string;
+  view_count: number;
+  creator_name: string;
+}
+
+export interface SearchResponse {
+  success: boolean;
+  creators: SearchCreator[];
+  videos: SearchVideo[];
+  tags: string[];
+}

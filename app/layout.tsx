@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import { Lilita_One } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import AppShell from "@/components/AppShell";
 import ServiceWorkerRegistration from "./sw-register";
 
 const geistSans = localFont({
@@ -58,10 +58,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} ${lilitaOne.variable} antialiased bg-black text-foreground min-h-screen`}>
           <ServiceWorkerRegistration />
-          <Navbar />
-          <main className="pt-14 pb-20 md:pb-0 min-h-screen">
-            {children}
-          </main>
+          <AppShell>{children}</AppShell>
         </body>
       </html>
     </ClerkProvider>
