@@ -24,6 +24,9 @@ app/
   creator/[username]/      Creator profile (UUID-based username param)
   wallet/page.tsx          Balance card + Overview/History/Buy Suns tabs
   sign-in/page.tsx         Sign-in / create account (auth shim, wire to Clerk)
+  terms/page.tsx           Terms of Service
+  about/page.tsx           About page + CTA to /creator-signup
+  creator-signup/page.tsx  Creator application form (Turnstile-protected)
 
 components/
   FeedCard.tsx             Card for both orientations + tip button
@@ -48,6 +51,9 @@ NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-in
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+
+# Cloudflare Turnstile (bot protection on /creator-signup)
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
 ```
 
 ## Architecture Notes

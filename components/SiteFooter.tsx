@@ -15,7 +15,7 @@ export default function SiteFooter() {
           <Link href="/about"    className="hover:text-gold-400 transition-colors">About</Link>
           <Link href="/privacy"  className="hover:text-gold-400 transition-colors">Privacy Policy</Link>
           <Link href="/terms"    className="hover:text-gold-400 transition-colors">Terms of Service</Link>
-          <Link href="/creators" className="hover:text-gold-400 transition-colors">Creators</Link>
+          <Link href="/creator-signup" className="hover:text-gold-400 transition-colors">Creator Sign-Up</Link>
         </nav>
         <p className="text-zinc-700 text-xs">© 2026 Zuva.TV Inc.</p>
       </div>
