@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import SiteFooter from "@/components/SiteFooter";
@@ -36,6 +36,12 @@ const FOLLOWER_RANGES = [
 ];
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
+
+// Cloudflare's official "always passes" test sitekey — used only when
+// NEXT_PUBLIC_TURNSTILE_SITE_KEY isn't set, so the widget still renders
+// (and onSuccess still fires) during local development.
+// https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
 
 interface FormState {
   fullName: string;
@@ -80,7 +86,17 @@ export default function CreatorSignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const configuredSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const turnstileSiteKey = configuredSiteKey || TURNSTILE_TEST_SITE_KEY;
+
+  useEffect(() => {
+    if (!configuredSiteKey) {
+      console.warn(
+        "[Turnstile] NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set — falling back to Cloudflare's test sitekey. " +
+        "Set NEXT_PUBLIC_TURNSTILE_SITE_KEY in .env.local for real verification."
+      );
+    }
+  }, [configuredSiteKey]);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -301,20 +317,47 @@ export default function CreatorSignupPage() {
             </label>
           </div>
 
-          {/* Turnstile */}
+          {/* Turnstile — always rendered (not gated behind the env var) so
+              onSuccess can actually fire; falls back to Cloudflare's test
+              sitekey in dev when NEXT_PUBLIC_TURNSTILE_SITE_KEY is unset. */}
           <div className="pt-2">
-            {turnstileSiteKey ? (
-              <Turnstile
-                siteKey={turnstileSiteKey}
-                onSuccess={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken(null)}
-                onError={() => setTurnstileToken(null)}
-              />
-            ) : (
-              <p className="text-red-400 text-xs">
-                Turnstile site key not configured (NEXT_PUBLIC_TURNSTILE_SITE_KEY).
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              onSuccess={(token) => {
+                console.log("[Turnstile] onSuccess fired, token:", token);
+                setTurnstileToken(token);
+              }}
+              onExpire={() => {
+                console.log("[Turnstile] onExpire fired");
+                setTurnstileToken(null);
+              }}
+              onError={() => {
+                console.log("[Turnstile] onError fired");
+                setTurnstileToken(null);
+              }}
+            />
+            {!configuredSiteKey && (
+              <p className="text-gold-400/70 text-xs mt-2">
+                Using Cloudflare's test sitekey — set NEXT_PUBLIC_TURNSTILE_SITE_KEY for production.
               </p>
             )}
+          </div>
+
+          {/* TEMP DEBUG WIDGET — remove once onSuccess is confirmed firing above.
+              appearance: "always" forces the widget to render and stay visible
+              (Turnstile can otherwise render invisibly depending on site config). */}
+          <div className="pt-2 border-t border-dashed border-gold-400/20">
+            <p className="text-zinc-600 text-[10px] uppercase tracking-wider mb-2">Debug widget (temporary)</p>
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              options={{ appearance: "always" }}
+              onSuccess={(token) => {
+                console.log("[Turnstile DEBUG] onSuccess fired, token:", token);
+              }}
+              onError={() => {
+                console.log("[Turnstile DEBUG] onError fired");
+              }}
+            />
           </div>
 
           {error && (
