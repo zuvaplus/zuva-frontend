@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -136,24 +136,25 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 export default function AdminPage() {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const router = useRouter();
 
   const callerEmail = user?.primaryEmailAddress?.emailAddress;
   const isAuthorized =
-    isLoaded && isSignedIn && !!callerEmail && !!ADMIN_EMAIL &&
+    isLoaded && !!user && !!callerEmail && !!ADMIN_EMAIL &&
     callerEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (!isSignedIn) {
+    if (!user) {
       router.replace("/sign-in");
       return;
     }
     if (!isAuthorized) {
       router.replace("/");
     }
-  }, [isLoaded, isSignedIn, isAuthorized, router]);
+  }, [isLoaded, user, isAuthorized, router]);
 
   const [tab, setTab] = useState<Tab>("applications");
 
@@ -175,7 +176,7 @@ export default function AdminPage() {
         ...options,
         headers: {
           "Content-Type": "application/json",
-          "x-admin-email": callerEmail ?? "",
+          "x-admin-email": ADMIN_EMAIL ?? "",
           ...options?.headers,
         },
       });
@@ -185,7 +186,7 @@ export default function AdminPage() {
       }
       return res.json() as Promise<T>;
     },
-    [callerEmail]
+    []
   );
 
   const loadApplications = useCallback(async () => {
@@ -298,10 +299,10 @@ export default function AdminPage() {
 
   // Gate rendering entirely until authorization is confirmed, so the
   // dashboard shell (and its data fetches) never mount for the wrong user.
-  if (!isAuthorized) {
+  if (!isLoaded || !isAuthorized) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-zinc-600 text-sm">Checking access…</p>
+        <div className="w-8 h-8 border-2 border-gold-400/30 border-t-gold-400 rounded-full animate-spin" />
       </div>
     );
   }
@@ -312,16 +313,24 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-black text-foreground px-4 sm:px-6 py-10 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-extrabold text-white">Admin Dashboard</h1>
-          <span className="bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-            Admin
-          </span>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-2xl font-extrabold text-white">Admin Dashboard</h1>
+            <span className="bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+              Admin
+            </span>
+          </div>
+          <p className="text-zinc-500 text-sm">
+            Manage creator applications, content moderation, and user accounts.
+          </p>
         </div>
-        <p className="text-zinc-500 text-sm">
-          Manage creator applications, content moderation, and user accounts.
-        </p>
+        <button
+          onClick={() => signOut(() => router.push("/"))}
+          className="shrink-0 text-sm font-semibold px-4 py-2 rounded-lg border border-gold-400 text-white hover:bg-gold-400/10 transition-colors"
+        >
+          Sign Out
+        </button>
       </div>
 
       {/* Tabs */}
