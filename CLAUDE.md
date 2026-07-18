@@ -27,6 +27,7 @@ app/
   terms/page.tsx           Terms of Service
   about/page.tsx           About page + CTA to /creator-signup
   creator-signup/page.tsx  Creator application form (Turnstile-protected)
+  admin/page.tsx           Admin dashboard: Applications / Content / Users tabs
 
 components/
   FeedCard.tsx             Card for both orientations + tip button
@@ -54,6 +55,9 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
 # Cloudflare Turnstile (bot protection on /creator-signup)
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_turnstile_site_key
+
+# Admin dashboard — must match backend's ADMIN_EMAIL
+NEXT_PUBLIC_ADMIN_EMAIL=your_admin_email@zuva.tv
 ```
 
 ## Architecture Notes
@@ -69,10 +73,18 @@ In dev `BACKEND_URL` defaults to `http://localhost:3000`. No CORS issues.
 
 ### Auth (Clerk) — fully wired
 - `app/layout.tsx` wraps everything in `<ClerkProvider>`
-- `middleware.ts` uses `clerkMiddleware` + `createRouteMatcher` to protect `/feed`, `/wallet`, `/creator`
+- `middleware.ts` uses `clerkMiddleware` + `createRouteMatcher` to protect `/feed`, `/wallet`, `/creator/*`, `/admin`
 - `app/sign-in/[[...sign-in]]/page.tsx` — Clerk `<SignIn>` with Zuva branding wrapper
 - `app/sign-up/[[...sign-up]]/page.tsx` — Clerk `<SignUp>` with Zuva branding wrapper
 - `lib/clerk-appearance.ts` — shared appearance config (vantablack `#000000` bg, amber `#F5A623` primary)
+
+### Admin Dashboard (`/admin`)
+Client-side gated: `useUser()` compares the signed-in Clerk email against `NEXT_PUBLIC_ADMIN_EMAIL`;
+non-matching users are redirected to `/` (or `/sign-in` if signed out). `middleware.ts` additionally
+requires sign-in before the page loads at all. Every request to `/api/admin/*` sends an
+`x-admin-email` header, which the backend's `requireAdmin` guard checks — see the note in
+`zuva-backend/CLAUDE.md` about this being a temporary, spoofable check that needs real session
+verification before production.
 
 Catch-all routes (`[[...sign-in]]` / `[[...sign-up]]`) are required for Clerk's multi-step auth flows (MFA, email verification, etc.).
 

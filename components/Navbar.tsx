@@ -50,6 +50,7 @@ function UserIcon({ active }: { active: boolean }) {
 export default function Navbar() {
   const pathname  = usePathname();
   const isLanding = pathname === "/";
+  const isAdmin   = pathname.startsWith("/admin");
 
   return (
     <>
@@ -79,6 +80,12 @@ export default function Navbar() {
               />
             </svg>
           </Link>
+
+          {isAdmin && (
+            <span className="bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+              Admin
+            </span>
+          )}
 
           {/* Desktop nav — hidden on landing page to keep it minimal */}
           {!isLanding && (
