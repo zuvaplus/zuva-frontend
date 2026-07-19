@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { Eye, Clock, Tag, Flag, X, Film } from "lucide-react";
 import type { VideoResponse } from "@/lib/types";
 import { formatDuration, timeAgo } from "@/lib/utils";
@@ -22,6 +23,7 @@ function VideoSkeleton() {
 }
 
 function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+  const { getToken } = useAuth();
   const [reason, setReason]     = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]       = useState<string | null>(null);
@@ -33,9 +35,15 @@ function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => voi
     setSubmitting(true);
     setError(null);
     try {
+      // Reporting works for signed-out viewers too — only attach a token
+      // when one is available so the report can be attributed if signed in.
+      const token = await getToken().catch(() => null);
       const res = await fetch(`${BACKEND_URL}/api/video/${videoId}/report`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ reason }),
       });
       if (!res.ok) {
