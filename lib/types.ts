@@ -202,3 +202,77 @@ export interface SearchResponse {
   videos: SearchVideo[];
   tags: string[];
 }
+
+// ─── Uploaded Videos (Cloudflare Stream) ─────────────────────
+export type VideoCategory =
+  | "Comedy" | "Drama" | "Music" | "News"
+  | "Sports" | "Lifestyle" | "Education" | "Other";
+
+export type VideoStatus = "pending" | "published" | "rejected";
+
+export interface UploadedVideo {
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  tags: string[];
+  cloudflare_video_id: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
+  status: VideoStatus;
+  view_count: number;
+  created_at: string;
+}
+
+export interface ChannelVideoSummary {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
+  view_count: number;
+  category: string;
+  created_at: string;
+}
+
+export interface ChannelCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  bio: string | null;
+  country_code: string | null;
+  avatar_url: string | null;
+  follower_count: number;
+  role: string;
+  created_at: string;
+}
+
+export interface ChannelResponse {
+  success: boolean;
+  creator: ChannelCreator;
+  videos: ChannelVideoSummary[];
+}
+
+export interface VideoPlayerCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  follower_count: number;
+}
+
+export interface RelatedVideo {
+  id: string;
+  title: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
+  view_count: number;
+  created_at: string;
+}
+
+export interface VideoResponse {
+  success: boolean;
+  video: UploadedVideo;
+  creator: VideoPlayerCreator;
+  related_videos: RelatedVideo[];
+}

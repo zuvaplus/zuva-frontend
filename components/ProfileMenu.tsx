@@ -33,23 +33,25 @@ const VIEWER_ITEMS: MenuItem[] = [
   { href: "/creator-signup", label: "Become a Creator", icon: UserPlus },
 ];
 
-const CREATOR_ITEMS: MenuItem[] = [
-  { href: "/channel",           label: "My Channel",            icon: Tv },
-  { href: "/creator-dashboard", label: "Creator Dashboard",     icon: LayoutDashboard },
-  { href: "/upload",            label: "Upload Video",          icon: UploadCloud },
-  { href: "/wallet",            label: "Wallet",                icon: Wallet },
-  { href: "/history",           label: "Watch History",         icon: History },
-  { href: "/saved",             label: "Saved Videos",          icon: Bookmark },
-  { href: "/settings",          label: "Account Settings",      icon: Settings },
-  { href: "/feed",              label: "Switch to Viewer Mode", icon: Repeat },
-];
+function creatorItems(username: string | null): MenuItem[] {
+  return [
+    { href: username ? `/channel/${username}` : "/channel", label: "My Channel",            icon: Tv },
+    { href: "/creator-dashboard",                            label: "Creator Dashboard",     icon: LayoutDashboard },
+    { href: "/upload",                                       label: "Upload Video",          icon: UploadCloud },
+    { href: "/wallet",                                       label: "Wallet",                icon: Wallet },
+    { href: "/history",                                      label: "Watch History",         icon: History },
+    { href: "/saved",                                        label: "Saved Videos",          icon: Bookmark },
+    { href: "/settings",                                     label: "Account Settings",      icon: Settings },
+    { href: "/feed",                                         label: "Switch to Viewer Mode", icon: Repeat },
+  ];
+}
 
 export default function ProfileMenu({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const { signOut } = useClerk();
   const { user } = useUser();
-  const { role } = useUserRole();
-  const items = role === "creator" ? CREATOR_ITEMS : VIEWER_ITEMS;
+  const { role, username } = useUserRole();
+  const items = role === "creator" ? creatorItems(username) : VIEWER_ITEMS;
 
   return (
     <div className="fixed inset-0 z-[100]" onClick={onClose}>
