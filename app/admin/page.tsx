@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, useAuth } from "@clerk/nextjs";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -137,6 +137,7 @@ function ErrorBanner({ message }: { message: string }) {
 
 export default function AdminPage() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const { signOut } = useClerk();
   const router = useRouter();
 
@@ -172,11 +173,12 @@ export default function AdminPage() {
 
   const adminFetch = useCallback(
     async <T,>(path: string, options?: RequestInit): Promise<T> => {
+      const token = await getToken();
       const res = await fetch(`${BACKEND_URL}${path}`, {
         ...options,
         headers: {
           "Content-Type": "application/json",
-          "x-admin-email": ADMIN_EMAIL ?? "",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...options?.headers,
         },
       });
@@ -186,7 +188,7 @@ export default function AdminPage() {
       }
       return res.json() as Promise<T>;
     },
-    []
+    [getToken]
   );
 
   const loadApplications = useCallback(async () => {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { UploadCloud, Film, Image as ImageIcon } from "lucide-react";
 import { useUserRole } from "@/components/UserRoleProvider";
 
@@ -34,6 +34,7 @@ function isAcceptedVideoFile(file: File) {
 
 export default function UploadPage() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const { role, userId, loading: roleLoading } = useUserRole();
   const router = useRouter();
 
@@ -89,13 +90,15 @@ export default function UploadPage() {
   const canSubmit =
     !!videoFile && !fileError && title.trim() !== "" && category !== "" && !uploading;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit || !videoFile || !user) return;
 
     setError(null);
     setUploading(true);
     setProgress(0);
+
+    const token = await getToken();
 
     const formData = new FormData();
     formData.append("video", videoFile);
@@ -109,7 +112,7 @@ export default function UploadPage() {
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
     xhr.open("POST", `${BACKEND_URL}/api/upload/video`);
-    xhr.setRequestHeader("x-clerk-user-id", user.id);
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
     xhr.upload.onprogress = (evt) => {
       if (evt.lengthComputable) {

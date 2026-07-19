@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import type { CreatorEarnings } from "@/lib/types";
 import { getCreatorEarnings } from "@/lib/api";
 import { formatSuns, tierInfo } from "@/lib/utils";
@@ -12,6 +13,7 @@ import { ProfileSkeleton } from "@/components/LoadingSkeleton";
 
 export default function CreatorProfilePage() {
   const { username } = useParams<{ username: string }>();
+  const { getToken } = useAuth();
   const [creator, setCreator] = useState<CreatorEarnings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
@@ -21,7 +23,8 @@ export default function CreatorProfilePage() {
     async function load() {
       setLoading(true); setError(null);
       try {
-        const data = await getCreatorEarnings(username);
+        const token = await getToken();
+        const data = await getCreatorEarnings(token, username);
         setCreator(data.earnings);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Creator not found");
@@ -30,7 +33,7 @@ export default function CreatorProfilePage() {
       }
     }
     load();
-  }, [username]);
+  }, [username, getToken]);
 
   if (loading) return <div className="max-w-2xl mx-auto px-4 py-8"><ProfileSkeleton /></div>;
 

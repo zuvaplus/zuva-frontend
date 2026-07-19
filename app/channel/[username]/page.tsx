@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { MapPin, Users, Film, Eye, Clock, Pencil, X } from "lucide-react";
 import type { ChannelResponse } from "@/lib/types";
 import { formatDuration, timeAgo } from "@/lib/utils";
@@ -33,6 +33,7 @@ function ChannelSkeleton() {
 export default function ChannelPage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { userId } = useUserRole();
 
   const [data, setData]       = useState<ChannelResponse | null>(null);
@@ -79,11 +80,12 @@ export default function ChannelPage() {
     setSaving(true);
     setSaveError(null);
     try {
+      const token = await getToken();
       const res = await fetch(`${BACKEND_URL}/api/channel/update`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "x-clerk-user-id": user.id,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           display_name: displayName.trim() || undefined,

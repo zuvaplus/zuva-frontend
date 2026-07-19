@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -20,6 +20,7 @@ const UserRoleContext = createContext<UserRoleContextValue>({
 
 export function UserRoleProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const [role, setRole]         = useState<UserRole>("viewer");
   const [userId, setUserId]     = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
@@ -39,32 +40,34 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     setLoading(true);
 
-    fetch(`${BACKEND_URL}/api/user/role`, {
-      headers: { "x-clerk-user-id": user.id },
-    })
-      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-      .then((data) => {
+    (async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${BACKEND_URL}/api/user/role`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw res;
+        const data = await res.json();
         if (!cancelled) {
           setRole(data.role === "creator" ? "creator" : "viewer");
           setUserId(data.id ?? null);
           setUsername(data.username ?? null);
         }
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) {
           setRole("viewer");
           setUserId(null);
           setUsername(null);
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [isLoaded, user]);
+  }, [isLoaded, user, getToken]);
 
   return (
     <UserRoleContext.Provider value={{ role, userId, username, loading }}>

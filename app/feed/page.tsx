@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
 import type { FeedItem } from "@/lib/types";
 import { getFeed } from "@/lib/api";
 import FeedCard from "@/components/FeedCard";
@@ -16,6 +17,7 @@ const FILTERS: { value: OrientationFilter; label: string }[] = [
 ];
 
 export default function FeedPage() {
+  const { getToken } = useAuth();
   const [feed,        setFeed]        = useState<FeedItem[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -30,7 +32,8 @@ export default function FeedPage() {
       append ? setLoadingMore(true) : setLoading(true);
       setError(null);
       try {
-        const data  = await getFeed(f, 30, off);
+        const token = await getToken();
+        const data  = await getFeed(token, f, 30, off);
         const items = data.feed ?? [];
         setFeed((prev) => (append ? [...prev, ...items] : items));
         setHasMore(items.length === 30);
@@ -42,7 +45,7 @@ export default function FeedPage() {
         setLoadingMore(false);
       }
     },
-    []
+    [getToken]
   );
 
   useEffect(() => { setOffset(0); loadFeed(filter, 0, false); }, [filter, loadFeed]);

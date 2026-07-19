@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import type { FeedItem, Orientation } from "@/lib/types";
 import { getFeed, recordViewComplete } from "@/lib/api";
 import { formatSuns, formatDuration, timeAgo } from "@/lib/utils";
@@ -11,6 +12,7 @@ import TipModal from "@/components/TipModal";
 
 export default function WatchPage() {
   const { id } = useParams<{ id: string }>();
+  const { getToken } = useAuth();
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const startTimeRef = useRef<number>(0);
@@ -30,7 +32,8 @@ export default function WatchPage() {
     async function load() {
       setLoading(true);
       try {
-        const data = await getFeed("both", 100, 0);
+        const token = await getToken();
+        const data = await getFeed(token, "both", 100, 0);
         const found = data.feed?.find((f) => f.id === id);
         if (found) {
           setItem(found);
@@ -42,7 +45,7 @@ export default function WatchPage() {
       }
     }
     load();
-  }, [id]);
+  }, [id, getToken]);
 
   // Auto-hide controls
   function resetControlsTimer() {
@@ -57,14 +60,15 @@ export default function WatchPage() {
     const watchDuration = Math.round(Date.now() / 1000 - startTimeRef.current);
     const totalDuration = item.duration_seconds;
     if (watchDuration > 0 && totalDuration > 0) {
-      await recordViewComplete({
+      const token = await getToken();
+      await recordViewComplete(token, {
         contentId: item.id,
         orientation: item.orientation,
         watchDurationSeconds: watchDuration,
         totalDurationSeconds: totalDuration,
       }).catch(() => {});
     }
-  }, [item]);
+  }, [item, getToken]);
 
   useEffect(() => {
     return () => {

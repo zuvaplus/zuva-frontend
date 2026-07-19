@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
 import type { WalletBalance, Transaction, FiatCurrency } from "@/lib/types";
 import { getWalletBalance, getLedger, purchaseSuns } from "@/lib/api";
 import { formatSuns, timeAgo, txLabel } from "@/lib/utils";
@@ -17,6 +18,7 @@ const FIAT_CURRENCIES: { value: FiatCurrency; label: string; symbol: string }[] 
 type ActiveTab = "overview" | "history" | "buy";
 
 export default function WalletPage() {
+  const { getToken } = useAuth();
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [txs, setTxs] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +38,10 @@ export default function WalletPage() {
     setLoading(true);
     setError(null);
     try {
+      const token = await getToken();
       const [walletData, ledgerData] = await Promise.all([
-        getWalletBalance(),
-        getLedger(1, 20),
+        getWalletBalance(token),
+        getLedger(token, 1, 20),
       ]);
       setWallet(walletData.wallet);
       setTxs(ledgerData.transactions ?? []);
@@ -49,7 +52,7 @@ export default function WalletPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     loadWallet();
@@ -59,7 +62,8 @@ export default function WalletPage() {
     setLoadingTxs(true);
     try {
       const next = txPage + 1;
-      const data = await getLedger(next, 20);
+      const token = await getToken();
+      const data = await getLedger(token, next, 20);
       const items = data.transactions ?? [];
       setTxs((prev) => [...prev, ...items]);
       setHasMoreTxs(items.length === 20);
@@ -76,7 +80,8 @@ export default function WalletPage() {
     setBuying(true);
     setBuyResult(null);
     try {
-      const resp = await purchaseSuns(buyAmount, buyCurrency);
+      const token = await getToken();
+      const resp = await purchaseSuns(token, buyAmount, buyCurrency);
       // Redirect to Chimoney checkout in a new tab
       if (resp.checkoutUrl) {
         window.open(resp.checkoutUrl, "_blank");

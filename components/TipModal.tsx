@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import type { Orientation } from "@/lib/types";
 import { tipCreator } from "@/lib/api";
 import { formatSuns } from "@/lib/utils";
@@ -17,6 +18,7 @@ interface TipModalProps {
 }
 
 export default function TipModal({ creatorId, creatorName, contentId, orientation, onClose }: TipModalProps) {
+  const { getToken } = useAuth();
   const [amount,  setAmount]  = useState(50);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,8 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
   async function handleTip() {
     setLoading(true);
     try {
-      const resp = await tipCreator(creatorId, amount, { contentId, orientation, message: message || undefined });
+      const token = await getToken();
+      const resp = await tipCreator(token, creatorId, amount, { contentId, orientation, message: message || undefined });
       setResult({ success: true, msg: resp.message });
     } catch (err: unknown) {
       setResult({ success: false, msg: err instanceof Error ? err.message : "Tip failed" });
