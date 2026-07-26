@@ -14,6 +14,32 @@ export function formatDuration(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** Compact count for view/like/subscriber numbers: 951 → "951",
+ *  12345 → "12K", 1234 → "1.2K", 2500000 → "2.5M". Whole-number
+ *  compacts drop the decimal (12.0K → 12K). */
+export function formatCount(n: number): string {
+  const compact = (value: number, suffix: string) => {
+    const rounded = value >= 10 ? Math.round(value) : Math.round(value * 10) / 10;
+    return `${rounded}${suffix}`;
+  };
+  if (n >= 1_000_000) return compact(n / 1_000_000, "M");
+  if (n >= 1_000) return compact(n / 1_000, "K");
+  return n.toLocaleString();
+}
+
+/** Long-form relative time: "3 days ago", "just now", "2 months ago" */
+export function timeAgoLong(dateStr: string): string {
+  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+  const unit = (n: number, word: string) =>
+    `${n} ${word}${n === 1 ? "" : "s"} ago`;
+  if (diff < 60) return "just now";
+  if (diff < 3600) return unit(Math.floor(diff / 60), "minute");
+  if (diff < 86400) return unit(Math.floor(diff / 3600), "hour");
+  if (diff < 2_592_000) return unit(Math.floor(diff / 86400), "day");
+  if (diff < 31_536_000) return unit(Math.floor(diff / 2_592_000), "month");
+  return unit(Math.floor(diff / 31_536_000), "year");
+}
+
 /** Format a UTC timestamp as a relative label: "2m ago", "3d ago" */
 export function timeAgo(dateStr: string): string {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;

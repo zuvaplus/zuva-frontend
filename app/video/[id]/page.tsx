@@ -1,12 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { Eye, Clock, Tag, Flag, X, Film } from "lucide-react";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { Eye, Clock, Tag, Flag, X, Film, Heart } from "lucide-react";
 import type { VideoResponse } from "@/lib/types";
-import { formatDuration, timeAgo } from "@/lib/utils";
+import {
+  likeVideo,
+  unlikeVideo,
+  subscribeCreator,
+  unsubscribeCreator,
+} from "@/lib/api";
+import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
+import CommentsSection from "@/components/CommentsSection";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -111,34 +118,160 @@ function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => voi
   );
 }
 
+/** Render description text with bare URLs converted to safe links. */
+function AutoLinkedText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold-400 hover:text-gold-300 underline underline-offset-2 break-all"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
+function Description({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  // Cheap heuristic for whether the collapse control is worth showing.
+  const isLong = text.length > 180 || text.split("\n").length > 3;
+
+  return (
+    <div className="bg-surface-200 border border-gold-400/10 rounded-xl px-4 py-3 mb-5">
+      <p
+        className={`text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap ${
+          expanded ? "" : "line-clamp-3"
+        }`}
+      >
+        <AutoLinkedText text={text} />
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded((e) => !e)}
+          className="text-zinc-500 hover:text-gold-400 text-xs font-semibold mt-1.5 transition-colors"
+        >
+          {expanded ? "Show less" : "...more"}
+        </button>
+      )}
+      {/* Links / merch shelf lands here in the upcoming monetization task */}
+    </div>
+  );
+}
+
 export default function VideoPlayerPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { getToken } = useAuth();
+  const { isSignedIn } = useUser();
 
   const [data, setData]       = useState<VideoResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
 
+  // Engagement state (seeded from the video response, mutated optimistically)
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeBusy, setLikeBusy] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [subBusy, setSubBusy] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/video/${id}`);
+      // Send the token when available so viewer.has_liked / is_subscribed
+      // reflect the signed-in user; anonymous viewers get false/false.
+      const token = await getToken().catch(() => null);
+      const res = await fetch(`${BACKEND_URL}/api/video/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error ?? "Video not found");
       }
-      setData(await res.json());
+      const json: VideoResponse = await res.json();
+      setData(json);
+      setLiked(json.viewer?.has_liked ?? false);
+      setLikeCount(json.video.like_count ?? 0);
+      setSubscribed(json.viewer?.is_subscribed ?? false);
+      setFollowerCount(json.creator.follower_count ?? 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Video not found");
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, getToken]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  async function toggleLike() {
+    if (!data || likeBusy) return;
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    // Optimistic flip; rollback on failure.
+    const prevLiked = liked;
+    const prevCount = likeCount;
+    setLiked(!prevLiked);
+    setLikeCount(prevCount + (prevLiked ? -1 : 1));
+    setLikeBusy(true);
+    try {
+      const token = await getToken();
+      const resp = prevLiked
+        ? await unlikeVideo(token, data.video.id)
+        : await likeVideo(token, data.video.id);
+      // Server count is authoritative (trigger-recomputed)
+      setLiked(resp.liked);
+      setLikeCount(resp.like_count);
+    } catch {
+      setLiked(prevLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setLikeBusy(false);
+    }
+  }
+
+  async function toggleSubscribe() {
+    if (!data || subBusy) return;
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    const prevSub = subscribed;
+    const prevCount = followerCount;
+    setSubscribed(!prevSub);
+    setFollowerCount(prevCount + (prevSub ? -1 : 1));
+    setSubBusy(true);
+    try {
+      const token = await getToken();
+      const resp = prevSub
+        ? await unsubscribeCreator(token, data.creator.id)
+        : await subscribeCreator(token, data.creator.id);
+      setSubscribed(resp.subscribed);
+      setFollowerCount(resp.follower_count);
+    } catch {
+      setSubscribed(prevSub);
+      setFollowerCount(prevCount);
+    } finally {
+      setSubBusy(false);
+    }
+  }
 
   if (loading) return <VideoSkeleton />;
 
@@ -156,9 +289,10 @@ export default function VideoPlayerPage() {
   }
 
   const { video, creator, related_videos } = data;
+  const creatorName = creator.display_name || creator.username;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-6 animate-fade-in">
       {/* Player */}
       <div className="aspect-video bg-surface-300 rounded-2xl overflow-hidden mb-5 border border-gold-400/10">
         <iframe
@@ -170,52 +304,88 @@ export default function VideoPlayerPage() {
         />
       </div>
 
-      {/* Info */}
-      <h1 className="text-white font-bold text-xl sm:text-2xl mb-3">{video.title}</h1>
+      {/* Title */}
+      <h1 className="text-white font-bold text-xl sm:text-2xl mb-2">{video.title}</h1>
 
+      {/* Meta row: views · date on the left, like (+ future tip) on the right */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <Link
-          href={`/channel/${creator.username}`}
-          className="flex items-center gap-3 group"
-        >
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gold-400/15 border border-gold-400/30 flex items-center justify-center text-sm font-bold text-gold-400 shrink-0">
+        <div className="flex items-center gap-x-3 text-zinc-500 text-sm">
+          <span className="flex items-center gap-1.5">
+            <Eye size={14} /> {formatCount(video.view_count)} views
+          </span>
+          <span aria-hidden>·</span>
+          <span>{timeAgoLong(video.created_at)}</span>
+          <span className="bg-gold-400/10 text-gold-400 border border-gold-400/25 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+            {video.category}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleLike}
+            disabled={likeBusy}
+            aria-pressed={liked}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all disabled:opacity-60
+              ${liked
+                ? "bg-gold-400 text-black border-gold-400 shadow-gold"
+                : "bg-surface-200 text-zinc-300 border-gold-400/25 hover:border-gold-400/60 hover:text-gold-300"
+              }`}
+          >
+            <Heart size={16} className={liked ? "fill-current" : ""} />
+            {formatCount(likeCount)}
+          </button>
+          {/* Tip button slot — filled by the upcoming monetization task */}
+          <div className="w-16" aria-hidden />
+          <button
+            onClick={() => setShowReport(true)}
+            className="text-zinc-600 hover:text-red-400 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
+            title="Report this video"
+          >
+            <Flag size={15} />
+          </button>
+        </div>
+      </div>
+
+      {/* Channel bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-surface-200 border border-gold-400/15 rounded-xl px-4 py-3 mb-5">
+        <Link href={`/channel/${creator.username}`} className="flex items-center gap-3 group min-w-0">
+          <div className="w-11 h-11 rounded-full overflow-hidden bg-gold-400/15 border border-gold-400/30 flex items-center justify-center text-base font-bold text-gold-400 shrink-0">
             {creator.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={creator.avatar_url} alt="" className="w-full h-full object-cover" />
             ) : (
-              (creator.display_name || creator.username).charAt(0).toUpperCase()
+              creatorName.charAt(0).toUpperCase()
             )}
           </div>
-          <div>
-            <p className="text-white text-sm font-semibold group-hover:text-gold-400 transition-colors">
-              {creator.display_name || creator.username}
+          <div className="min-w-0">
+            <p className="text-white text-sm font-semibold group-hover:text-gold-400 transition-colors truncate">
+              {creatorName}
             </p>
-            <p className="text-zinc-500 text-xs">{creator.follower_count.toLocaleString()} followers</p>
+            <p className="text-zinc-500 text-xs">
+              {formatCount(followerCount)} {followerCount === 1 ? "follower" : "followers"}
+            </p>
           </div>
         </Link>
 
         <button
-          onClick={() => setShowReport(true)}
-          className="flex items-center gap-2 text-zinc-500 hover:text-red-400 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-400/10 transition-colors"
+          onClick={toggleSubscribe}
+          disabled={subBusy}
+          className={`shrink-0 text-sm font-bold px-5 py-2 rounded-full transition-all disabled:opacity-60
+            ${subscribed
+              ? "bg-transparent text-gold-400 border border-gold-400/50 hover:bg-gold-400/10"
+              : "bg-gold-400 hover:bg-gold-300 text-black shadow-gold"
+            }`}
         >
-          <Flag size={15} /> Report
+          {subBusy ? "…" : subscribed ? "Subscribed" : "Subscribe"}
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-zinc-500 text-sm mb-4 pb-4 border-b border-white/5">
-        <span className="flex items-center gap-1.5"><Eye size={14} /> {video.view_count.toLocaleString()} views</span>
-        <span className="flex items-center gap-1.5"><Clock size={14} /> {timeAgo(video.created_at)}</span>
-        <span className="bg-gold-400/10 text-gold-400 border border-gold-400/25 text-xs font-semibold px-2.5 py-1 rounded-full">
-          {video.category}
-        </span>
-      </div>
+      {/* Description (collapsed to 3 lines, auto-linked URLs) */}
+      {video.description && <Description text={video.description} />}
 
-      {video.description && (
-        <p className="text-zinc-400 text-sm leading-relaxed mb-5 whitespace-pre-wrap">{video.description}</p>
-      )}
-
+      {/* Tags */}
       {video.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-2">
           {video.tags.map((tag) => (
             <span
               key={tag}
@@ -227,9 +397,12 @@ export default function VideoPlayerPage() {
         </div>
       )}
 
+      {/* Comments */}
+      <CommentsSection videoId={video.id} initialCount={video.comment_count ?? 0} />
+
       {/* Related videos */}
       {related_videos.length > 0 && (
-        <div>
+        <div className="mt-10">
           <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">More like this</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {related_videos.map((rv) => (
@@ -251,7 +424,7 @@ export default function VideoPlayerPage() {
                 </div>
                 <div className="p-2.5">
                   <p className="text-white text-sm font-medium truncate">{rv.title}</p>
-                  <p className="text-zinc-500 text-[11px] mt-1">{rv.view_count.toLocaleString()} views</p>
+                  <p className="text-zinc-500 text-[11px] mt-1">{formatCount(rv.view_count)} views</p>
                 </div>
               </Link>
             ))}

@@ -248,6 +248,8 @@ export interface UploadedVideo {
   duration_seconds: number | null;
   status: VideoStatus;
   view_count: number;
+  like_count: number;
+  comment_count: number;
   created_at: string;
 }
 
@@ -296,9 +298,56 @@ export interface RelatedVideo {
   created_at: string;
 }
 
+// Viewer engagement state on GET /api/video/:id — false/false for
+// anonymous viewers.
+export interface VideoViewerState {
+  has_liked: boolean;
+  is_subscribed: boolean;
+}
+
 export interface VideoResponse {
   success: boolean;
   video: UploadedVideo;
   creator: VideoPlayerCreator;
+  viewer: VideoViewerState;
   related_videos: RelatedVideo[];
+}
+
+// ─── Engagement: comments ────────────────────────────────────
+export interface CommentUser {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+export interface VideoComment {
+  id: string;
+  parent_comment_id: string | null;
+  body: string | null; // null when status === "deleted"
+  status: "visible" | "hidden" | "deleted";
+  created_at: string;
+  is_own: boolean;
+  user: CommentUser;
+  replies?: VideoComment[]; // present on top-level comments only
+}
+
+export interface CommentsResponse {
+  success: boolean;
+  comments: VideoComment[];
+  comment_count: number;
+  has_more: boolean;
+  page: number;
+}
+
+export interface LikeResponse {
+  success: boolean;
+  liked: boolean;
+  like_count: number;
+}
+
+export interface SubscribeResponse {
+  success: boolean;
+  subscribed: boolean;
+  follower_count: number;
 }

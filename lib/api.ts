@@ -7,6 +7,10 @@ import type {
   CashoutResponse,
   PayoutOptionsResponse,
   PayoutHistoryResponse,
+  CommentsResponse,
+  VideoComment,
+  LikeResponse,
+  SubscribeResponse,
   EarningsResponse,
   InterestsResponse,
   FiatCurrency,
@@ -161,6 +165,64 @@ export function getPayoutOptions(token: string | null): Promise<PayoutOptionsRes
 
 export function getPayoutHistory(token: string | null): Promise<PayoutHistoryResponse> {
   return apiFetch<PayoutHistoryResponse>("/api/payouts/history", token);
+}
+
+// ─── Engagement (likes, comments, subscriptions) ─────────────
+export function likeVideo(token: string | null, videoId: string): Promise<LikeResponse> {
+  return apiFetch<LikeResponse>(`/api/video/${videoId}/like`, token, { method: "POST" });
+}
+
+export function unlikeVideo(token: string | null, videoId: string): Promise<LikeResponse> {
+  return apiFetch<LikeResponse>(`/api/video/${videoId}/like`, token, { method: "DELETE" });
+}
+
+export function getComments(
+  token: string | null,
+  videoId: string,
+  page = 1,
+  limit = 20
+): Promise<CommentsResponse> {
+  return apiFetch<CommentsResponse>(
+    `/api/video/${videoId}/comments?page=${page}&limit=${limit}`,
+    token
+  );
+}
+
+export function postComment(
+  token: string | null,
+  videoId: string,
+  body: string,
+  parentCommentId?: string
+): Promise<{ success: boolean; comment: VideoComment }> {
+  return apiFetch(`/api/video/${videoId}/comments`, token, {
+    method: "POST",
+    body: JSON.stringify({ body, ...(parentCommentId ? { parentCommentId } : {}) }),
+  });
+}
+
+export function deleteComment(
+  token: string | null,
+  commentId: string
+): Promise<{ success: boolean }> {
+  return apiFetch(`/api/comments/${commentId}`, token, { method: "DELETE" });
+}
+
+export function subscribeCreator(
+  token: string | null,
+  creatorId: string
+): Promise<SubscribeResponse> {
+  return apiFetch<SubscribeResponse>(`/api/creator/${creatorId}/subscribe`, token, {
+    method: "POST",
+  });
+}
+
+export function unsubscribeCreator(
+  token: string | null,
+  creatorId: string
+): Promise<SubscribeResponse> {
+  return apiFetch<SubscribeResponse>(`/api/creator/${creatorId}/subscribe`, token, {
+    method: "DELETE",
+  });
 }
 
 // ─── Creator ─────────────────────────────────────────────────
