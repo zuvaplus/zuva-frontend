@@ -58,7 +58,14 @@ async function apiFetch<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new ApiError(body?.error ?? `HTTP ${res.status}`, res.status, body?.code);
+    const validatorMsgs = Array.isArray(body?.errors)
+      ? body.errors.map((e: { msg?: string }) => e.msg).filter(Boolean).join("; ")
+      : "";
+    throw new ApiError(
+      body?.error ?? (validatorMsgs || `HTTP ${res.status}`),
+      res.status,
+      body?.code
+    );
   }
 
   return res.json() as Promise<T>;

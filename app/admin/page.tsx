@@ -10,7 +10,7 @@ const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 type Tab = "applications" | "content" | "users";
 
 interface Application {
-  id: number;
+  id: string; // UUID — the live creator_applications.id column
   full_name: string;
   email: string;
   country: string;
@@ -161,7 +161,7 @@ export default function AdminPage() {
 
   const [applications, setApplications] = useState<Application[] | null>(null);
   const [appsError, setAppsError] = useState<string | null>(null);
-  const [appActionId, setAppActionId] = useState<number | null>(null);
+  const [appActionId, setAppActionId] = useState<string | null>(null);
 
   const [content, setContent] = useState<ContentItem[] | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
@@ -184,7 +184,12 @@ export default function AdminPage() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? `Request failed (${res.status})`);
+        // Prefer the backend's message; fall back to express-validator's
+        // errors array (older responses), then the bare status code.
+        const validatorMsgs = Array.isArray(body?.errors)
+          ? body.errors.map((e: { msg?: string }) => e.msg).filter(Boolean).join("; ")
+          : "";
+        throw new Error(body?.error ?? (validatorMsgs || `Request failed (${res.status})`));
       }
       return res.json() as Promise<T>;
     },
@@ -228,7 +233,7 @@ export default function AdminPage() {
     loadUsers();
   }, [isAuthorized, loadApplications, loadContent, loadUsers]);
 
-  async function handleApplicationStatus(id: number, status: "approved" | "rejected") {
+  async function handleApplicationStatus(id: string, status: "approved" | "rejected") {
     setAppActionId(id);
     try {
       await adminFetch(`/api/admin/applications/${id}`, {
