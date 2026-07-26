@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { usePathname } from "@/i18n/navigation";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
@@ -12,6 +13,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const signedIn = isLoaded && Boolean(isSignedIn);
+  const pathname = usePathname();
+
+  // Flares is a deliberately full-screen, chrome-free experience (its own
+  // back arrow + Zuva mark instead) — no Navbar/Sidebar/BottomNav, and no
+  // padded <main> wrapper, since the video itself needs to be full-bleed
+  // edge-to-edge with zero letterboxing.
+  const isFlares = pathname === "/flares" || pathname.startsWith("/flares/");
+  if (isFlares) {
+    return <UserRoleProvider>{children}</UserRoleProvider>;
+  }
 
   return (
     <UserRoleProvider>

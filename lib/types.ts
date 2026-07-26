@@ -250,7 +250,39 @@ export interface UploadedVideo {
   view_count: number;
   like_count: number;
   comment_count: number;
+  is_flare?: boolean;
   created_at: string;
+}
+
+// ─── Flares (short-form vertical feed) ───────────────────────
+export interface FlareCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  follower_count: number;
+}
+
+export interface FlareItem {
+  id: string;
+  title: string;
+  description: string | null;
+  cloudflare_video_id: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
+  view_count: number;
+  like_count: number;
+  comment_count: number;
+  category: string;
+  tags: string[];
+  created_at: string;
+  creator: FlareCreator;
+}
+
+export interface FlaresFeedResponse {
+  success: boolean;
+  flares: FlareItem[];
+  nextCursor: string | null;
 }
 
 export interface ChannelVideoSummary {

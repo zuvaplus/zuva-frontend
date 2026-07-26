@@ -115,3 +115,17 @@ input[type="range"].gold-range::-webkit-slider-thumb {
 /* ── Aspect ratios ─────────────────────────────────── */
 .aspect-portrait  { aspect-ratio: 9 / 16; }
 .aspect-landscape { aspect-ratio: 16 / 9; }
+
+/* ── Flares full-bleed player ──────────────────────────
+   @cloudflare/stream-react's `responsive` mode preserves the source
+   aspect ratio via a padding-bottom trick (i.e. it letterboxes) — the
+   opposite of what a full-bleed vertical feed needs. With
+   responsive={false} the SDK applies no sizing to its iframe at all,
+   so this forces it to fill whatever container it's given. */
+.flare-stream-fill iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}

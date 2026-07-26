@@ -24,10 +24,12 @@
     "watchHistory": "Historique",
     "savedVideos": "Vidéos enregistrées",
     "creatorDashboard": "Tableau de bord créateur",
-    "uploadVideo": "Mettre en ligne une vidéo"
+    "uploadVideo": "Mettre en ligne une vidéo",
+    "flares": "Flares"
   },
   "BottomNav": {
     "home": "Accueil",
+    "flares": "Flares",
     "search": "Recherche",
     "upload": "Publier",
     "alerts": "Alertes",
@@ -217,7 +219,8 @@
       "tooLarge": "Le fichier est trop volumineux. La taille maximale est de 2 Go.",
       "unreadableResponse": "La mise en ligne a réussi, mais la réponse n'a pas pu être lue.",
       "uploadFailedStatus": "Échec de la mise en ligne ({status})",
-      "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez."
+      "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez.",
+      "flareTooLong": "Les Flares doivent durer {max} secondes maximum — cette vidéo dure {actual}s."
     },
     "uploadedTitle": "Vidéo mise en ligne !",
     "processingComplete": "Traitement terminé — prête à être lue.",
@@ -225,8 +228,12 @@
     "processingVideo": "Traitement de la vidéo…",
     "stillProcessing": "Traitement toujours en cours — cela peut prendre quelques minutes pour les fichiers volumineux. Vérifiez « Mes vidéos » sous peu.",
     "uploadAnother": "Mettre en ligne une autre vidéo",
+    "postAFlare": "Publier un Flare",
+    "postAFlareHint": "Vidéo verticale courte, {seconds} secondes maximum",
+    "chooseVideoFlare": "Cliquez pour choisir une vidéo verticale (MP4, MOV, AVI — jusqu'à 90s)",
     "fields": {
       "videoFile": "Fichier vidéo",
+      "videoFileFlare": "Vidéo du Flare",
       "title": "Titre",
       "description": "Description",
       "category": "Catégorie",
@@ -548,6 +555,20 @@
     "videos": "Vidéos",
     "viewsCount": "{count} vues",
     "tags": "Tags"
+  },
+  "Flares": {
+    "back": "Retour",
+    "loadError": "Impossible de charger les Flares",
+    "tryAgain": "Réessayer",
+    "empty": "Aucun Flare pour l'instant — revenez bientôt.",
+    "unmute": "Réactiver le son",
+    "mute": "Couper le son",
+    "tip": "Pourboire",
+    "share": "Partager",
+    "following": "Abonné",
+    "follow": "Suivre",
+    "more": "...plus",
+    "closeComments": "Fermer les commentaires"
   },
   "Categories": {
     "Comedy": "Comédie",

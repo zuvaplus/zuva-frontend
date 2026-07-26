@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Home, Search, Plus, Bell, User } from "lucide-react";
+import { Home, Search, Plus, Bell, User, Flame } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
 import BecomeCreatorModal from "./BecomeCreatorModal";
 
@@ -29,6 +29,14 @@ export default function BottomNav({ onOpenProfileMenu }: BottomNavProps) {
           <Link href="/feed" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/feed") ? "text-gold-400" : "text-zinc-500"}`}>
             <Home size={20} color={isActive("/feed") ? AMBER : MUTED} />
             <span className="text-[10px] font-medium">{t("home")}</span>
+          </Link>
+
+          {/* Flares — always-amber Flame icon, distinct from the other
+              items which only turn amber when active, since it's a
+              different mode of the app rather than another browse tab. */}
+          <Link href="/flares" className="flex flex-col items-center gap-1 px-3 py-1 text-gold-400">
+            <Flame size={20} color={AMBER} fill={isActive("/flares") ? AMBER : "none"} />
+            <span className="text-[10px] font-bold">{t("flares")}</span>
           </Link>
 
           <Link href="/search" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/search") ? "text-gold-400" : "text-zinc-500"}`}>

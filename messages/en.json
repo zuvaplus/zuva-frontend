@@ -24,10 +24,12 @@
     "watchHistory": "Watch History",
     "savedVideos": "Saved Videos",
     "creatorDashboard": "Creator Dashboard",
-    "uploadVideo": "Upload Video"
+    "uploadVideo": "Upload Video",
+    "flares": "Flares"
   },
   "BottomNav": {
     "home": "Home",
+    "flares": "Flares",
     "search": "Search",
     "upload": "Upload",
     "alerts": "Alerts",
@@ -217,7 +219,8 @@
       "tooLarge": "File is too large. Maximum upload size is 2GB.",
       "unreadableResponse": "Upload succeeded but the response could not be read.",
       "uploadFailedStatus": "Upload failed ({status})",
-      "uploadFailedNetwork": "Upload failed. Please check your connection and try again."
+      "uploadFailedNetwork": "Upload failed. Please check your connection and try again.",
+      "flareTooLong": "Flares must be {max} seconds or under — this video is {actual}s."
     },
     "uploadedTitle": "Video uploaded!",
     "processingComplete": "Video processing complete — ready to play.",
@@ -225,8 +228,12 @@
     "processingVideo": "Processing video…",
     "stillProcessing": "Still processing — this can take a few minutes for larger files. Check My Videos shortly.",
     "uploadAnother": "Upload Another Video",
+    "postAFlare": "Post a Flare",
+    "postAFlareHint": "Short-form vertical video, {seconds} seconds max",
+    "chooseVideoFlare": "Click to choose a vertical video (MP4, MOV, AVI — up to 90s)",
     "fields": {
       "videoFile": "Video File",
+      "videoFileFlare": "Flare Video",
       "title": "Title",
       "description": "Description",
       "category": "Category",
@@ -548,6 +555,20 @@
     "videos": "Videos",
     "viewsCount": "{count} views",
     "tags": "Tags"
+  },
+  "Flares": {
+    "back": "Back",
+    "loadError": "Could not load Flares",
+    "tryAgain": "Try again",
+    "empty": "No Flares yet — check back soon.",
+    "unmute": "Unmute",
+    "mute": "Mute",
+    "tip": "Tip",
+    "share": "Share",
+    "following": "Following",
+    "follow": "Follow",
+    "more": "...more",
+    "closeComments": "Close comments"
   },
   "Categories": {
     "Comedy": "Comedy",

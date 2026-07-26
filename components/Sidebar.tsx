@@ -15,6 +15,7 @@ import {
   UserPlus,
   LayoutDashboard,
   UploadCloud,
+  Flame,
 } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
 
@@ -65,6 +66,27 @@ function SidebarLink({
   );
 }
 
+// Flares gets its own distinct, always-amber treatment (not the plain
+// grey-until-active style of the other links) — it's a different *mode*
+// of the app (full-screen swipe feed), not another item in the regular
+// browse list, and the sidebar should make that legible at a glance.
+function FlaresLink({ active }: { active: boolean }) {
+  const t = useTranslations("Sidebar");
+  return (
+    <Link
+      href="/flares"
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all border
+        ${active
+          ? "bg-gold-400 text-black border-gold-400 shadow-gold"
+          : "bg-gold-400/10 text-gold-400 border-gold-400/25 hover:bg-gold-400/20"
+        }`}
+    >
+      <Flame size={18} className={active ? "" : "fill-gold-400/30"} />
+      {t("flares")}
+    </Link>
+  );
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
@@ -83,6 +105,10 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex md:flex-col fixed top-14 left-0 bottom-0 w-60 bg-black border-r border-gold-400/10 overflow-y-auto scrollbar-hide z-40">
       <nav className="flex-1 px-2 py-3">
+        <div className="px-1 pb-3">
+          <FlaresLink active={pathname === "/flares" || pathname.startsWith("/flares/")} />
+        </div>
+
         <SectionLabel>{t("main")}</SectionLabel>
         <div className="space-y-0.5">
           {MAIN_LINKS.map(({ href, labelKey, icon }) => (

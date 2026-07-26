@@ -18,6 +18,8 @@ import type {
   CreatorLink,
   CaptionLanguage,
   CaptionsListResponse,
+  FlaresFeedResponse,
+  VideoResponse,
   EarningsResponse,
   InterestsResponse,
   FiatCurrency,
@@ -237,6 +239,27 @@ export function unsubscribeCreator(
   return apiFetch<SubscribeResponse>(`/api/creator/${creatorId}/subscribe`, token, {
     method: "DELETE",
   });
+}
+
+// ─── Flares (short-form vertical feed) ───────────────────────
+// Reuses the exact same GET /api/video/:id the long-form watch page
+// uses — Flares are just videos.is_flare=true rows. This is also what
+// increments view_count and returns fresh viewer.has_liked/is_subscribed,
+// called once per slide as it becomes the active one in the feed.
+export function getVideoDetail(token: string | null, videoId: string): Promise<VideoResponse> {
+  return apiFetch<VideoResponse>(`/api/video/${videoId}`, token);
+}
+
+export function getFlaresFeed(
+  token: string | null,
+  opts: { cursor?: string | null; exclude?: string[]; limit?: number } = {}
+): Promise<FlaresFeedResponse> {
+  const params = new URLSearchParams();
+  if (opts.cursor) params.set("cursor", opts.cursor);
+  if (opts.limit) params.set("limit", String(opts.limit));
+  if (opts.exclude?.length) params.set("exclude", opts.exclude.join(","));
+  const qs = params.toString();
+  return apiFetch<FlaresFeedResponse>(`/api/flares/feed${qs ? `?${qs}` : ""}`, token);
 }
 
 // ─── Creator dashboard ────────────────────────────────────────

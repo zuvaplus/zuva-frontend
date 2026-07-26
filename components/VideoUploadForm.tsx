@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle, Captions, Plus, Trash2 } from "lucide-react";
+import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle, Captions, Plus, Trash2, Flame } from "lucide-react";
 import type { UploadedVideo, UploadProcessingStatus, CaptionLanguage } from "@/lib/types";
 import { getUploadStatus, uploadCaptionTrack } from "@/lib/api";
 
@@ -14,6 +14,35 @@ const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "
 const MAX_VIDEO_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/avi"];
 const ACCEPTED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"];
+
+// Must match FLARE_MAX_DURATION_SECONDS in zuva-backend/zuva-api.js. This
+// client-side check is a fast-fail convenience only — the backend is the
+// real enforcement point (it validates against Cloudflare's own reported
+// duration once processing confirms it, not this client-side estimate).
+const FLARE_MAX_DURATION_SECONDS = 90;
+
+// Reads a video file's duration without uploading it, by loading it into
+// a detached <video> element and waiting for metadata. Best-effort: some
+// browsers/codecs can fail to report duration from metadata alone, so a
+// rejection here just means "couldn't check" — callers should let the
+// upload proceed and rely on the backend's authoritative check.
+function probeVideoDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    const url = URL.createObjectURL(file);
+    const cleanup = () => URL.revokeObjectURL(url);
+    video.onloadedmetadata = () => {
+      cleanup();
+      resolve(Number.isFinite(video.duration) ? video.duration : null);
+    };
+    video.onerror = () => {
+      cleanup();
+      resolve(null);
+    };
+    video.src = url;
+  });
+}
 
 // Curated languages matching the platform's African & Caribbean audience —
 // must match CAPTION_LANGUAGES in zuva-backend/zuva-api.js. Labels are
@@ -84,6 +113,7 @@ export default function VideoUploadForm({
   const [description, setDescription] = useState("");
   const [category, setCategory]       = useState("");
   const [tags, setTags]               = useState("");
+  const [isFlare, setIsFlare]         = useState(false);
 
   const [fileError, setFileError]   = useState<string | null>(null);
   const [error, setError]           = useState<string | null>(null);
@@ -192,7 +222,7 @@ export default function VideoUploadForm({
     setPendingCaptions((prev) => prev.filter((c) => c.id !== id));
   }
 
-  function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setFileError(null);
     if (!file) {
@@ -209,7 +239,35 @@ export default function VideoUploadForm({
       setVideoFile(null);
       return;
     }
+    // Fail fast for Flares — check locally before spending any upload
+    // bandwidth. This is a convenience check only; the backend validates
+    // against Cloudflare's own reported duration once processing confirms
+    // it, since a client-side estimate isn't authoritative (see
+    // probeVideoDuration's comment).
+    if (isFlare) {
+      const duration = await probeVideoDuration(file);
+      if (duration !== null && duration > FLARE_MAX_DURATION_SECONDS) {
+        setFileError(t("errors.flareTooLong", { max: FLARE_MAX_DURATION_SECONDS, actual: Math.round(duration) }));
+        setVideoFile(null);
+        return;
+      }
+    }
     setVideoFile(file);
+  }
+
+  // Re-check an already-selected file if the creator flips the toggle
+  // AFTER choosing a video, rather than only checking at file-select time.
+  async function handleFlareToggle(next: boolean) {
+    setIsFlare(next);
+    if (next && videoFile) {
+      const duration = await probeVideoDuration(videoFile);
+      if (duration !== null && duration > FLARE_MAX_DURATION_SECONDS) {
+        setFileError(t("errors.flareTooLong", { max: FLARE_MAX_DURATION_SECONDS, actual: Math.round(duration) }));
+        setVideoFile(null);
+      }
+    } else {
+      setFileError(null);
+    }
   }
 
   const canSubmit =
@@ -231,6 +289,7 @@ export default function VideoUploadForm({
     formData.append("description", description.trim());
     formData.append("category", category);
     formData.append("tags", tags);
+    formData.append("is_flare", String(isFlare));
     if (userId) formData.append("creator_id", userId);
     if (thumbnailFile) formData.append("thumbnail", thumbnailFile);
 
@@ -372,7 +431,33 @@ export default function VideoUploadForm({
 
   return (
     <form onSubmit={handleSubmit} className="bg-surface-200 border border-gold-400/15 rounded-2xl p-6 sm:p-8 space-y-5">
-      <Field label={t("fields.videoFile")}>
+      {/* Post a Flare — short-form vertical toggle. Distinct amber-filled
+          treatment matching the Flares nav entries, so it reads as a
+          different upload *mode* rather than just another checkbox. */}
+      <button
+        type="button"
+        onClick={() => handleFlareToggle(!isFlare)}
+        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border text-left transition-all
+          ${isFlare
+            ? "bg-gold-400/15 border-gold-400 shadow-gold"
+            : "bg-surface-100 border-gold-400/15 hover:border-gold-400/30"
+          }`}
+      >
+        <div className="flex items-center gap-3">
+          <Flame size={20} className={isFlare ? "text-gold-400 fill-gold-400/40" : "text-zinc-500"} />
+          <div>
+            <div className={`text-sm font-bold ${isFlare ? "text-gold-300" : "text-zinc-300"}`}>{t("postAFlare")}</div>
+            <div className="text-zinc-500 text-xs">{t("postAFlareHint", { seconds: FLARE_MAX_DURATION_SECONDS })}</div>
+          </div>
+        </div>
+        <div className={`w-10 h-6 rounded-full shrink-0 relative transition-colors ${isFlare ? "bg-gold-400" : "bg-surface-50"}`}>
+          <div
+            className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isFlare ? "translate-x-4" : "translate-x-0.5"}`}
+          />
+        </div>
+      </button>
+
+      <Field label={isFlare ? t("fields.videoFileFlare") : t("fields.videoFile")}>
         <label
           htmlFor="video-file"
           className={`flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-4 py-8 cursor-pointer transition-colors
@@ -380,7 +465,7 @@ export default function VideoUploadForm({
         >
           <Film size={24} className="text-gold-400" />
           <span className="text-sm text-zinc-300 text-center">
-            {videoFile ? videoFile.name : t("chooseVideo")}
+            {videoFile ? videoFile.name : isFlare ? t("chooseVideoFlare") : t("chooseVideo")}
           </span>
           <input
             id="video-file"
