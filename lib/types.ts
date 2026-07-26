@@ -1,45 +1,43 @@
 // ─── Feed & Content ──────────────────────────────────────────
+// Orientation is kept only for the Watch page's viewer badge/layout
+// (a client-derived notion of the video's aspect, not a DB column —
+// see lib/api.ts's getFeed). Main-feed videos are always "landscape"
+// now that Flares owns the vertical short-form experience.
 export type Orientation = "vertical" | "landscape";
 
+export interface FeedCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  follower_count: number;
+}
+
+// Matches GET /api/feed's response shape — the real videos/creator join,
+// scored and category-floor-adjusted server-side (see computeFeedScore /
+// buildRankedFeed in zuva-backend/zuva-api.js). Deliberately close to
+// FlareItem/UploadedVideo rather than the old cloudfront_url/
+// ai_generated_tags shape, which never matched any real table.
 export interface FeedItem {
   id: string;
-  creator_id: string;
   title: string;
-  duration_seconds: number;
-  cloudfront_url: string;
-  thumbnail_url: string;
-  ai_generated_tags: string[];
+  description: string | null;
+  cloudflare_video_id: string;
+  thumbnail_url: string | null;
+  duration_seconds: number | null;
   view_count: number;
   like_count: number;
-  total_tips_suns: number;
-  orientation: Orientation;
-  // Discovery engine metadata
-  _bucket?: "trending" | "personalized" | "wildcard";
-  trending_suns_24h?: number;
-  trending_tip_count_24h?: number;
-  relevance_score?: number;
-  matched_tags?: string[];
-  // Creator info (joined on some routes)
-  creator_username?: string;
-  creator_display_name?: string;
-  creator_avatar_url?: string;
+  comment_count: number;
+  category: string;
+  content_category: ContentCategory;
+  tags: string[];
+  created_at: string;
+  creator: FeedCreator;
 }
 
 export interface FeedResponse {
   success: boolean;
   feed: FeedItem[];
-  diagnostics?: {
-    requested: number;
-    delivered: number;
-    trending: number;
-    personalized: number;
-    wildcard: number;
-    mix: {
-      trending_pct: string;
-      personalized_pct: string;
-      wildcard_pct: string;
-    };
-  };
 }
 
 // ─── Wallet & Transactions ───────────────────────────────────
@@ -179,29 +177,23 @@ export interface EarningsResponse {
   earnings: CreatorEarnings;
 }
 
-// ─── Interest Graph ──────────────────────────────────────────
-export interface UserInterest {
-  tag: string;
-  weight: number;
-  view_count: number;
-  vertical_completions: number;
-  landscape_completions: number;
-  updated_at: string;
-  strength_pct: number;
+// ─── Watch progress (feeds the main feed's completion-rate ranking) ──
+// Fired periodically (every 10-15s of playback) and on pause/unload —
+// see POST /api/feed/watch-progress and watch_events in the backend.
+export interface WatchProgressPayload {
+  videoId: string;
+  watchedSeconds: number;
+  videoDurationSeconds: number;
 }
 
-export interface InterestsResponse {
-  success: boolean;
-  interests: UserInterest[];
-  count: number;
-}
-
-// ─── View Completion ─────────────────────────────────────────
-export interface ViewCompletePayload {
-  contentId: string;
-  orientation: Orientation;
-  watchDurationSeconds: number;
-  totalDurationSeconds: number;
+// ─── Flares swipe events (feeds computeFlareScore — independent from
+// the main feed's watch-progress/completion-rate ranking above) ──────
+export interface FlareSwipeEventPayload {
+  videoId: string;
+  watchedSeconds: number;
+  videoDurationSeconds: number;
+  swipedAway?: boolean;
+  looped?: boolean;
 }
 
 // ─── Search ──────────────────────────────────────────────────
@@ -234,6 +226,16 @@ export type VideoCategory =
   | "Comedy" | "Drama" | "Music" | "News"
   | "Sports" | "Lifestyle" | "Education" | "Other";
 
+// The ranking-model taxonomy (videos.content_category) — separate from
+// VideoCategory/`category` above, which stays as-is. See CLAUDE.md for
+// why these two category fields coexist. "documentary" | "discussion_debate"
+// | "interview" | "lifestyle_culture" are grouped in the UI as the
+// "Documentary & Discussion" umbrella (a code-level grouping only, matching
+// zuva-backend's DOC_DISCUSSION_CATEGORIES — see VideoUploadForm.tsx).
+export type ContentCategory =
+  | "entertainment" | "music" | "comedy" | "drama_series" | "documentary"
+  | "discussion_debate" | "interview" | "lifestyle_culture" | "news" | "other";
+
 export type VideoStatus = "pending" | "published" | "rejected";
 
 export interface UploadedVideo {
@@ -242,6 +244,7 @@ export interface UploadedVideo {
   title: string;
   description: string | null;
   category: string;
+  content_category: ContentCategory;
   tags: string[];
   cloudflare_video_id: string;
   thumbnail_url: string | null;

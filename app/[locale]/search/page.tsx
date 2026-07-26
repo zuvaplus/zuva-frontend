@@ -124,7 +124,7 @@ function SearchResults() {
                 {results.videos.map((video) => (
                   <Link
                     key={video.id}
-                    href={`/watch/${video.id}`}
+                    href={`/video/${video.id}`}
                     className="rounded-xl overflow-hidden bg-surface-200 border border-gold-400/10 hover:border-gold-400/30 transition-colors"
                   >
                     <div

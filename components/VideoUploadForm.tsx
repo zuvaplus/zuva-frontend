@@ -4,12 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle, Captions, Plus, Trash2, Flame } from "lucide-react";
-import type { UploadedVideo, UploadProcessingStatus, CaptionLanguage } from "@/lib/types";
+import type { UploadedVideo, UploadProcessingStatus, CaptionLanguage, ContentCategory } from "@/lib/types";
 import { getUploadStatus, uploadCaptionTrack } from "@/lib/api";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
 const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "Education", "Other"];
+
+// The ranking-model taxonomy (videos.content_category) — separate from
+// CATEGORIES above, which stays as-is. Must match CONTENT_CATEGORIES /
+// DOC_DISCUSSION_CATEGORIES in zuva-backend/zuva-api.js. The umbrella
+// grouping is a UI/code-level concept only, not a DB one.
+const GENERAL_CONTENT_CATEGORIES: ContentCategory[] = [
+  "entertainment", "music", "comedy", "drama_series", "news", "other",
+];
+const DOC_DISCUSSION_CONTENT_CATEGORIES: ContentCategory[] = [
+  "documentary", "discussion_debate", "interview", "lifestyle_culture",
+];
 
 const MAX_VIDEO_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/avi"];
@@ -105,6 +116,7 @@ export default function VideoUploadForm({
 }) {
   const t = useTranslations("VideoUpload");
   const tCategories = useTranslations("Categories");
+  const tContentCategories = useTranslations("ContentCategories");
   const { getToken } = useAuth();
 
   const [videoFile, setVideoFile]         = useState<File | null>(null);
@@ -112,6 +124,7 @@ export default function VideoUploadForm({
   const [title, setTitle]             = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory]       = useState("");
+  const [contentCategory, setContentCategory] = useState<ContentCategory | "">("");
   const [tags, setTags]               = useState("");
   const [isFlare, setIsFlare]         = useState(false);
 
@@ -271,7 +284,8 @@ export default function VideoUploadForm({
   }
 
   const canSubmit =
-    !!videoFile && !fileError && title.trim() !== "" && category !== "" && !uploading;
+    !!videoFile && !fileError && title.trim() !== "" && category !== ""
+    && contentCategory !== "" && !uploading;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -288,6 +302,7 @@ export default function VideoUploadForm({
     formData.append("title", title.trim());
     formData.append("description", description.trim());
     formData.append("category", category);
+    formData.append("content_category", contentCategory);
     formData.append("tags", tags);
     formData.append("is_flare", String(isFlare));
     if (userId) formData.append("creator_id", userId);
@@ -343,6 +358,7 @@ export default function VideoUploadForm({
     setTitle("");
     setDescription("");
     setCategory("");
+    setContentCategory("");
     setTags("");
     setProgress(0);
     setPendingCaptions([]);
@@ -511,6 +527,28 @@ export default function VideoUploadForm({
             <option key={c} value={c}>{tCategories(c)}</option>
           ))}
         </select>
+      </Field>
+
+      <Field label={t("fields.contentCategory")}>
+        <select
+          required
+          value={contentCategory}
+          onChange={(e) => setContentCategory(e.target.value as ContentCategory)}
+          className={inputClass}
+        >
+          <option value="" disabled>{t("selectContentCategory")}</option>
+          <optgroup label={tContentCategories("groupGeneral")}>
+            {GENERAL_CONTENT_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{tContentCategories(c)}</option>
+            ))}
+          </optgroup>
+          <optgroup label={tContentCategories("groupDocDiscussion")}>
+            {DOC_DISCUSSION_CONTENT_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{tContentCategories(c)}</option>
+            ))}
+          </optgroup>
+        </select>
+        <p className="text-zinc-600 text-xs mt-1.5">{t("contentCategoryHint")}</p>
       </Field>
 
       <Field label={t("fields.tags")}>

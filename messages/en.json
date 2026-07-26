@@ -106,12 +106,7 @@
   },
   "Feed": {
     "title": "Discover Creators",
-    "subtitle": "Trending & personalised — powered by your interest graph",
-    "filters": {
-      "both": "For You",
-      "vertical": "Shorts",
-      "landscape": "Videos"
-    },
+    "subtitle": "Trending & rising — ranked by what keeps people watching",
     "loadingMore": "Loading more…",
     "loadError": "Could not load feed",
     "tryAgain": "Try again",
@@ -237,6 +232,7 @@
       "title": "Title",
       "description": "Description",
       "category": "Category",
+      "contentCategory": "Content Category",
       "tags": "Tags",
       "thumbnail": "Thumbnail (optional)",
       "captions": "Captions (optional)"
@@ -245,6 +241,8 @@
     "titlePlaceholder": "Give your video a title",
     "descriptionPlaceholder": "What's this video about?",
     "selectCategory": "Select a category",
+    "selectContentCategory": "Select a content category",
+    "contentCategoryHint": "Used to rank and recommend your video — pick whichever fits best.",
     "tagsPlaceholder": "comedy, lagos, skits (comma-separated)",
     "chooseImage": "Choose an image (optional)",
     "uploadingPct": "Uploading… {pct}%",
@@ -579,5 +577,19 @@
     "Lifestyle": "Lifestyle",
     "Education": "Education",
     "Other": "Other"
+  },
+  "ContentCategories": {
+    "groupGeneral": "General",
+    "groupDocDiscussion": "Documentary & Discussion",
+    "entertainment": "Entertainment",
+    "music": "Music",
+    "comedy": "Comedy",
+    "drama_series": "Drama Series",
+    "news": "News",
+    "other": "Other",
+    "documentary": "Documentary",
+    "discussion_debate": "Discussion & Debate",
+    "interview": "Interview",
+    "lifestyle_culture": "Lifestyle & Culture"
   }
 }

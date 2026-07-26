@@ -21,11 +21,11 @@ import type {
   FlaresFeedResponse,
   VideoResponse,
   EarningsResponse,
-  InterestsResponse,
   FiatCurrency,
   CashoutChannel,
   Orientation,
-  ViewCompletePayload,
+  WatchProgressPayload,
+  FlareSwipeEventPayload,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -83,34 +83,26 @@ async function apiFetch<T>(
 // ─── Feed ────────────────────────────────────────────────────
 export function getFeed(
   token: string | null,
-  orientation: "vertical" | "landscape" | "both" = "both",
   limit = 30,
   offset = 0
 ): Promise<FeedResponse> {
   return apiFetch<FeedResponse>(
-    `/api/feed/recommended?orientation=${orientation}&limit=${limit}&offset=${offset}`,
+    `/api/feed?limit=${limit}&offset=${offset}`,
     token
   );
 }
 
-export function recordViewComplete(
+// Fired periodically (every 10-15s of playback) and on pause/unload —
+// feeds the main feed's completion-rate ranking (watch_events). Works
+// signed-out too (optionalAuth on the backend), so no token is required.
+export function recordWatchProgress(
   token: string | null,
-  payload: ViewCompletePayload
+  payload: WatchProgressPayload
 ): Promise<unknown> {
-  return apiFetch("/api/feed/view-complete", token, {
+  return apiFetch("/api/feed/watch-progress", token, {
     method: "POST",
     body: JSON.stringify(payload),
   });
-}
-
-export function getUserInterests(
-  token: string | null,
-  limit = 20
-): Promise<InterestsResponse> {
-  return apiFetch<InterestsResponse>(
-    `/api/feed/user-interests?limit=${limit}`,
-    token
-  );
 }
 
 // ─── Wallet ──────────────────────────────────────────────────
@@ -260,6 +252,19 @@ export function getFlaresFeed(
   if (opts.exclude?.length) params.set("exclude", opts.exclude.join(","));
   const qs = params.toString();
   return apiFetch<FlaresFeedResponse>(`/api/flares/feed${qs ? `?${qs}` : ""}`, token);
+}
+
+// Fired on swipe-away, loop detection, and periodically during playback —
+// feeds computeFlareScore, deliberately independent from the main feed's
+// watch-progress/completion-rate ranking above.
+export function recordFlareSwipeEvent(
+  token: string | null,
+  payload: FlareSwipeEventPayload
+): Promise<unknown> {
+  return apiFetch("/api/flares/swipe-event", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 // ─── Creator dashboard ────────────────────────────────────────

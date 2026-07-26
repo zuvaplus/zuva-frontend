@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
 import { Eye, Clock, Tag, Flag, X, Film, Heart } from "lucide-react";
 import type { VideoResponse } from "@/lib/types";
 import {
@@ -12,6 +13,7 @@ import {
   unlikeVideo,
   subscribeCreator,
   unsubscribeCreator,
+  recordWatchProgress,
 } from "@/lib/api";
 import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
 import CommentsSection from "@/components/CommentsSection";
@@ -203,6 +205,8 @@ export default function VideoPlayerPage() {
   const [followerCount, setFollowerCount] = useState(0);
   const [subBusy, setSubBusy] = useState(false);
 
+  const streamRef = useRef<StreamPlayerApi | undefined>(undefined);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -233,6 +237,40 @@ export default function VideoPlayerPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Watch-progress tracking — the missing signal computeFeedScore's
+  // completion rate depends on. Fired periodically (every 12s, within
+  // the requested 10-15s cadence) while playing, on pause, on 'ended',
+  // and once more on unmount (route navigation away) — not just a
+  // single on-leave guess like the old (removed) view-complete route.
+  // Best-effort throughout: a missed ping just means slightly sparser
+  // signal, never something to surface to the viewer.
+  const sendProgress = useCallback(async () => {
+    const api = streamRef.current;
+    if (!api || !data) return;
+    const watchedSeconds = Math.round(api.currentTime);
+    const videoDurationSeconds = data.video.duration_seconds ?? Math.round(api.duration) ?? 0;
+    if (!videoDurationSeconds || watchedSeconds <= 0) return;
+    try {
+      const token = await getToken().catch(() => null);
+      await recordWatchProgress(token, {
+        videoId: data.video.id,
+        watchedSeconds,
+        videoDurationSeconds,
+      });
+    } catch {
+      // best-effort — see comment above
+    }
+  }, [data, getToken]);
+
+  useEffect(() => {
+    if (!data) return;
+    const interval = setInterval(sendProgress, 12000);
+    return () => {
+      clearInterval(interval);
+      sendProgress();
+    };
+  }, [data, sendProgress]);
 
   async function toggleLike() {
     if (!data || likeBusy) return;
@@ -308,14 +346,20 @@ export default function VideoPlayerPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-6 animate-fade-in">
-      {/* Player */}
+      {/* Player — Stream (not a raw iframe) so streamRef gives us
+          imperative currentTime/duration/paused access for watch-progress
+          tracking, same verified pattern as FlareSlide.tsx. controls=true
+          here (unlike Flares) since this page has no custom overlay UI. */}
       <div className="aspect-video bg-surface-300 rounded-2xl overflow-hidden mb-5 border border-gold-400/10">
-        <iframe
-          src={`https://iframe.cloudflarestream.com/${video.cloudflare_video_id}`}
-          style={{ border: "none", width: "100%", height: "100%" }}
-          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-          allowFullScreen
-          title={video.title}
+        <Stream
+          streamRef={streamRef}
+          src={video.cloudflare_video_id}
+          controls
+          responsive={false}
+          preload="metadata"
+          className="w-full h-full"
+          onPause={() => { sendProgress(); }}
+          onEnded={() => { sendProgress(); }}
         />
       </div>
 

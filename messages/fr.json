@@ -106,12 +106,7 @@
   },
   "Feed": {
     "title": "Découvrir des créateurs",
-    "subtitle": "Tendances et contenu personnalisé — basé sur vos centres d'intérêt",
-    "filters": {
-      "both": "Pour vous",
-      "vertical": "Shorts",
-      "landscape": "Vidéos"
-    },
+    "subtitle": "Tendances et contenu montant — classé selon ce qui capte vraiment l'attention",
     "loadingMore": "Chargement…",
     "loadError": "Impossible de charger le fil",
     "tryAgain": "Réessayer",
@@ -237,6 +232,7 @@
       "title": "Titre",
       "description": "Description",
       "category": "Catégorie",
+      "contentCategory": "Catégorie de contenu",
       "tags": "Tags",
       "thumbnail": "Miniature (facultatif)",
       "captions": "Sous-titres (facultatif)"
@@ -245,6 +241,8 @@
     "titlePlaceholder": "Donnez un titre à votre vidéo",
     "descriptionPlaceholder": "De quoi parle cette vidéo ?",
     "selectCategory": "Choisissez une catégorie",
+    "selectContentCategory": "Choisissez une catégorie de contenu",
+    "contentCategoryHint": "Utilisée pour classer et recommander votre vidéo — choisissez ce qui convient le mieux.",
     "tagsPlaceholder": "comédie, dakar, sketchs (séparés par des virgules)",
     "chooseImage": "Choisissez une image (facultatif)",
     "uploadingPct": "Mise en ligne… {pct} %",
@@ -579,5 +577,19 @@
     "Lifestyle": "Style de vie",
     "Education": "Éducation",
     "Other": "Autre"
+  },
+  "ContentCategories": {
+    "groupGeneral": "Général",
+    "groupDocDiscussion": "Documentaire & Discussion",
+    "entertainment": "Divertissement",
+    "music": "Musique",
+    "comedy": "Comédie",
+    "drama_series": "Série dramatique",
+    "news": "Actualités",
+    "other": "Autre",
+    "documentary": "Documentaire",
+    "discussion_debate": "Discussion & Débat",
+    "interview": "Interview",
+    "lifestyle_culture": "Style de vie & Culture"
   }
 }

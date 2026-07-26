@@ -9,9 +9,7 @@ import FeedCard from "@/components/FeedCard";
 import { FeedSkeleton } from "@/components/LoadingSkeleton";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
-type OrientationFilter = "both" | "vertical" | "landscape";
-
-const FILTER_VALUES: OrientationFilter[] = ["both", "vertical", "landscape"];
+const PAGE_SIZE = 30;
 
 export default function FeedPage() {
   const t = useTranslations("Feed");
@@ -20,21 +18,20 @@ export default function FeedPage() {
   const [loading,     setLoading]     = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error,       setError]       = useState<string | null>(null);
-  const [filter,      setFilter]      = useState<OrientationFilter>("both");
   const [offset,      setOffset]      = useState(0);
   const [hasMore,     setHasMore]     = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const loadFeed = useCallback(
-    async (f: OrientationFilter, off: number, append = false) => {
+    async (off: number, append = false) => {
       append ? setLoadingMore(true) : setLoading(true);
       setError(null);
       try {
         const token = await getToken();
-        const data  = await getFeed(token, f, 30, off);
+        const data  = await getFeed(token, PAGE_SIZE, off);
         const items = data.feed ?? [];
         setFeed((prev) => (append ? [...prev, ...items] : items));
-        setHasMore(items.length === 30);
+        setHasMore(items.length === PAGE_SIZE);
         setOffset(off + items.length);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : t("loadError"));
@@ -46,16 +43,16 @@ export default function FeedPage() {
     [getToken, t]
   );
 
-  useEffect(() => { setOffset(0); loadFeed(filter, 0, false); }, [filter, loadFeed]);
+  useEffect(() => { loadFeed(0, false); }, [loadFeed]);
 
   useEffect(() => {
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting && hasMore && !loadingMore && !loading) loadFeed(filter, offset, true); },
+      ([e]) => { if (e.isIntersecting && hasMore && !loadingMore && !loading) loadFeed(offset, true); },
       { threshold: 0.1 }
     );
     if (loaderRef.current) obs.observe(loaderRef.current);
     return () => obs.disconnect();
-  }, [hasMore, loadingMore, loading, filter, offset, loadFeed]);
+  }, [hasMore, loadingMore, loading, offset, loadFeed]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -68,43 +65,18 @@ export default function FeedPage() {
         <p className="text-zinc-500 text-sm">{t("subtitle")}</p>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex items-center gap-1 mb-6 bg-surface-300 p-1 rounded-xl border border-gold-400/10 w-fit mx-auto">
-        {FILTER_VALUES.map((value) => (
-          <button
-            key={value}
-            onClick={() => setFilter(value)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all
-              ${filter === value
-                ? "bg-gold-400 text-black shadow-gold"
-                : "text-zinc-500 hover:text-gold-300"
-              }`}
-          >
-            {t(`filters.${value}`)}
-          </button>
-        ))}
-      </div>
-
       {/* Content */}
       {loading ? (
         <FeedSkeleton />
       ) : error ? (
-        <ErrorState message={error} onRetry={() => loadFeed(filter, 0)} />
+        <ErrorState message={error} onRetry={() => loadFeed(0)} />
       ) : feed.length === 0 ? (
         <EmptyState />
       ) : (
         <>
-          {filter === "landscape" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {feed.map((item) => <FeedCard key={item.id} item={item} />)}
-            </div>
-          ) : filter === "vertical" ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
-              {feed.map((item) => <FeedCard key={item.id} item={item} />)}
-            </div>
-          ) : (
-            <MixedFeed items={feed} />
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {feed.map((item) => <FeedCard key={item.id} item={item} />)}
+          </div>
 
           <div ref={loaderRef} className="mt-10 flex justify-center">
             {loadingMore && (
@@ -115,41 +87,6 @@ export default function FeedPage() {
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function MixedFeed({ items }: { items: FeedItem[] }) {
-  const t = useTranslations("Feed");
-  const verticals  = items.filter((i) => i.orientation === "vertical");
-  const landscapes = items.filter((i) => i.orientation === "landscape");
-  return (
-    <div className="space-y-10">
-      {verticals.length > 0 && (
-        <section>
-          <SectionDivider label={t("filters.vertical")} />
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
-            {verticals.map((item) => <FeedCard key={item.id} item={item} />)}
-          </div>
-        </section>
-      )}
-      {landscapes.length > 0 && (
-        <section>
-          <SectionDivider label={t("filters.landscape")} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {landscapes.map((item) => <FeedCard key={item.id} item={item} />)}
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
-
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 mb-5">
-      <span className="text-gold-400 font-bold text-base">{label}</span>
-      <div className="flex-1 h-px bg-gold-400/15" />
     </div>
   );
 }

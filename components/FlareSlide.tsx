@@ -13,6 +13,7 @@ import {
   unlikeVideo,
   subscribeCreator,
   unsubscribeCreator,
+  recordFlareSwipeEvent,
 } from "@/lib/api";
 import { formatCount } from "@/lib/utils";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
@@ -49,6 +50,31 @@ export default function FlareSlide({
   const [descExpanded, setDescExpanded] = useState(false);
   const detailFetchedRef = useRef(false);
 
+  // Loop detection state — the Stream player's native `loop` attribute
+  // seeks back to 0 internally without firing 'ended' (same as a looping
+  // HTML5 <video>), so a loop is inferred from the currentTime series
+  // instead: a big backward jump from near-the-end to near-the-start
+  // while still active means it looped.
+  const hasLoopedRef = useRef(false);
+  const prevTimeRef = useRef(0);
+
+  // Best-effort, fire-and-forget — feeds computeFlareScore
+  // (completion/loop/swipe-away), deliberately independent from the main
+  // feed's watch-progress endpoint.
+  async function reportSwipeEvent(payload: {
+    watchedSeconds: number;
+    videoDurationSeconds: number;
+    swipedAway: boolean;
+    looped: boolean;
+  }) {
+    try {
+      const token = await getToken().catch(() => null);
+      await recordFlareSwipeEvent(token, { videoId: flare.id, ...payload });
+    } catch {
+      // best-effort — a missed event just means slightly sparser signal
+    }
+  }
+
   const creatorName = flare.creator.display_name || flare.creator.username;
 
   // Fires once per slide the first time it becomes active — registers the
@@ -78,15 +104,60 @@ export default function FlareSlide({
   // mount (it's a one-time iframe-src parameter, not a live control), so
   // every slide mounts with autoplay=false and this effect drives playback
   // based on which slide the IntersectionObserver says is active.
+  //
+  // The cleanup (fires when isActive flips to false, or on unmount —
+  // covering both "swiped to the next slide" and "left the Flares page
+  // entirely") is also where the swipe/loop event is reported: it's the
+  // natural moment we know how far the viewer actually got.
   useEffect(() => {
-    if (!streamRef.current) return;
+    const api = streamRef.current;
+    if (!api) return;
     if (isActive) {
-      streamRef.current.play().catch(() => {}); // browser may block until a user gesture; muted start avoids this in practice
-    } else {
-      streamRef.current.pause();
-      streamRef.current.currentTime = 0; // next time this slide is reached, it starts fresh
+      api.play().catch(() => {}); // browser may block until a user gesture; muted start avoids this in practice
     }
+    return () => {
+      const watchedSeconds = Math.round(api.currentTime);
+      const videoDurationSeconds = flare.duration_seconds ?? (Math.round(api.duration) || 0);
+      if (watchedSeconds > 0 && videoDurationSeconds > 0) {
+        const swipedAway = watchedSeconds / videoDurationSeconds < 0.75;
+        reportSwipeEvent({ watchedSeconds, videoDurationSeconds, swipedAway, looped: hasLoopedRef.current });
+      }
+      api.pause();
+      api.currentTime = 0; // next time this slide is reached, it starts fresh
+      hasLoopedRef.current = false;
+      prevTimeRef.current = 0;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive]);
+
+  // Periodic progress ping while active — same "every 10-15s" cadence as
+  // the main feed's watch-progress tracking, reported as a non-swipe-away
+  // event so a long, still-being-watched Flare doesn't get penalized
+  // just because the viewer hasn't swiped away yet.
+  useEffect(() => {
+    if (!isActive) return;
+    const interval = setInterval(() => {
+      const api = streamRef.current;
+      if (!api) return;
+      const watchedSeconds = Math.round(api.currentTime);
+      const videoDurationSeconds = flare.duration_seconds ?? (Math.round(api.duration) || 0);
+      if (watchedSeconds <= 0 || videoDurationSeconds <= 0) return;
+      reportSwipeEvent({ watchedSeconds, videoDurationSeconds, swipedAway: false, looped: hasLoopedRef.current });
+    }, 12000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive]);
+
+  // Loop inference — see hasLoopedRef's declaration above for why this
+  // can't just be an 'ended' handler.
+  function handleStreamTimeUpdate() {
+    const api = streamRef.current;
+    if (!api || !api.duration) return;
+    if (prevTimeRef.current > api.duration * 0.85 && api.currentTime < 1) {
+      hasLoopedRef.current = true;
+    }
+    prevTimeRef.current = api.currentTime;
+  }
 
   // Same reasoning as autoplay — mute is driven imperatively so the toggle
   // works on an already-mounted player, not just at mount time.
@@ -187,6 +258,7 @@ export default function FlareSlide({
           responsive={false}
           preload="auto"
           className="w-full h-full"
+          onTimeUpdate={handleStreamTimeUpdate}
         />
       </div>
 
