@@ -1,10 +1,57 @@
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
+import { auth } from "@clerk/nextjs/server";
+import { Link, redirect } from "@/i18n/navigation";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import SiteFooter from "@/components/SiteFooter";
 
-export default function LandingPage() {
-  const t = useTranslations("Landing");
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
+
+// Root ("/") is where post-sign-in landing is decided — see
+// signInFallbackRedirectUrl/signUpFallbackRedirectUrl in ../layout.tsx,
+// both pointed at "/" rather than a fixed page, specifically so this
+// server-side check runs right after auth. Signed-out visitors fall
+// through to the marketing page below unchanged; signed-in visitors are
+// redirected before any marketing JSX renders (no client-side flash).
+//
+// next-intl's server-side redirect() needs an explicit locale (there's
+// no request-scoped "current locale" hook available outside client
+// components in this navigation build), hence the explicit param here
+// rather than reading it from context.
+async function redirectSignedInUser(locale: string) {
+  const { userId, getToken } = await auth();
+  if (!userId) return;
+
+  let role: "creator" | "viewer" = "viewer";
+  try {
+    const token = await getToken();
+    const res = await fetch(`${BACKEND_URL}/api/user/role`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      role = data.role === "creator" ? "creator" : "viewer";
+    }
+  } catch {
+    // Backend unreachable — fall through to the viewer default (/feed)
+    // rather than stranding a signed-in user on the marketing page.
+  }
+
+  // redirect() throws internally — must be called outside any try/catch
+  // above, or Next.js's own redirect signal would get swallowed as if it
+  // were a normal error.
+  redirect({ href: role === "creator" ? "/creator-dashboard" : "/feed", locale });
+}
+
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  await redirectSignedInUser(locale);
+
+  const t = await getTranslations({ locale, namespace: "Landing" });
   return (
     <div className="flex flex-col min-h-[calc(100vh-56px)] bg-black">
 

@@ -90,12 +90,17 @@ export default async function RootLayout({
   // nothing about locales — passed here instead so Clerk-driven redirects
   // (e.g. an expired session) land on /fr/sign-in for a French-locale user
   // rather than always bouncing through /en/sign-in.
+  //
+  // Fallback redirects point at the locale root, not a fixed page —
+  // app/[locale]/page.tsx does a server-side role check right after
+  // auth and sends creators to /creator-dashboard, everyone else to
+  // /feed, so this one redirect target covers both roles correctly.
   return (
     <ClerkProvider
       signInUrl={`/${locale}/sign-in`}
       signUpUrl={`/${locale}/sign-up`}
-      signInFallbackRedirectUrl={`/${locale}/feed`}
-      signUpFallbackRedirectUrl={`/${locale}/feed`}
+      signInFallbackRedirectUrl={`/${locale}`}
+      signUpFallbackRedirectUrl={`/${locale}`}
     >
       <html lang={locale}>
         <body className={`${geistSans.variable} ${geistMono.variable} ${lilitaOne.variable} antialiased bg-black text-foreground min-h-screen`}>
