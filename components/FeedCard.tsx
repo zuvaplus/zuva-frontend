@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatSuns, formatDuration } from "@/lib/utils";
 import ZuvaSunIcon from "./ZuvaSunIcon";

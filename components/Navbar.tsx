@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Search, User as UserIcon } from "lucide-react";
 

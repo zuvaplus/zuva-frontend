@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { MessageCircle, Trash2, CornerDownRight } from "lucide-react";
 import type { VideoComment } from "@/lib/types";
