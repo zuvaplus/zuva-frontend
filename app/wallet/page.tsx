@@ -3,10 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import type { WalletBalance, Transaction, FiatCurrency } from "@/lib/types";
-import { getWalletBalance, getLedger, purchaseSuns } from "@/lib/api";
+import { getWalletBalance, getLedger, purchaseSuns, ApiError } from "@/lib/api";
 import { formatSuns, timeAgo, txLabel } from "@/lib/utils";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import { WalletSkeleton } from "@/components/LoadingSkeleton";
+import CashoutPanel from "@/components/CashoutPanel";
 
 const FIAT_CURRENCIES: { value: FiatCurrency; label: string; symbol: string }[] = [
   { value: "USD", label: "US Dollar", symbol: "$" },
@@ -15,7 +16,11 @@ const FIAT_CURRENCIES: { value: FiatCurrency; label: string; symbol: string }[] 
   { value: "AUD", label: "Australian Dollar", symbol: "A$" },
 ];
 
-type ActiveTab = "overview" | "history" | "buy";
+type ActiveTab = "overview" | "history" | "buy" | "cashout";
+
+// kind: "coming-soon" is the pre-launch state — the backend answers 503
+// PURCHASES_NOT_LIVE until a pay-in provider is wired up. Not an error.
+type BuyResult = { kind: "success" | "error" | "coming-soon"; msg: string };
 
 export default function WalletPage() {
   const { getToken } = useAuth();
@@ -32,7 +37,7 @@ export default function WalletPage() {
   const [buyAmount, setBuyAmount] = useState(10);
   const [buyCurrency, setBuyCurrency] = useState<FiatCurrency>("USD");
   const [buying, setBuying] = useState(false);
-  const [buyResult, setBuyResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [buyResult, setBuyResult] = useState<BuyResult | null>(null);
 
   const loadWallet = useCallback(async () => {
     setLoading(true);
@@ -82,20 +87,27 @@ export default function WalletPage() {
     try {
       const token = await getToken();
       const resp = await purchaseSuns(token, buyAmount, buyCurrency);
-      // Redirect to Chimoney checkout in a new tab
+      // Redirect to the provider's checkout in a new tab
       if (resp.checkoutUrl) {
         window.open(resp.checkoutUrl, "_blank");
-        setBuyResult({ ok: true, msg: `${resp.message} — checkout opened in a new tab.` });
+        setBuyResult({ kind: "success", msg: `${resp.message} — checkout opened in a new tab.` });
       } else {
-        setBuyResult({ ok: true, msg: resp.message });
+        setBuyResult({ kind: "success", msg: resp.message });
       }
       // Refresh balance after purchase
       await loadWallet();
     } catch (err: unknown) {
-      setBuyResult({
-        ok: false,
-        msg: err instanceof Error ? err.message : "Purchase failed",
-      });
+      if (err instanceof ApiError && (err.code === "PURCHASES_NOT_LIVE" || err.status === 503)) {
+        setBuyResult({
+          kind: "coming-soon",
+          msg: "Suns purchases are coming soon — we're putting the finishing touches on payments. Check back shortly!",
+        });
+      } else {
+        setBuyResult({
+          kind: "error",
+          msg: err instanceof Error ? err.message : "Purchase failed",
+        });
+      }
     } finally {
       setBuying(false);
     }
@@ -159,7 +171,7 @@ export default function WalletPage() {
 
       {/* Tabs */}
       <div className="flex bg-surface-300 p-1 rounded-xl border border-gold-400/15 mb-6">
-        {(["overview", "history", "buy"] as ActiveTab[]).map((t) => (
+        {(["overview", "history", "buy", "cashout"] as ActiveTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setActiveTab(t)}
@@ -169,14 +181,18 @@ export default function WalletPage() {
                 : "text-zinc-400 hover:text-gold-300"
               }`}
           >
-            {t === "buy" ? "Buy Suns" : t === "history" ? "History" : "Overview"}
+            {t === "buy" ? "Buy Suns" : t === "cashout" ? "Cash Out" : t === "history" ? "History" : "Overview"}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
       {activeTab === "overview" && (
-        <OverviewTab wallet={wallet} onBuyClick={() => setActiveTab("buy")} />
+        <OverviewTab
+          wallet={wallet}
+          onBuyClick={() => setActiveTab("buy")}
+          onCashoutClick={() => setActiveTab("cashout")}
+        />
       )}
 
       {activeTab === "history" && (
@@ -185,6 +201,13 @@ export default function WalletPage() {
           hasMore={hasMoreTxs}
           loadingMore={loadingTxs}
           onLoadMore={loadMoreTxs}
+        />
+      )}
+
+      {activeTab === "cashout" && (
+        <CashoutPanel
+          balanceSuns={wallet.balance_suns}
+          onCashoutComplete={loadWallet}
         />
       )}
 
@@ -209,9 +232,11 @@ export default function WalletPage() {
 function OverviewTab({
   wallet,
   onBuyClick,
+  onCashoutClick,
 }: {
   wallet: WalletBalance;
   onBuyClick: () => void;
+  onCashoutClick: () => void;
 }) {
   return (
     <div className="space-y-4">
@@ -225,12 +250,12 @@ function OverviewTab({
           <span className="text-sm">Buy Suns</span>
         </button>
         <button
-          disabled
-          className="flex flex-col items-center gap-2 bg-surface-200 border border-gold-400/20 text-zinc-400 font-bold py-4 rounded-2xl opacity-60 cursor-not-allowed"
+          onClick={onCashoutClick}
+          className="flex flex-col items-center gap-2 bg-surface-200 border border-gold-400/20 text-zinc-300 font-bold py-4 rounded-2xl hover:border-gold-400/50 transition-all"
         >
           <CashoutIcon />
           <span className="text-sm">Cash Out</span>
-          <span className="text-[10px] font-normal">Creator only</span>
+          <span className="text-[10px] font-normal text-zinc-500">Creator only</span>
         </button>
       </div>
 
@@ -256,18 +281,19 @@ function OverviewTab({
           ))}
         </div>
         <p className="text-zinc-600 text-xs mt-3">
-          1,000 Suns = $1.00 USD. Minimum cashout: 10,000 Suns ($10).
+          1,000 Suns = $1.00 USD. Minimum cashout depends on your region:
+          5,000 Suns ($5) for mobile money &amp; cash pickup, 20,000 Suns ($20) for bank transfers.
         </p>
       </div>
 
       {/* Minimum cashout info */}
-      {wallet.balance_suns >= 10000 && (
+      {wallet.balance_suns >= 5000 && (
         <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4">
           <p className="text-green-400 text-sm font-semibold">
             You have enough Suns to cash out!
           </p>
           <p className="text-zinc-400 text-xs mt-1">
-            Go to your creator dashboard to withdraw via mobile money or bank transfer.
+            Open the Cash Out tab to withdraw via mobile money or bank transfer.
           </p>
         </div>
       )}
@@ -380,7 +406,7 @@ function BuyTab({
   setBuyCurrency: (c: FiatCurrency) => void;
   sunsPreview: number;
   buying: boolean;
-  buyResult: { ok: boolean; msg: string } | null;
+  buyResult: BuyResult | null;
   setBuyResult: (r: null) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
@@ -392,16 +418,22 @@ function BuyTab({
 
       {buyResult ? (
         <div className="text-center py-4">
-          <div className={`text-2xl mb-3`}>{buyResult.ok ? "☀️" : "⚠️"}</div>
-          <p className={`font-semibold ${buyResult.ok ? "text-gold-300" : "text-red-400"}`}>
+          <div className={`text-2xl mb-3`}>{buyResult.kind === "error" ? "⚠️" : "☀️"}</div>
+          <p className={`font-semibold ${buyResult.kind === "error" ? "text-red-400" : "text-gold-300"}`}>
             {buyResult.msg}
           </p>
-          <button
-            onClick={() => setBuyResult(null)}
-            className="mt-4 w-full bg-gold-400/20 text-gold-300 border border-gold-400/30 rounded-xl py-2.5 font-medium"
-          >
-            Buy More
-          </button>
+          {buyResult.kind === "coming-soon" ? (
+            <p className="text-zinc-500 text-sm mt-2">
+              Your wallet is ready — tipping with earned Suns already works.
+            </p>
+          ) : (
+            <button
+              onClick={() => setBuyResult(null)}
+              className="mt-4 w-full bg-gold-400/20 text-gold-300 border border-gold-400/30 rounded-xl py-2.5 font-medium"
+            >
+              {buyResult.kind === "success" ? "Buy More" : "Try Again"}
+            </button>
+          )}
         </div>
       ) : (
         <form onSubmit={onSubmit} className="space-y-4">
@@ -471,7 +503,7 @@ function BuyTab({
           </button>
 
           <p className="text-zinc-600 text-xs text-center">
-            Powered by Chimoney. Secure card, bank & mobile money payments.
+            Secure card, bank & mobile money payments.
           </p>
         </form>
       )}

@@ -106,13 +106,7 @@ export interface TipResponse {
   message: string;
 }
 
-export type CashoutChannel =
-  | "mobile_money_mpesa"
-  | "mobile_money_mtn"
-  | "mobile_money_airtel"
-  | "mobile_money_ecocash"
-  | "bank_transfer"
-  | "chimoney_wallet";
+export type CashoutChannel = "mobile_money" | "bank_transfer" | "cash_pickup";
 
 export interface CashoutResponse {
   success: boolean;
@@ -120,13 +114,45 @@ export interface CashoutResponse {
   transactionRef: string;
   amountSuns: number;
   usdAmount: string;
-  localAmount: string;
-  localCurrency: string;
-  exchangeRate: string;
+  provider: string;
   channel: string;
-  chimoneyIssueId: string;
   status: string;
   message: string;
+}
+
+// One available payout method for the creator's country, from
+// GET /api/payouts/options. configured=false → provider keys/onboarding
+// pending; render disabled with a "coming soon" badge.
+export interface PayoutMethodOption {
+  method: CashoutChannel;
+  provider: string;
+  minUSD: number;
+  minSuns: number;
+  configured: boolean;
+  network: string | null;
+  currency: string | null;
+}
+
+export interface PayoutOptionsResponse {
+  success: boolean;
+  countryCode: string | null;
+  methods: PayoutMethodOption[];
+}
+
+export interface PayoutRecord {
+  id: string;
+  amount_suns: number;
+  usd_amount: string;
+  channel: string;
+  provider: string | null;
+  status: "pending" | "processing" | "completed" | "failed";
+  created_at: string;
+  processed_at: string | null;
+}
+
+export interface PayoutHistoryResponse {
+  success: boolean;
+  payouts: PayoutRecord[];
 }
 
 // ─── Creator ─────────────────────────────────────────────────

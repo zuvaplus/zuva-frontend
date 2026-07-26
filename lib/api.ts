@@ -5,6 +5,8 @@ import type {
   PurchaseResponse,
   TipResponse,
   CashoutResponse,
+  PayoutOptionsResponse,
+  PayoutHistoryResponse,
   EarningsResponse,
   InterestsResponse,
   FiatCurrency,
@@ -19,6 +21,20 @@ const BASE_URL =
   typeof window === "undefined"
     ? (process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000")
     : "";
+
+// Thrown for non-2xx responses so callers can branch on the HTTP status
+// or the backend's machine-readable `code` (e.g. PURCHASES_NOT_LIVE)
+// instead of string-matching the human message.
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 // token is the caller's Clerk session token (from useAuth().getToken() —
 // apiFetch itself can't call that hook, since it isn't a React component).
@@ -38,7 +54,7 @@ async function apiFetch<T>(
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? `HTTP ${res.status}`);
+    throw new ApiError(body?.error ?? `HTTP ${res.status}`, res.status, body?.code);
   }
 
   return res.json() as Promise<T>;
@@ -126,15 +142,25 @@ export function cashoutSuns(
   payload: {
     amountSuns: number;
     channel: CashoutChannel;
-    localCurrencyCode: string;
+    recipientFirstName: string;
+    recipientLastName: string;
     phoneNumber?: string;
     bankAccountRef?: string;
+    bankCode?: string;
   }
 ): Promise<CashoutResponse> {
   return apiFetch<CashoutResponse>("/api/suns/cashout", token, {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export function getPayoutOptions(token: string | null): Promise<PayoutOptionsResponse> {
+  return apiFetch<PayoutOptionsResponse>("/api/payouts/options", token);
+}
+
+export function getPayoutHistory(token: string | null): Promise<PayoutHistoryResponse> {
+  return apiFetch<PayoutHistoryResponse>("/api/payouts/history", token);
 }
 
 // ─── Creator ─────────────────────────────────────────────────
