@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Search, User as UserIcon } from "lucide-react";
@@ -10,6 +11,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
+  const t = useTranslations("Nav");
   const pathname  = usePathname();
   const router    = useRouter();
   const isAdmin   = pathname.startsWith("/admin");
@@ -53,7 +55,7 @@ export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
 
         {isAdmin && (
           <span className="hidden sm:inline bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded shrink-0">
-            Admin
+            {t("adminBadge")}
           </span>
         )}
 
@@ -65,8 +67,8 @@ export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search creators, videos, tags..."
-              aria-label="Search creators, videos, tags"
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
               className="w-full bg-surface-200 border border-gold-400/10 focus:border-gold-400/40 rounded-full pl-9 pr-3 py-2 text-sm text-white placeholder:text-zinc-600 outline-none transition-colors"
             />
           </div>
@@ -77,7 +79,7 @@ export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
           {isSignedIn ? (
             <button
               onClick={onOpenProfileMenu}
-              aria-label="Open profile menu"
+              aria-label={t("openProfileMenu")}
               className="flex items-center justify-center w-9 h-9 rounded-full overflow-hidden border border-gold-400/25 hover:border-gold-400/50 transition-colors bg-surface-200"
             >
               {user?.imageUrl ? (
@@ -92,7 +94,7 @@ export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
               href="/sign-in"
               className="inline-flex items-center gap-2 border border-gold-400/30 text-gold-400 hover:bg-gold-400/10 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
             >
-              Sign In
+              {t("signIn")}
             </Link>
           )}
         </div>

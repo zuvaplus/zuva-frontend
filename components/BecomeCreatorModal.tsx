@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { X } from "lucide-react";
 import ZuvaSunIcon from "./ZuvaSunIcon";
 
 export default function BecomeCreatorModal({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("BecomeCreatorModal");
   return (
     <div
       className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in"
@@ -16,23 +18,21 @@ export default function BecomeCreatorModal({ onClose }: { onClose: () => void })
         </button>
 
         <ZuvaSunIcon size={52} glow className="mx-auto mb-4" />
-        <h2 className="text-white font-bold text-lg mb-2">Become a Creator</h2>
-        <p className="text-zinc-500 text-sm mb-6">
-          Upload videos, earn Suns from your fans, and cash out to mobile money. Apply to join Zuva as a creator.
-        </p>
+        <h2 className="text-white font-bold text-lg mb-2">{t("title")}</h2>
+        <p className="text-zinc-500 text-sm mb-6">{t("body")}</p>
 
         <Link
           href="/creator-signup"
           onClick={onClose}
           className="block w-full bg-gold-400 text-black font-semibold rounded-xl py-2.5 hover:bg-gold-300 transition-colors"
         >
-          Apply Now
+          {t("applyNow")}
         </Link>
         <button
           onClick={onClose}
           className="mt-3 w-full text-zinc-500 text-sm hover:text-white transition-colors py-1.5"
         >
-          Not Now
+          {t("notNow")}
         </button>
       </div>
     </div>

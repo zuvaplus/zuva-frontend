@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatSuns, formatDuration } from "@/lib/utils";
@@ -13,6 +14,7 @@ interface FeedCardProps {
 }
 
 export default function FeedCard({ item, autoplay = false }: FeedCardProps) {
+  const t = useTranslations("FeedCard");
   const [showTip,    setShowTip]    = useState(false);
   const [liked,      setLiked]      = useState(false);
   const [localLikes, setLocalLikes] = useState(item.like_count);
@@ -62,7 +64,7 @@ export default function FeedCard({ item, autoplay = false }: FeedCardProps) {
         {/* Trending badge */}
         {item._bucket === "trending" && (
           <span className="absolute top-3 left-3 flex items-center gap-1 bg-gold-400/15 border border-gold-400/35 text-gold-400 text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
-            <ZuvaSunIcon size={10} /> Trending
+            <ZuvaSunIcon size={10} /> {t("trending")}
           </span>
         )}
 
@@ -108,7 +110,7 @@ export default function FeedCard({ item, autoplay = false }: FeedCardProps) {
               className="flex items-center gap-1.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 text-gold-400 text-xs px-3 py-1.5 rounded-full font-semibold transition-all"
             >
               <ZuvaSunIcon size={12} interactive />
-              {item.total_tips_suns > 0 ? formatSuns(item.total_tips_suns) : "Tip"}
+              {item.total_tips_suns > 0 ? formatSuns(item.total_tips_suns) : t("tip")}
             </button>
           </div>
         </div>

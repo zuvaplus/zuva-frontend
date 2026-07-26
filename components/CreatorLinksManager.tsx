@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { Link2, Plus, Trash2, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import type { CreatorLink } from "@/lib/types";
@@ -14,6 +15,7 @@ import {
 const MAX_LINKS = 10;
 
 export default function CreatorLinksManager() {
+  const t = useTranslations("CreatorLinks");
   const { getToken } = useAuth();
   const [links, setLinks] = useState<CreatorLink[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function CreatorLinksManager() {
         const data = await getCreatorLinks(token);
         setLinks(data.links);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not load links");
+        setError(err instanceof Error ? err.message : t("errors.load"));
       }
     })();
   }, [getToken]);
@@ -47,7 +49,7 @@ export default function CreatorLinksManager() {
       setTitle("");
       setUrl("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not add link");
+      setError(err instanceof Error ? err.message : t("errors.add"));
     } finally {
       setAdding(false);
     }
@@ -60,7 +62,7 @@ export default function CreatorLinksManager() {
       await deleteCreatorLink(token, id);
       setLinks((prev) => prev?.filter((l) => l.id !== id) ?? null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete link");
+      setError(err instanceof Error ? err.message : t("errors.delete"));
     } finally {
       setBusyId(null);
     }
@@ -80,19 +82,16 @@ export default function CreatorLinksManager() {
       await reorderCreatorLinks(token, reordered.map((l) => l.id));
     } catch (err) {
       setLinks(links); // rollback
-      setError(err instanceof Error ? err.message : "Could not reorder links");
+      setError(err instanceof Error ? err.message : t("errors.reorder"));
     }
   }
 
   return (
     <div>
       <h3 className="flex items-center gap-2 text-white font-semibold text-sm mb-1">
-        <Link2 size={16} className="text-gold-400" /> Links
+        <Link2 size={16} className="text-gold-400" /> {t("title")}
       </h3>
-      <p className="text-zinc-500 text-xs mb-4">
-        Add up to {MAX_LINKS} links (socials, merch, anything) — they&apos;ll appear on your videos
-        once the links shelf ships.
-      </p>
+      <p className="text-zinc-500 text-xs mb-4">{t("description", { max: MAX_LINKS })}</p>
 
       {error && (
         <p className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2 mb-3">
@@ -122,7 +121,7 @@ export default function CreatorLinksManager() {
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   className="p-1.5 text-zinc-500 hover:text-gold-400 disabled:opacity-30 disabled:hover:text-zinc-500 transition-colors"
-                  aria-label="Move up"
+                  aria-label={t("moveUp")}
                 >
                   <ChevronUp size={15} />
                 </button>
@@ -131,7 +130,7 @@ export default function CreatorLinksManager() {
                   onClick={() => move(i, 1)}
                   disabled={i === links.length - 1}
                   className="p-1.5 text-zinc-500 hover:text-gold-400 disabled:opacity-30 disabled:hover:text-zinc-500 transition-colors"
-                  aria-label="Move down"
+                  aria-label={t("moveDown")}
                 >
                   <ChevronDown size={15} />
                 </button>
@@ -140,7 +139,7 @@ export default function CreatorLinksManager() {
                   onClick={() => handleDelete(link.id)}
                   disabled={busyId === link.id}
                   className="p-1.5 text-zinc-500 hover:text-red-400 disabled:opacity-50 transition-colors"
-                  aria-label="Delete link"
+                  aria-label={t("deleteLink")}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -148,7 +147,7 @@ export default function CreatorLinksManager() {
             </div>
           ))}
           {links.length === 0 && (
-            <p className="text-zinc-600 text-sm py-2">No links yet.</p>
+            <p className="text-zinc-600 text-sm py-2">{t("noLinks")}</p>
           )}
         </div>
       )}
@@ -159,7 +158,7 @@ export default function CreatorLinksManager() {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title (e.g. Instagram)"
+            placeholder={t("titlePlaceholder")}
             maxLength={100}
             className="flex-1 bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-3.5 py-2.5 outline-none"
           />
@@ -175,7 +174,7 @@ export default function CreatorLinksManager() {
             disabled={!title.trim() || !url.trim() || adding}
             className="shrink-0 flex items-center justify-center gap-1.5 bg-gold-400/15 hover:bg-gold-400/25 text-gold-300 border border-gold-400/30 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors disabled:opacity-40"
           >
-            <Plus size={15} /> Add
+            <Plus size={15} /> {t("add")}
           </button>
         </form>
       )}

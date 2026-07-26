@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useUser, useAuth } from "@clerk/nextjs";
 import {
@@ -16,6 +17,11 @@ import { getMyVideos, getWalletBalance, getLedger, updateChannel } from "@/lib/a
 import { formatCount, timeAgo } from "@/lib/utils";
 
 type Tab = "upload" | "videos" | "settings";
+const TABS: { key: Tab; icon: React.ComponentType<{ size?: number }> }[] = [
+  { key: "upload", icon: UploadCloud },
+  { key: "videos", icon: Film },
+  { key: "settings", icon: SettingsIcon },
+];
 
 const STATUS_STYLES: Record<string, string> = {
   pending:       "bg-zinc-500/10 text-zinc-400 border-zinc-500/25",
@@ -26,14 +32,16 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function VideoStatusBadge({ status }: { status: string }) {
+  const t = useTranslations("Status");
   return (
     <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[status] ?? STATUS_STYLES.pending}`}>
-      {status.replace("_", " ")}
+      {t.has(status) ? t(status) : status.replace("_", " ")}
     </span>
   );
 }
 
 function WalletSummaryCard() {
+  const t = useTranslations("CreatorDashboard");
   const { getToken } = useAuth();
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [recentTips, setRecentTips] = useState<Transaction[] | null>(null);
@@ -68,7 +76,7 @@ function WalletSummaryCard() {
         <div className="flex items-center gap-3">
           <ZuvaSunIcon size={36} glow />
           <div>
-            <p className="text-zinc-400 text-xs mb-0.5">Wallet balance</p>
+            <p className="text-zinc-400 text-xs mb-0.5">{t("walletBalance")}</p>
             {wallet ? (
               <p className="text-2xl font-bold text-gold-400 tabular-nums leading-none">
                 {formatCount(wallet.balance_suns)}
@@ -85,19 +93,19 @@ function WalletSummaryCard() {
           href="/wallet"
           className="shrink-0 flex items-center justify-center gap-1.5 border border-gold-400/30 text-gold-400 hover:bg-gold-400/10 text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
         >
-          <WalletIcon size={15} /> Open Wallet <ArrowRight size={14} />
+          <WalletIcon size={15} /> {t("openWallet")} <ArrowRight size={14} />
         </Link>
       </div>
 
       {recentTips !== null && recentTips.length > 0 && (
         <div className="relative mt-4 pt-4 border-t border-gold-400/10 space-y-1.5">
           <p className="text-zinc-500 text-[10px] uppercase tracking-wide font-semibold mb-1.5">
-            Recent tips
+            {t("recentTips")}
           </p>
           {recentTips.map((tx) => (
             <div key={tx.id} className="flex items-center justify-between text-xs">
               <span className="text-zinc-400 truncate">
-                {tx.counterparty_username ? `@${tx.counterparty_username}` : tx.counterparty_name ?? "A fan"}
+                {tx.counterparty_username ? `@${tx.counterparty_username}` : tx.counterparty_name ?? t("aFan")}
               </span>
               <span className="text-green-400 font-semibold tabular-nums shrink-0 ml-2">
                 +{formatCount(tx.amount_suns)} ☀
@@ -111,6 +119,7 @@ function WalletSummaryCard() {
 }
 
 function MyVideosTab({ videos, loading, error }: { videos: UploadedVideo[] | null; loading: boolean; error: string | null }) {
+  const t = useTranslations("CreatorDashboard");
   if (loading) {
     return (
       <div className="space-y-2">
@@ -125,7 +134,7 @@ function MyVideosTab({ videos, loading, error }: { videos: UploadedVideo[] | nul
     return (
       <div className="text-center py-14">
         <Film size={32} className="mx-auto mb-3 text-zinc-700" />
-        <p className="text-zinc-400 text-sm">No videos yet — upload your first one to get started.</p>
+        <p className="text-zinc-400 text-sm">{t("noVideos")}</p>
       </div>
     );
   }
@@ -155,7 +164,7 @@ function MyVideosTab({ videos, loading, error }: { videos: UploadedVideo[] | nul
             <Link
               href={`/video/${v.id}`}
               className="shrink-0 p-2 text-zinc-500 hover:text-gold-400 transition-colors"
-              aria-label="View video"
+              aria-label={t("viewVideo")}
             >
               <ExternalLink size={16} />
             </Link>
@@ -167,6 +176,7 @@ function MyVideosTab({ videos, loading, error }: { videos: UploadedVideo[] | nul
 }
 
 function SettingsTab() {
+  const t = useTranslations("CreatorDashboard");
   const { user } = useUser();
   const { getToken } = useAuth();
   const [displayName, setDisplayName] = useState(user?.fullName ?? "");
@@ -190,7 +200,7 @@ function SettingsTab() {
       });
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save settings");
+      setError(err instanceof Error ? err.message : t("saveError"));
     } finally {
       setSaving(false);
     }
@@ -200,7 +210,7 @@ function SettingsTab() {
     <div className="space-y-6">
       <form onSubmit={handleSave} className="bg-surface-200 border border-gold-400/15 rounded-2xl p-5 space-y-4">
         <h3 className="text-white font-semibold text-sm flex items-center gap-2">
-          <SettingsIcon size={16} className="text-gold-400" /> Channel Info
+          <SettingsIcon size={16} className="text-gold-400" /> {t("channelInfo")}
         </h3>
 
         <div className="flex items-center gap-4">
@@ -213,7 +223,7 @@ function SettingsTab() {
             )}
           </div>
           <div className="flex-1">
-            <label className="block text-zinc-300 text-xs font-medium mb-1.5">Avatar URL</label>
+            <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("avatarUrl")}</label>
             <input
               type="url"
               value={avatarUrl}
@@ -225,7 +235,7 @@ function SettingsTab() {
         </div>
 
         <div>
-          <label className="block text-zinc-300 text-xs font-medium mb-1.5">Display Name</label>
+          <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("displayName")}</label>
           <input
             type="text"
             value={displayName}
@@ -236,26 +246,26 @@ function SettingsTab() {
         </div>
 
         <div>
-          <label className="block text-zinc-300 text-xs font-medium mb-1.5">Bio</label>
+          <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("bio")}</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={3}
             maxLength={500}
-            placeholder="Tell fans about yourself"
+            placeholder={t("bioPlaceholder")}
             className="w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-3.5 py-2.5 outline-none resize-none"
           />
         </div>
 
         {error && <p className="text-red-400 text-xs">{error}</p>}
-        {saved && <p className="text-green-400 text-xs">Saved!</p>}
+        {saved && <p className="text-green-400 text-xs">{t("saved")}</p>}
 
         <button
           type="submit"
           disabled={saving}
           className="bg-gold-400 hover:bg-gold-300 text-black font-semibold text-sm px-6 py-2.5 rounded-xl transition-all disabled:opacity-50"
         >
-          {saving ? "Saving…" : "Save Changes"}
+          {saving ? t("saving") : t("saveChanges")}
         </button>
       </form>
 
@@ -267,6 +277,7 @@ function SettingsTab() {
 }
 
 export default function CreatorDashboardPage() {
+  const t = useTranslations("CreatorDashboard");
   const { user, isLoaded } = useUser();
   const { role, userId, loading: roleLoading } = useUserRole();
   const router = useRouter();
@@ -299,11 +310,11 @@ export default function CreatorDashboardPage() {
       setVideos(data.videos);
       setVideosError(null);
     } catch (err) {
-      setVideosError(err instanceof Error ? err.message : "Could not load your videos");
+      setVideosError(err instanceof Error ? err.message : t("loadVideosError"));
     } finally {
       setVideosLoading(false);
     }
-  }, [getToken]);
+  }, [getToken, t]);
 
   useEffect(() => {
     if (!isCreator) return;
@@ -322,33 +333,25 @@ export default function CreatorDashboardPage() {
     <div className="min-h-screen bg-black text-foreground px-4 sm:px-6 py-8 max-w-3xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
-          Creator Studio
+          {t("title")}
         </h1>
-        <p className="text-zinc-500 text-sm mt-1">
-          Manage uploads, track performance, and update your channel.
-        </p>
+        <p className="text-zinc-500 text-sm mt-1">{t("subtitle")}</p>
       </div>
 
       <WalletSummaryCard />
 
       {/* Tabs */}
       <div className="flex bg-surface-300 p-1 rounded-xl border border-gold-400/15 mb-6">
-        {([
-          { key: "upload", label: "Upload", icon: UploadCloud },
-          { key: "videos", label: "My Videos", icon: Film },
-          { key: "settings", label: "Settings", icon: SettingsIcon },
-        ] as { key: Tab; label: string; icon: React.ComponentType<{ size?: number }> }[]).map(
-          ({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all
-                ${tab === key ? "bg-gold-400 text-black shadow-gold" : "text-zinc-400 hover:text-gold-300"}`}
-            >
-              <Icon size={15} /> {label}
-            </button>
-          )
-        )}
+        {TABS.map(({ key, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all
+              ${tab === key ? "bg-gold-400 text-black shadow-gold" : "text-zinc-400 hover:text-gold-300"}`}
+          >
+            <Icon size={15} /> {t(`tabs.${key}`)}
+          </button>
+        ))}
       </div>
 
       {tab === "upload" && (

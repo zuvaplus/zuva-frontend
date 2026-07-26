@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useUser, useClerk, useAuth } from "@clerk/nextjs";
 
@@ -8,6 +9,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:300
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 type Tab = "applications" | "content" | "users";
+const TABS: Tab[] = ["applications", "content", "users"];
 
 interface Application {
   id: string; // UUID — the live creator_applications.id column
@@ -61,9 +63,10 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("Status");
   return (
     <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[status] ?? STATUS_STYLES.pending}`}>
-      {status}
+      {t.has(status) ? t(status) : status}
     </span>
   );
 }
@@ -139,6 +142,7 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 export default function AdminPage() {
+  const t = useTranslations("Admin");
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const { signOut } = useClerk();
@@ -205,9 +209,9 @@ export default function AdminPage() {
       setApplications(data.applications);
       setAppsError(null);
     } catch (err) {
-      setAppsError(err instanceof Error ? err.message : "Failed to load applications");
+      setAppsError(err instanceof Error ? err.message : t("errors.loadApplications"));
     }
-  }, [adminFetch]);
+  }, [adminFetch, t]);
 
   const loadContent = useCallback(async () => {
     try {
@@ -215,9 +219,9 @@ export default function AdminPage() {
       setContent(data.content);
       setContentError(null);
     } catch (err) {
-      setContentError(err instanceof Error ? err.message : "Failed to load content");
+      setContentError(err instanceof Error ? err.message : t("errors.loadContent"));
     }
-  }, [adminFetch]);
+  }, [adminFetch, t]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -225,9 +229,9 @@ export default function AdminPage() {
       setUsers(data.users);
       setUsersError(null);
     } catch (err) {
-      setUsersError(err instanceof Error ? err.message : "Failed to load users");
+      setUsersError(err instanceof Error ? err.message : t("errors.loadUsers"));
     }
-  }, [adminFetch]);
+  }, [adminFetch, t]);
 
   useEffect(() => {
     if (!isAuthorized) return;
@@ -245,7 +249,7 @@ export default function AdminPage() {
       });
       setApplications((prev) => prev?.map((a) => (a.id === id ? { ...a, status } : a)) ?? null);
     } catch (err) {
-      setAppsError(err instanceof Error ? err.message : "Failed to update application");
+      setAppsError(err instanceof Error ? err.message : t("errors.updateApplication"));
     } finally {
       setAppActionId(null);
     }
@@ -260,7 +264,7 @@ export default function AdminPage() {
       });
       setContent((prev) => prev?.map((c) => (c.id === item.id ? { ...c, status } : c)) ?? null);
     } catch (err) {
-      setContentError(err instanceof Error ? err.message : "Failed to update content");
+      setContentError(err instanceof Error ? err.message : t("errors.updateContent"));
     } finally {
       setContentActionId(null);
     }
@@ -274,7 +278,7 @@ export default function AdminPage() {
       });
       setContent((prev) => prev?.filter((c) => c.id !== item.id) ?? null);
     } catch (err) {
-      setContentError(err instanceof Error ? err.message : "Failed to remove content");
+      setContentError(err instanceof Error ? err.message : t("errors.removeContent"));
     } finally {
       setContentActionId(null);
     }
@@ -289,7 +293,7 @@ export default function AdminPage() {
       });
       setUsers((prev) => prev?.map((u) => (u.id === id ? { ...u, status: "suspended" } : u)) ?? null);
     } catch (err) {
-      setUsersError(err instanceof Error ? err.message : "Failed to suspend user");
+      setUsersError(err instanceof Error ? err.message : t("errors.suspendUser"));
     } finally {
       setUserActionId(null);
     }
@@ -301,7 +305,7 @@ export default function AdminPage() {
       await adminFetch(`/api/admin/users/${id}`, { method: "DELETE" });
       setUsers((prev) => prev?.filter((u) => u.id !== id) ?? null);
     } catch (err) {
-      setUsersError(err instanceof Error ? err.message : "Failed to remove user");
+      setUsersError(err instanceof Error ? err.message : t("errors.removeUser"));
     } finally {
       setUserActionId(null);
     }
@@ -326,33 +330,31 @@ export default function AdminPage() {
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-extrabold text-white">Admin Dashboard</h1>
+            <h1 className="text-2xl font-extrabold text-white">{t("title")}</h1>
             <span className="bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-              Admin
+              {t("badge")}
             </span>
           </div>
-          <p className="text-zinc-500 text-sm">
-            Manage creator applications, content moderation, and user accounts.
-          </p>
+          <p className="text-zinc-500 text-sm">{t("subtitle")}</p>
         </div>
         <button
           onClick={() => signOut(() => router.push("/"))}
           className="shrink-0 text-sm font-semibold px-4 py-2 rounded-lg border border-gold-400 text-white hover:bg-gold-400/10 transition-colors"
         >
-          Sign Out
+          {t("signOut")}
         </button>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-white/10">
-        {(["applications", "content", "users"] as Tab[]).map((t) => (
+        {TABS.map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`px-4 py-2.5 text-sm font-semibold capitalize border-b-2 transition-colors
-              ${tab === t ? "border-gold-400 text-gold-400" : "border-transparent text-zinc-500 hover:text-zinc-300"}`}
+              ${tab === tabKey ? "border-gold-400 text-gold-400" : "border-transparent text-zinc-500 hover:text-zinc-300"}`}
           >
-            {t}
+            {t(`tabs.${tabKey}`)}
           </button>
         ))}
       </div>
@@ -360,18 +362,22 @@ export default function AdminPage() {
       {tab === "applications" && (
         <div>
           <div className="grid grid-cols-3 gap-3 mb-5 max-w-sm">
-            <StatTile label="Pending" value={pendingCount} />
-            <StatTile label="Approved" value={approvedCount} />
-            <StatTile label="Rejected" value={rejectedCount} />
+            <StatTile label={t("stats.pending")} value={pendingCount} />
+            <StatTile label={t("stats.approved")} value={approvedCount} />
+            <StatTile label={t("stats.rejected")} value={rejectedCount} />
           </div>
 
           {appsError && <ErrorBanner message={appsError} />}
 
-          <TableShell columns={["Name", "Email", "Country", "Platform", "Social Handle", "Followers", "Status", "Date Applied", "Actions"]}>
+          <TableShell columns={[
+            t("columns.name"), t("columns.email"), t("columns.country"), t("columns.platform"),
+            t("columns.socialHandle"), t("columns.followers"), t("columns.status"),
+            t("columns.dateApplied"), t("columns.actions"),
+          ]}>
             {applications === null ? (
-              <EmptyRow colSpan={9}>Loading applications…</EmptyRow>
+              <EmptyRow colSpan={9}>{t("loadingApplications")}</EmptyRow>
             ) : applications.length === 0 ? (
-              <EmptyRow colSpan={9}>No applications yet.</EmptyRow>
+              <EmptyRow colSpan={9}>{t("noApplications")}</EmptyRow>
             ) : (
               applications.map((a) => (
                 <tr key={a.id} className="hover:bg-surface-300/30 transition-colors">
@@ -384,7 +390,7 @@ export default function AdminPage() {
                   <td className="px-4 py-3">
                     <StatusBadge status={a.status} />
                     {a.status === "approved" && a.awaiting_signup && (
-                      <div className="text-zinc-600 text-[10px] mt-1">awaiting sign-up</div>
+                      <div className="text-zinc-600 text-[10px] mt-1">{t("awaitingSignup")}</div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-zinc-500 whitespace-nowrap">{formatDate(a.created_at)}</td>
@@ -393,13 +399,13 @@ export default function AdminPage() {
                       {/* Unconfirmed applications aren't reviewable yet — the
                           applicant must click their email confirm link first */}
                       <ActionButton
-                        label="Approve"
+                        label={t("actions.approve")}
                         variant="approve"
                         disabled={appActionId === a.id || a.status === "approved" || a.status === "unconfirmed"}
                         onClick={() => handleApplicationStatus(a.id, "approved")}
                       />
                       <ActionButton
-                        label="Reject"
+                        label={t("actions.reject")}
                         variant="reject"
                         disabled={appActionId === a.id || a.status === "rejected" || a.status === "unconfirmed"}
                         onClick={() => handleApplicationStatus(a.id, "rejected")}
@@ -417,11 +423,14 @@ export default function AdminPage() {
         <div>
           {contentError && <ErrorBanner message={contentError} />}
 
-          <TableShell columns={["Title", "Creator", "Upload Date", "Status", "Reports", "Actions"]}>
+          <TableShell columns={[
+            t("columns.title"), t("columns.creator"), t("columns.uploadDate"),
+            t("columns.status"), t("columns.reports"), t("columns.actions"),
+          ]}>
             {content === null ? (
-              <EmptyRow colSpan={6}>Loading content…</EmptyRow>
+              <EmptyRow colSpan={6}>{t("loadingContent")}</EmptyRow>
             ) : content.length === 0 ? (
-              <EmptyRow colSpan={6}>No content yet.</EmptyRow>
+              <EmptyRow colSpan={6}>{t("noContent")}</EmptyRow>
             ) : (
               content.map((c) => (
                 <tr key={`${c.orientation}-${c.id}`} className="hover:bg-surface-300/30 transition-colors">
@@ -433,19 +442,19 @@ export default function AdminPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       <ActionButton
-                        label="Approve"
+                        label={t("actions.approve")}
                         variant="approve"
                         disabled={contentActionId === c.id || c.status === "approved"}
                         onClick={() => handleContentStatus(c, "approved")}
                       />
                       <ActionButton
-                        label="Reject"
+                        label={t("actions.reject")}
                         variant="reject"
                         disabled={contentActionId === c.id || c.status === "rejected"}
                         onClick={() => handleContentStatus(c, "rejected")}
                       />
                       <ActionButton
-                        label="Remove"
+                        label={t("actions.remove")}
                         variant="danger"
                         disabled={contentActionId === c.id}
                         onClick={() => handleContentRemove(c)}
@@ -463,11 +472,14 @@ export default function AdminPage() {
         <div>
           {usersError && <ErrorBanner message={usersError} />}
 
-          <TableShell columns={["Name", "Email", "Country", "Role", "Join Date", "Status", "Actions"]}>
+          <TableShell columns={[
+            t("columns.name"), t("columns.email"), t("columns.country"), t("columns.role"),
+            t("columns.joinDate"), t("columns.status"), t("columns.actions"),
+          ]}>
             {users === null ? (
-              <EmptyRow colSpan={7}>Loading users…</EmptyRow>
+              <EmptyRow colSpan={7}>{t("loadingUsers")}</EmptyRow>
             ) : users.length === 0 ? (
-              <EmptyRow colSpan={7}>No users yet.</EmptyRow>
+              <EmptyRow colSpan={7}>{t("noUsers")}</EmptyRow>
             ) : (
               users.map((u) => (
                 <tr key={u.id} className="hover:bg-surface-300/30 transition-colors">
@@ -480,13 +492,13 @@ export default function AdminPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
                       <ActionButton
-                        label="Suspend"
+                        label={t("actions.suspend")}
                         variant="reject"
                         disabled={userActionId === u.id || u.status === "suspended"}
                         onClick={() => handleUserSuspend(u.id)}
                       />
                       <ActionButton
-                        label="Remove Account"
+                        label={t("actions.removeAccount")}
                         variant="danger"
                         disabled={userActionId === u.id}
                         onClick={() => handleUserRemove(u.id)}

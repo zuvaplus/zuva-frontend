@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import type { FeedItem } from "@/lib/types";
 import { getFeed } from "@/lib/api";
@@ -10,13 +11,10 @@ import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
 type OrientationFilter = "both" | "vertical" | "landscape";
 
-const FILTERS: { value: OrientationFilter; label: string }[] = [
-  { value: "both",      label: "For You"  },
-  { value: "vertical",  label: "Shorts"   },
-  { value: "landscape", label: "Videos"   },
-];
+const FILTER_VALUES: OrientationFilter[] = ["both", "vertical", "landscape"];
 
 export default function FeedPage() {
+  const t = useTranslations("Feed");
   const { getToken } = useAuth();
   const [feed,        setFeed]        = useState<FeedItem[]>([]);
   const [loading,     setLoading]     = useState(true);
@@ -39,13 +37,13 @@ export default function FeedPage() {
         setHasMore(items.length === 30);
         setOffset(off + items.length);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to load feed");
+        setError(err instanceof Error ? err.message : t("loadError"));
       } finally {
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [getToken]
+    [getToken, t]
   );
 
   useEffect(() => { setOffset(0); loadFeed(filter, 0, false); }, [filter, loadFeed]);
@@ -65,16 +63,14 @@ export default function FeedPage() {
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-2">
           <ZuvaSunIcon size={36} glow />
-          <h1 className="text-3xl md:text-4xl font-bold gold-shimmer">Discover Creators</h1>
+          <h1 className="text-3xl md:text-4xl font-bold gold-shimmer">{t("title")}</h1>
         </div>
-        <p className="text-zinc-500 text-sm">
-          Trending &amp; personalised — powered by your interest graph
-        </p>
+        <p className="text-zinc-500 text-sm">{t("subtitle")}</p>
       </div>
 
       {/* Filter tabs */}
       <div className="flex items-center gap-1 mb-6 bg-surface-300 p-1 rounded-xl border border-gold-400/10 w-fit mx-auto">
-        {FILTERS.map(({ value, label }) => (
+        {FILTER_VALUES.map((value) => (
           <button
             key={value}
             onClick={() => setFilter(value)}
@@ -84,7 +80,7 @@ export default function FeedPage() {
                 : "text-zinc-500 hover:text-gold-300"
               }`}
           >
-            {label}
+            {t(`filters.${value}`)}
           </button>
         ))}
       </div>
@@ -113,7 +109,7 @@ export default function FeedPage() {
           <div ref={loaderRef} className="mt-10 flex justify-center">
             {loadingMore && (
               <span className="flex items-center gap-2 text-gold-400 text-sm animate-pulse">
-                <ZuvaSunIcon size={16} glow /> Loading more…
+                <ZuvaSunIcon size={16} glow /> {t("loadingMore")}
               </span>
             )}
           </div>
@@ -124,13 +120,14 @@ export default function FeedPage() {
 }
 
 function MixedFeed({ items }: { items: FeedItem[] }) {
+  const t = useTranslations("Feed");
   const verticals  = items.filter((i) => i.orientation === "vertical");
   const landscapes = items.filter((i) => i.orientation === "landscape");
   return (
     <div className="space-y-10">
       {verticals.length > 0 && (
         <section>
-          <SectionDivider label="Shorts" />
+          <SectionDivider label={t("filters.vertical")} />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
             {verticals.map((item) => <FeedCard key={item.id} item={item} />)}
           </div>
@@ -138,7 +135,7 @@ function MixedFeed({ items }: { items: FeedItem[] }) {
       )}
       {landscapes.length > 0 && (
         <section>
-          <SectionDivider label="Videos" />
+          <SectionDivider label={t("filters.landscape")} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {landscapes.map((item) => <FeedCard key={item.id} item={item} />)}
           </div>
@@ -158,26 +155,28 @@ function SectionDivider({ label }: { label: string }) {
 }
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("Feed");
   return (
     <div className="text-center py-16">
-      <p className="text-zinc-500 mb-1">Could not load feed</p>
+      <p className="text-zinc-500 mb-1">{t("loadError")}</p>
       <p className="text-red-400 text-sm mb-6">{message}</p>
       <button
         onClick={onRetry}
         className="bg-gold-400/15 hover:bg-gold-400/25 text-gold-300 border border-gold-400/25 px-6 py-2.5 rounded-xl font-medium transition-colors"
       >
-        Try again
+        {t("tryAgain")}
       </button>
     </div>
   );
 }
 
 function EmptyState() {
+  const t = useTranslations("Feed");
   return (
     <div className="text-center py-24">
       <ZuvaSunIcon size={52} glow className="mx-auto mb-5" />
-      <h2 className="text-white font-semibold text-xl mb-2">No content yet</h2>
-      <p className="text-zinc-600 text-sm">Feed will fill up as creators publish content.</p>
+      <h2 className="text-white font-semibold text-xl mb-2">{t("emptyTitle")}</h2>
+      <p className="text-zinc-600 text-sm">{t("emptyBody")}</p>
     </div>
   );
 }

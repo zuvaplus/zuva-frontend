@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle } from "lucide-react";
 import type { UploadedVideo, UploadProcessingStatus } from "@/lib/types";
@@ -46,6 +47,8 @@ export default function VideoUploadForm({
   userId: string | null;
   onUploaded?: (video: UploadedVideo) => void;
 }) {
+  const t = useTranslations("VideoUpload");
+  const tCategories = useTranslations("Categories");
   const { getToken } = useAuth();
 
   const [videoFile, setVideoFile]         = useState<File | null>(null);
@@ -122,12 +125,12 @@ export default function VideoUploadForm({
       return;
     }
     if (!isAcceptedVideoFile(file)) {
-      setFileError("Unsupported file type. Please upload an MP4, MOV, or AVI file.");
+      setFileError(t("errors.unsupportedType"));
       setVideoFile(null);
       return;
     }
     if (file.size > MAX_VIDEO_BYTES) {
-      setFileError("File is too large. Maximum upload size is 2GB.");
+      setFileError(t("errors.tooLarge"));
       setVideoFile(null);
       return;
     }
@@ -176,21 +179,21 @@ export default function VideoUploadForm({
           setUploadMessage(body.message ?? null);
           onUploaded?.(body.video);
         } catch {
-          setError("Upload succeeded but the response could not be read.");
+          setError(t("errors.unreadableResponse"));
         }
       } else {
         try {
           const body = JSON.parse(xhr.responseText);
-          setError(body?.error ?? `Upload failed (${xhr.status})`);
+          setError(body?.error ?? t("errors.uploadFailedStatus", { status: xhr.status }));
         } catch {
-          setError(`Upload failed (${xhr.status})`);
+          setError(t("errors.uploadFailedStatus", { status: xhr.status }));
         }
       }
     };
 
     xhr.onerror = () => {
       setUploading(false);
-      setError("Upload failed. Please check your connection and try again.");
+      setError(t("errors.uploadFailedNetwork"));
     };
 
     xhr.send(formData);
@@ -221,24 +224,24 @@ export default function VideoUploadForm({
         <div className="w-16 h-16 rounded-full bg-gold-400/15 border border-gold-400/30 flex items-center justify-center mx-auto mb-5">
           <UploadCloud size={28} className="text-gold-400" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Video uploaded!</h2>
+        <h2 className="text-xl font-bold text-white mb-2">{t("uploadedTitle")}</h2>
         {uploadMessage && <p className="text-zinc-400 text-sm leading-relaxed mb-5">{uploadMessage}</p>}
 
         {/* Cloudflare encoding status */}
         <div className="bg-surface-300 border border-gold-400/10 rounded-xl px-4 py-3.5 mb-6 text-left">
           {isReady ? (
             <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
-              <CheckCircle2 size={16} /> Video processing complete — ready to play.
+              <CheckCircle2 size={16} /> {t("processingComplete")}
             </div>
           ) : isEncodeError ? (
             <div className="flex items-center gap-2 text-red-400 text-sm font-medium">
               <XCircle size={16} />
-              Processing failed{processing?.errorReasonText ? `: ${processing.errorReasonText}` : "."}
+              {t("processingFailed")}{processing?.errorReasonText ? `: ${processing.errorReasonText}` : "."}
             </div>
           ) : (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-zinc-300 text-sm font-medium">Processing video…</span>
+                <span className="text-zinc-300 text-sm font-medium">{t("processingVideo")}</span>
                 {pct !== null && <span className="text-gold-400 text-sm font-semibold">{pct}%</span>}
               </div>
               <div className="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
@@ -248,9 +251,7 @@ export default function VideoUploadForm({
                 />
               </div>
               {pollGaveUp && (
-                <p className="text-zinc-600 text-xs mt-2">
-                  Still processing — this can take a few minutes for larger files. Check My Videos shortly.
-                </p>
+                <p className="text-zinc-600 text-xs mt-2">{t("stillProcessing")}</p>
               )}
             </div>
           )}
@@ -260,7 +261,7 @@ export default function VideoUploadForm({
           onClick={resetForm}
           className="bg-gold-400 hover:bg-gold-300 text-black font-bold px-8 py-3 rounded-xl transition-all shadow-gold"
         >
-          Upload Another Video
+          {t("uploadAnother")}
         </button>
       </div>
     );
@@ -268,7 +269,7 @@ export default function VideoUploadForm({
 
   return (
     <form onSubmit={handleSubmit} className="bg-surface-200 border border-gold-400/15 rounded-2xl p-6 sm:p-8 space-y-5">
-      <Field label="Video File">
+      <Field label={t("fields.videoFile")}>
         <label
           htmlFor="video-file"
           className={`flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-4 py-8 cursor-pointer transition-colors
@@ -276,7 +277,7 @@ export default function VideoUploadForm({
         >
           <Film size={24} className="text-gold-400" />
           <span className="text-sm text-zinc-300 text-center">
-            {videoFile ? videoFile.name : "Click to choose a video (MP4, MOV, AVI — up to 2GB)"}
+            {videoFile ? videoFile.name : t("chooseVideo")}
           </span>
           <input
             id="video-file"
@@ -289,59 +290,59 @@ export default function VideoUploadForm({
         {fileError && <p className="text-red-400 text-xs mt-2">{fileError}</p>}
       </Field>
 
-      <Field label="Title">
+      <Field label={t("fields.title")}>
         <input
           type="text"
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
-          placeholder="Give your video a title"
+          placeholder={t("titlePlaceholder")}
         />
       </Field>
 
-      <Field label="Description">
+      <Field label={t("fields.description")}>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           className={`${inputClass} resize-none`}
-          placeholder="What's this video about?"
+          placeholder={t("descriptionPlaceholder")}
         />
       </Field>
 
-      <Field label="Category">
+      <Field label={t("fields.category")}>
         <select
           required
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className={inputClass}
         >
-          <option value="" disabled>Select a category</option>
+          <option value="" disabled>{t("selectCategory")}</option>
           {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>{tCategories(c)}</option>
           ))}
         </select>
       </Field>
 
-      <Field label="Tags">
+      <Field label={t("fields.tags")}>
         <input
           type="text"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           className={inputClass}
-          placeholder="comedy, lagos, skits (comma-separated)"
+          placeholder={t("tagsPlaceholder")}
         />
       </Field>
 
-      <Field label="Thumbnail (optional)">
+      <Field label={t("fields.thumbnail")}>
         <label
           htmlFor="thumbnail-file"
           className="flex items-center gap-3 border border-dashed border-gold-400/20 hover:border-gold-400/40 rounded-xl px-4 py-3 cursor-pointer transition-colors"
         >
           <ImageIcon size={18} className="text-gold-400 shrink-0" />
           <span className="text-sm text-zinc-400 truncate">
-            {thumbnailFile ? thumbnailFile.name : "Choose an image (optional)"}
+            {thumbnailFile ? thumbnailFile.name : t("chooseImage")}
           </span>
           <input
             id="thumbnail-file"
@@ -361,7 +362,7 @@ export default function VideoUploadForm({
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-zinc-500 text-xs mt-1.5 text-center">Uploading… {progress}%</p>
+          <p className="text-zinc-500 text-xs mt-1.5 text-center">{t("uploadingPct", { pct: progress })}</p>
         </div>
       )}
 
@@ -376,7 +377,7 @@ export default function VideoUploadForm({
         disabled={!canSubmit}
         className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-gold"
       >
-        {uploading ? "Uploading…" : "Upload Video"}
+        {uploading ? t("uploading") : t("uploadVideo")}
       </button>
     </form>
   );

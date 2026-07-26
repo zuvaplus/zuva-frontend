@@ -2,5 +2,269 @@
   "Metadata": {
     "title": "Zuva.TV — Histoires d'Afrique et des Caraïbes. Gratuit pour toujours.",
     "description": "Regardez et soutenez des créateurs africains et caribéens. Envoyez des pourboires en Suns, gagnez de l'argent réel, retirez vers votre mobile money. Sans abonnement."
+  },
+  "Nav": {
+    "adminBadge": "Admin",
+    "searchPlaceholder": "Rechercher des créateurs, vidéos, tags...",
+    "openProfileMenu": "Ouvrir le menu du profil",
+    "signIn": "Se connecter"
+  },
+  "Sidebar": {
+    "main": "Principal",
+    "studio": "Studio",
+    "library": "Bibliothèque",
+    "browse": "Parcourir",
+    "categories": "Catégories",
+    "about": "À propos",
+    "terms": "Conditions",
+    "creatorSignUp": "Devenir créateur",
+    "home": "Accueil",
+    "trending": "Tendances",
+    "following": "Abonnements",
+    "watchHistory": "Historique",
+    "savedVideos": "Vidéos enregistrées",
+    "creatorDashboard": "Tableau de bord créateur",
+    "uploadVideo": "Mettre en ligne une vidéo"
+  },
+  "BottomNav": {
+    "home": "Accueil",
+    "search": "Recherche",
+    "upload": "Publier",
+    "alerts": "Alertes",
+    "profile": "Profil"
+  },
+  "ProfileMenu": {
+    "account": "Compte",
+    "signOut": "Se déconnecter",
+    "myProfile": "Mon profil",
+    "wallet": "Portefeuille",
+    "watchHistory": "Historique",
+    "savedVideos": "Vidéos enregistrées",
+    "accountSettings": "Paramètres du compte",
+    "becomeCreator": "Devenir créateur",
+    "myChannel": "Ma chaîne",
+    "creatorDashboard": "Tableau de bord créateur",
+    "uploadVideo": "Mettre en ligne une vidéo",
+    "switchToViewer": "Passer en mode spectateur"
+  },
+  "BecomeCreatorModal": {
+    "title": "Devenir créateur",
+    "body": "Mettez vos vidéos en ligne, gagnez des Suns grâce à vos fans, et retirez vos gains vers votre mobile money. Postulez pour devenir créateur sur Zuva.",
+    "applyNow": "Postuler maintenant",
+    "notNow": "Plus tard"
+  },
+  "SiteFooter": {
+    "homeAriaLabel": "Accueil Zuva",
+    "about": "À propos",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "creatorSignUp": "Inscription créateur",
+    "copyright": "© {year} Zuva.TV Inc."
+  },
+  "Landing": {
+    "headline": "Histoires d'Afrique et des Caraïbes.",
+    "headlineHighlight": "Gratuit pour toujours.",
+    "subhead": "Regardez et soutenez les créateurs qui racontent votre histoire. Envoyez des pourboires en Suns. Retirez vos gains vers votre mobile money. Sans abonnement, jamais.",
+    "watchNow": "Regarder maintenant",
+    "signIn": "Se connecter →",
+    "trustStrip": "Une confiance partagée par des créateurs à travers l'Afrique, le Royaume-Uni et les Caraïbes",
+    "features": {
+      "bridges": {
+        "title": "Un pont entre deux mondes",
+        "body": "Regardez les créateurs qui vous gardent connectés à votre pays d'origine — et soutenez-les directement."
+      },
+      "earn": {
+        "title": "Gagnez de l'argent réel",
+        "body": "Les fans envoient des pourboires en Suns aux créateurs. Les créateurs retirent leurs gains vers M-Pesa, MTN Mobile Money, ou leur banque. Aucun délai minimum."
+      },
+      "free": {
+        "title": "Gratuit pour toujours",
+        "body": "Aucun abonnement, aucune barrière payante. Zuva est gratuit à regarder. Soutenez directement vos créateurs préférés."
+      }
+    }
+  },
+  "Auth": {
+    "signInTagline": "Là où les créateurs brillent",
+    "signUpTagline": "Rejoignez l'économie des créateurs",
+    "pills": {
+      "diasporaFirst": "Pensé pour la diaspora",
+      "earnSuns": "Gagnez des Suns",
+      "mobileMoney": "Mobile Money"
+    },
+    "agreeToTerms": "En continuant, vous acceptez nos",
+    "terms": "Conditions",
+    "privacyPolicy": "Politique de confidentialité"
+  },
+  "LanguageSwitcher": {
+    "label": "Langue"
+  },
+  "FeedCard": {
+    "trending": "Tendance",
+    "tip": "Pourboire"
+  },
+  "Feed": {
+    "title": "Découvrir des créateurs",
+    "subtitle": "Tendances et contenu personnalisé — basé sur vos centres d'intérêt",
+    "filters": {
+      "both": "Pour vous",
+      "vertical": "Shorts",
+      "landscape": "Vidéos"
+    },
+    "loadingMore": "Chargement…",
+    "loadError": "Impossible de charger le fil",
+    "tryAgain": "Réessayer",
+    "emptyTitle": "Aucun contenu pour l'instant",
+    "emptyBody": "Le fil se remplira au fur et à mesure que les créateurs publieront du contenu."
+  },
+  "Status": {
+    "unconfirmed": "Non confirmé",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "active": "Actif",
+    "suspended": "Suspendu",
+    "flagged": "Signalé",
+    "published": "Publié",
+    "under_review": "En cours d'examen"
+  },
+  "Admin": {
+    "title": "Tableau de bord administrateur",
+    "badge": "Admin",
+    "subtitle": "Gérez les candidatures créateurs, la modération de contenu et les comptes utilisateurs.",
+    "signOut": "Se déconnecter",
+    "tabs": {
+      "applications": "Candidatures",
+      "content": "Contenu",
+      "users": "Utilisateurs"
+    },
+    "stats": {
+      "pending": "En attente",
+      "approved": "Approuvées",
+      "rejected": "Rejetées"
+    },
+    "columns": {
+      "name": "Nom",
+      "email": "E-mail",
+      "country": "Pays",
+      "platform": "Plateforme",
+      "socialHandle": "Identifiant réseau social",
+      "followers": "Abonnés",
+      "status": "Statut",
+      "dateApplied": "Date de candidature",
+      "actions": "Actions",
+      "title": "Titre",
+      "creator": "Créateur",
+      "uploadDate": "Date de mise en ligne",
+      "reports": "Signalements",
+      "role": "Rôle",
+      "joinDate": "Date d'inscription"
+    },
+    "loadingApplications": "Chargement des candidatures…",
+    "noApplications": "Aucune candidature pour l'instant.",
+    "loadingContent": "Chargement du contenu…",
+    "noContent": "Aucun contenu pour l'instant.",
+    "loadingUsers": "Chargement des utilisateurs…",
+    "noUsers": "Aucun utilisateur pour l'instant.",
+    "awaitingSignup": "en attente d'inscription",
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "remove": "Supprimer",
+      "suspend": "Suspendre",
+      "removeAccount": "Supprimer le compte"
+    },
+    "errors": {
+      "loadApplications": "Échec du chargement des candidatures",
+      "loadContent": "Échec du chargement du contenu",
+      "loadUsers": "Échec du chargement des utilisateurs",
+      "updateApplication": "Échec de la mise à jour de la candidature",
+      "updateContent": "Échec de la mise à jour du contenu",
+      "removeContent": "Échec de la suppression du contenu",
+      "suspendUser": "Échec de la suspension de l'utilisateur",
+      "removeUser": "Échec de la suppression de l'utilisateur"
+    }
+  },
+  "CreatorDashboard": {
+    "title": "Studio Créateur",
+    "subtitle": "Gérez vos publications, suivez vos performances et mettez à jour votre chaîne.",
+    "walletBalance": "Solde du portefeuille",
+    "openWallet": "Ouvrir le portefeuille",
+    "recentTips": "Pourboires récents",
+    "aFan": "Un fan",
+    "noVideos": "Aucune vidéo pour l'instant — mettez en ligne votre première vidéo pour commencer.",
+    "viewVideo": "Voir la vidéo",
+    "loadVideosError": "Impossible de charger vos vidéos",
+    "saveError": "Impossible d'enregistrer les paramètres",
+    "channelInfo": "Informations sur la chaîne",
+    "avatarUrl": "URL de l'avatar",
+    "displayName": "Nom d'affichage",
+    "bio": "Bio",
+    "bioPlaceholder": "Parlez de vous à vos fans",
+    "saved": "Enregistré !",
+    "saving": "Enregistrement…",
+    "saveChanges": "Enregistrer les modifications",
+    "tabs": {
+      "upload": "Mettre en ligne",
+      "videos": "Mes vidéos",
+      "settings": "Paramètres"
+    }
+  },
+  "VideoUpload": {
+    "errors": {
+      "unsupportedType": "Type de fichier non pris en charge. Veuillez mettre en ligne un fichier MP4, MOV ou AVI.",
+      "tooLarge": "Le fichier est trop volumineux. La taille maximale est de 2 Go.",
+      "unreadableResponse": "La mise en ligne a réussi, mais la réponse n'a pas pu être lue.",
+      "uploadFailedStatus": "Échec de la mise en ligne ({status})",
+      "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez."
+    },
+    "uploadedTitle": "Vidéo mise en ligne !",
+    "processingComplete": "Traitement terminé — prête à être lue.",
+    "processingFailed": "Échec du traitement",
+    "processingVideo": "Traitement de la vidéo…",
+    "stillProcessing": "Traitement toujours en cours — cela peut prendre quelques minutes pour les fichiers volumineux. Vérifiez « Mes vidéos » sous peu.",
+    "uploadAnother": "Mettre en ligne une autre vidéo",
+    "fields": {
+      "videoFile": "Fichier vidéo",
+      "title": "Titre",
+      "description": "Description",
+      "category": "Catégorie",
+      "tags": "Tags",
+      "thumbnail": "Miniature (facultatif)"
+    },
+    "chooseVideo": "Cliquez pour choisir une vidéo (MP4, MOV, AVI — jusqu'à 2 Go)",
+    "titlePlaceholder": "Donnez un titre à votre vidéo",
+    "descriptionPlaceholder": "De quoi parle cette vidéo ?",
+    "selectCategory": "Choisissez une catégorie",
+    "tagsPlaceholder": "comédie, dakar, sketchs (séparés par des virgules)",
+    "chooseImage": "Choisissez une image (facultatif)",
+    "uploadingPct": "Mise en ligne… {pct} %",
+    "uploading": "Mise en ligne…",
+    "uploadVideo": "Mettre en ligne la vidéo"
+  },
+  "CreatorLinks": {
+    "title": "Liens",
+    "description": "Ajoutez jusqu'à {max} liens (réseaux sociaux, boutique, ce que vous voulez) — ils apparaîtront sur vos vidéos une fois le rayon de liens disponible.",
+    "errors": {
+      "load": "Impossible de charger les liens",
+      "add": "Impossible d'ajouter le lien",
+      "delete": "Impossible de supprimer le lien",
+      "reorder": "Impossible de réorganiser les liens"
+    },
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "deleteLink": "Supprimer le lien",
+    "noLinks": "Aucun lien pour l'instant.",
+    "titlePlaceholder": "Titre (ex. Instagram)",
+    "add": "Ajouter"
+  },
+  "Categories": {
+    "Comedy": "Comédie",
+    "Drama": "Drame",
+    "Music": "Musique",
+    "News": "Actualités",
+    "Sports": "Sport",
+    "Lifestyle": "Style de vie",
+    "Education": "Éducation",
+    "Other": "Autre"
   }
 }

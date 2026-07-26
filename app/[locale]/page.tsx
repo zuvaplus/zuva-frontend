@@ -1,8 +1,10 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import SiteFooter from "@/components/SiteFooter";
 
 export default function LandingPage() {
+  const t = useTranslations("Landing");
   return (
     <div className="flex flex-col min-h-[calc(100vh-56px)] bg-black">
 
@@ -32,16 +34,15 @@ export default function LandingPage() {
           className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 max-w-2xl animate-fade-in"
           style={{ animationDelay: "0.1s" }}
         >
-          African &amp; Caribbean Stories.{" "}
-          <span className="gold-shimmer">Free Forever.</span>
+          {t("headline")}{" "}
+          <span className="gold-shimmer">{t("headlineHighlight")}</span>
         </h1>
 
         <p
           className="text-zinc-400 text-base sm:text-lg max-w-md mb-10 leading-relaxed animate-fade-in"
           style={{ animationDelay: "0.2s" }}
         >
-          Watch and support the creators who tell your stories. Tip with Suns.
-          Cash out to mobile money. No subscription, ever.
+          {t("subhead")}
         </p>
 
         {/* CTAs */}
@@ -54,13 +55,13 @@ export default function LandingPage() {
             className="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-black font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-gold hover:shadow-gold-lg hover:-translate-y-0.5"
           >
             <ZuvaSunIcon size={20} />
-            Watch Now
+            {t("watchNow")}
           </Link>
           <Link
             href="/sign-in"
             className="text-zinc-400 hover:text-gold-400 text-sm font-medium transition-colors underline-offset-4 hover:underline"
           >
-            Sign In →
+            {t("signIn")}
           </Link>
         </div>
       </section>
@@ -68,14 +69,14 @@ export default function LandingPage() {
       {/* ── FEATURES ─────────────────────────────────────── */}
       <section className="px-6 pb-16 pt-4">
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {FEATURES.map(({ icon, title, body }) => (
+          {FEATURE_ICONS.map(({ key, icon }) => (
             <div
-              key={title}
+              key={key}
               className="bg-surface-300 border border-gold-400/12 rounded-2xl p-6 text-center group hover:border-gold-400/30 transition-colors"
             >
               <div className="flex justify-center mb-4">{icon}</div>
-              <h3 className="text-white font-bold text-base mb-2">{title}</h3>
-              <p className="text-zinc-500 text-sm leading-relaxed">{body}</p>
+              <h3 className="text-white font-bold text-base mb-2">{t(`features.${key}.title`)}</h3>
+              <p className="text-zinc-500 text-sm leading-relaxed">{t(`features.${key}.body`)}</p>
             </div>
           ))}
         </div>
@@ -85,7 +86,7 @@ export default function LandingPage() {
       <section className="border-t border-gold-400/10 py-10 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-zinc-500 text-sm mb-6">
-            Trusted by creators across Africa, the UK, and the Caribbean
+            {t("trustStrip")}
           </p>
           <div className="flex flex-wrap justify-center gap-8 text-zinc-600 text-xs font-medium uppercase tracking-widest">
             {["Lagos", "London", "Kingston", "Accra", "Toronto", "Nairobi"].map((city) => (
@@ -101,9 +102,10 @@ export default function LandingPage() {
   );
 }
 
-// ── Feature card data ─────────────────────────────────────────
-const FEATURES = [
+// ── Feature card icons — titles/bodies live in messages ("Landing.features.*") ──
+const FEATURE_ICONS = [
   {
+    key: "bridges",
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
         <circle cx="20" cy="20" r="19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.3" />
@@ -113,10 +115,9 @@ const FEATURES = [
         <path d="M3 12h34M3 28h34" stroke="#f37b0d" strokeWidth="1" strokeOpacity="0.4" />
       </svg>
     ),
-    title: "Bridges Two Worlds",
-    body:  "Watch the creators who keep you connected to home — and support them directly.",
   },
   {
+    key: "earn",
     icon: (
       <svg viewBox="0 0 56 56" width="40" height="40" fill="none">
         <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round"/>
@@ -126,10 +127,9 @@ const FEATURES = [
         <circle cx="28" cy="28" r="10" fill="#f37b0d"/>
       </svg>
     ),
-    title: "Earn Real Money",
-    body:  "Fans tip creators with Suns. Creators cash out to M-Pesa, MTN Mobile Money, or bank. No minimum wait.",
   },
   {
+    key: "free",
     icon: (
       <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
         <rect x="2" y="8" width="36" height="24" rx="4" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.6"/>
@@ -138,7 +138,5 @@ const FEATURES = [
         <rect x="23" y="22" width="10" height="3" rx="1.5" fill="#f37b0d" fillOpacity="0.3"/>
       </svg>
     ),
-    title: "Free Forever",
-    body:  "No subscription, no paywalls. Zuva is free to watch. Support your favourite creators directly.",
   },
 ];

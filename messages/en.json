@@ -2,5 +2,269 @@
   "Metadata": {
     "title": "Zuva.TV — African & Caribbean Stories. Free Forever.",
     "description": "Watch and support African and Caribbean creators. Tip with Suns, earn real money, cash out to mobile money. No subscription."
+  },
+  "Nav": {
+    "adminBadge": "Admin",
+    "searchPlaceholder": "Search creators, videos, tags...",
+    "openProfileMenu": "Open profile menu",
+    "signIn": "Sign In"
+  },
+  "Sidebar": {
+    "main": "Main",
+    "studio": "Studio",
+    "library": "Library",
+    "browse": "Browse",
+    "categories": "Categories",
+    "about": "About",
+    "terms": "Terms",
+    "creatorSignUp": "Creator Sign Up",
+    "home": "Home",
+    "trending": "Trending",
+    "following": "Following",
+    "watchHistory": "Watch History",
+    "savedVideos": "Saved Videos",
+    "creatorDashboard": "Creator Dashboard",
+    "uploadVideo": "Upload Video"
+  },
+  "BottomNav": {
+    "home": "Home",
+    "search": "Search",
+    "upload": "Upload",
+    "alerts": "Alerts",
+    "profile": "Profile"
+  },
+  "ProfileMenu": {
+    "account": "Account",
+    "signOut": "Sign Out",
+    "myProfile": "My Profile",
+    "wallet": "Wallet",
+    "watchHistory": "Watch History",
+    "savedVideos": "Saved Videos",
+    "accountSettings": "Account Settings",
+    "becomeCreator": "Become a Creator",
+    "myChannel": "My Channel",
+    "creatorDashboard": "Creator Dashboard",
+    "uploadVideo": "Upload Video",
+    "switchToViewer": "Switch to Viewer Mode"
+  },
+  "BecomeCreatorModal": {
+    "title": "Become a Creator",
+    "body": "Upload videos, earn Suns from your fans, and cash out to mobile money. Apply to join Zuva as a creator.",
+    "applyNow": "Apply Now",
+    "notNow": "Not Now"
+  },
+  "SiteFooter": {
+    "homeAriaLabel": "Zuva home",
+    "about": "About",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "creatorSignUp": "Creator Sign-Up",
+    "copyright": "© {year} Zuva.TV Inc."
+  },
+  "Landing": {
+    "headline": "African & Caribbean Stories.",
+    "headlineHighlight": "Free Forever.",
+    "subhead": "Watch and support the creators who tell your stories. Tip with Suns. Cash out to mobile money. No subscription, ever.",
+    "watchNow": "Watch Now",
+    "signIn": "Sign In →",
+    "trustStrip": "Trusted by creators across Africa, the UK, and the Caribbean",
+    "features": {
+      "bridges": {
+        "title": "Bridges Two Worlds",
+        "body": "Watch the creators who keep you connected to home — and support them directly."
+      },
+      "earn": {
+        "title": "Earn Real Money",
+        "body": "Fans tip creators with Suns. Creators cash out to M-Pesa, MTN Mobile Money, or bank. No minimum wait."
+      },
+      "free": {
+        "title": "Free Forever",
+        "body": "No subscription, no paywalls. Zuva is free to watch. Support your favourite creators directly."
+      }
+    }
+  },
+  "Auth": {
+    "signInTagline": "Where creators shine",
+    "signUpTagline": "Join the creator economy",
+    "pills": {
+      "diasporaFirst": "Diaspora-first",
+      "earnSuns": "Earn Suns",
+      "mobileMoney": "Mobile Money"
+    },
+    "agreeToTerms": "By continuing you agree to our",
+    "terms": "Terms",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "LanguageSwitcher": {
+    "label": "Language"
+  },
+  "FeedCard": {
+    "trending": "Trending",
+    "tip": "Tip"
+  },
+  "Feed": {
+    "title": "Discover Creators",
+    "subtitle": "Trending & personalised — powered by your interest graph",
+    "filters": {
+      "both": "For You",
+      "vertical": "Shorts",
+      "landscape": "Videos"
+    },
+    "loadingMore": "Loading more…",
+    "loadError": "Could not load feed",
+    "tryAgain": "Try again",
+    "emptyTitle": "No content yet",
+    "emptyBody": "Feed will fill up as creators publish content."
+  },
+  "Status": {
+    "unconfirmed": "Unconfirmed",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "active": "Active",
+    "suspended": "Suspended",
+    "flagged": "Flagged",
+    "published": "Published",
+    "under_review": "Under Review"
+  },
+  "Admin": {
+    "title": "Admin Dashboard",
+    "badge": "Admin",
+    "subtitle": "Manage creator applications, content moderation, and user accounts.",
+    "signOut": "Sign Out",
+    "tabs": {
+      "applications": "Applications",
+      "content": "Content",
+      "users": "Users"
+    },
+    "stats": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "country": "Country",
+      "platform": "Platform",
+      "socialHandle": "Social Handle",
+      "followers": "Followers",
+      "status": "Status",
+      "dateApplied": "Date Applied",
+      "actions": "Actions",
+      "title": "Title",
+      "creator": "Creator",
+      "uploadDate": "Upload Date",
+      "reports": "Reports",
+      "role": "Role",
+      "joinDate": "Join Date"
+    },
+    "loadingApplications": "Loading applications…",
+    "noApplications": "No applications yet.",
+    "loadingContent": "Loading content…",
+    "noContent": "No content yet.",
+    "loadingUsers": "Loading users…",
+    "noUsers": "No users yet.",
+    "awaitingSignup": "awaiting sign-up",
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "remove": "Remove",
+      "suspend": "Suspend",
+      "removeAccount": "Remove Account"
+    },
+    "errors": {
+      "loadApplications": "Failed to load applications",
+      "loadContent": "Failed to load content",
+      "loadUsers": "Failed to load users",
+      "updateApplication": "Failed to update application",
+      "updateContent": "Failed to update content",
+      "removeContent": "Failed to remove content",
+      "suspendUser": "Failed to suspend user",
+      "removeUser": "Failed to remove user"
+    }
+  },
+  "CreatorDashboard": {
+    "title": "Creator Studio",
+    "subtitle": "Manage uploads, track performance, and update your channel.",
+    "walletBalance": "Wallet balance",
+    "openWallet": "Open Wallet",
+    "recentTips": "Recent tips",
+    "aFan": "A fan",
+    "noVideos": "No videos yet — upload your first one to get started.",
+    "viewVideo": "View video",
+    "loadVideosError": "Could not load your videos",
+    "saveError": "Could not save settings",
+    "channelInfo": "Channel Info",
+    "avatarUrl": "Avatar URL",
+    "displayName": "Display Name",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell fans about yourself",
+    "saved": "Saved!",
+    "saving": "Saving…",
+    "saveChanges": "Save Changes",
+    "tabs": {
+      "upload": "Upload",
+      "videos": "My Videos",
+      "settings": "Settings"
+    }
+  },
+  "VideoUpload": {
+    "errors": {
+      "unsupportedType": "Unsupported file type. Please upload an MP4, MOV, or AVI file.",
+      "tooLarge": "File is too large. Maximum upload size is 2GB.",
+      "unreadableResponse": "Upload succeeded but the response could not be read.",
+      "uploadFailedStatus": "Upload failed ({status})",
+      "uploadFailedNetwork": "Upload failed. Please check your connection and try again."
+    },
+    "uploadedTitle": "Video uploaded!",
+    "processingComplete": "Video processing complete — ready to play.",
+    "processingFailed": "Processing failed",
+    "processingVideo": "Processing video…",
+    "stillProcessing": "Still processing — this can take a few minutes for larger files. Check My Videos shortly.",
+    "uploadAnother": "Upload Another Video",
+    "fields": {
+      "videoFile": "Video File",
+      "title": "Title",
+      "description": "Description",
+      "category": "Category",
+      "tags": "Tags",
+      "thumbnail": "Thumbnail (optional)"
+    },
+    "chooseVideo": "Click to choose a video (MP4, MOV, AVI — up to 2GB)",
+    "titlePlaceholder": "Give your video a title",
+    "descriptionPlaceholder": "What's this video about?",
+    "selectCategory": "Select a category",
+    "tagsPlaceholder": "comedy, lagos, skits (comma-separated)",
+    "chooseImage": "Choose an image (optional)",
+    "uploadingPct": "Uploading… {pct}%",
+    "uploading": "Uploading…",
+    "uploadVideo": "Upload Video"
+  },
+  "CreatorLinks": {
+    "title": "Links",
+    "description": "Add up to {max} links (socials, merch, anything) — they'll appear on your videos once the links shelf ships.",
+    "errors": {
+      "load": "Could not load links",
+      "add": "Could not add link",
+      "delete": "Could not delete link",
+      "reorder": "Could not reorder links"
+    },
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "deleteLink": "Delete link",
+    "noLinks": "No links yet.",
+    "titlePlaceholder": "Title (e.g. Instagram)",
+    "add": "Add"
+  },
+  "Categories": {
+    "Comedy": "Comedy",
+    "Drama": "Drama",
+    "Music": "Music",
+    "News": "News",
+    "Sports": "Sports",
+    "Lifestyle": "Lifestyle",
+    "Education": "Education",
+    "Other": "Other"
   }
 }

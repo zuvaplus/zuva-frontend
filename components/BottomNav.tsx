@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Home, Search, Plus, Bell, User } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
@@ -14,6 +15,7 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ onOpenProfileMenu }: BottomNavProps) {
+  const t = useTranslations("BottomNav");
   const pathname = usePathname();
   const { role } = useUserRole();
   const [showCreatorModal, setShowCreatorModal] = useState(false);
@@ -26,34 +28,34 @@ export default function BottomNav({ onOpenProfileMenu }: BottomNavProps) {
         <div className="flex items-center justify-around py-2 px-2">
           <Link href="/feed" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/feed") ? "text-gold-400" : "text-zinc-500"}`}>
             <Home size={20} color={isActive("/feed") ? AMBER : MUTED} />
-            <span className="text-[10px] font-medium">Home</span>
+            <span className="text-[10px] font-medium">{t("home")}</span>
           </Link>
 
           <Link href="/search" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/search") ? "text-gold-400" : "text-zinc-500"}`}>
             <Search size={20} color={isActive("/search") ? AMBER : MUTED} />
-            <span className="text-[10px] font-medium">Search</span>
+            <span className="text-[10px] font-medium">{t("search")}</span>
           </Link>
 
           {role === "creator" ? (
             <Link href="/upload" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/upload") ? "text-gold-400" : "text-zinc-500"}`}>
               <Plus size={20} color={isActive("/upload") ? AMBER : MUTED} />
-              <span className="text-[10px] font-medium">Upload</span>
+              <span className="text-[10px] font-medium">{t("upload")}</span>
             </Link>
           ) : (
             <button onClick={() => setShowCreatorModal(true)} className="flex flex-col items-center gap-1 px-3 py-1 text-zinc-500">
               <Plus size={20} color={MUTED} />
-              <span className="text-[10px] font-medium">Upload</span>
+              <span className="text-[10px] font-medium">{t("upload")}</span>
             </button>
           )}
 
           <Link href="/notifications" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/notifications") ? "text-gold-400" : "text-zinc-500"}`}>
             <Bell size={20} color={isActive("/notifications") ? AMBER : MUTED} />
-            <span className="text-[10px] font-medium">Alerts</span>
+            <span className="text-[10px] font-medium">{t("alerts")}</span>
           </Link>
 
           <button onClick={onOpenProfileMenu} className="flex flex-col items-center gap-1 px-3 py-1 text-zinc-500">
             <User size={20} color={MUTED} />
-            <span className="text-[10px] font-medium">Profile</span>
+            <span className="text-[10px] font-medium">{t("profile")}</span>
           </button>
         </div>
       </nav>
