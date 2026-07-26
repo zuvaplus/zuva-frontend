@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@clerk/nextjs";
 import type { FeedItem, Orientation } from "@/lib/types";
@@ -11,6 +12,7 @@ import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import TipModal from "@/components/TipModal";
 
 export default function WatchPage() {
+  const t = useTranslations("Watch");
   const { id } = useParams<{ id: string }>();
   const { getToken } = useAuth();
   const router = useRouter();
@@ -112,9 +114,9 @@ export default function WatchPage() {
   if (!item) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-56px)] gap-4">
-        <p className="text-zinc-400">Video not found</p>
+        <p className="text-zinc-400">{t("videoNotFound")}</p>
         <button onClick={() => router.back()} className="text-gold-400 hover:underline text-sm">
-          Go back
+          {t("goBack")}
         </button>
       </div>
     );
@@ -220,7 +222,7 @@ export default function WatchPage() {
                 className="flex items-center gap-1.5 bg-gold-400 hover:bg-gold-300 text-black text-xs font-bold px-3 py-1.5 rounded-full transition-all"
               >
                 <ZuvaSunIcon size={12} />
-                Tip
+                {t("tip")}
               </button>
             </div>
           </div>
@@ -235,14 +237,14 @@ export default function WatchPage() {
           <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
             <div className="flex items-center gap-4 text-zinc-400 text-sm">
               <span className="flex items-center gap-1">
-                <EyeIcon size={14} /> {formatSuns(item.view_count)} views
+                <EyeIcon size={14} /> {t("viewsCount", { count: formatSuns(item.view_count) })}
               </span>
               <span className="flex items-center gap-1">
                 <HeartIcon size={14} /> {formatSuns(item.like_count)}
               </span>
               {item.total_tips_suns > 0 && (
                 <span className="flex items-center gap-1 text-gold-400">
-                  <ZuvaSunIcon size={13} /> {formatSuns(item.total_tips_suns)} Suns tipped
+                  <ZuvaSunIcon size={13} /> {t("sunsTipped", { count: formatSuns(item.total_tips_suns) })}
                 </span>
               )}
             </div>
@@ -257,7 +259,7 @@ export default function WatchPage() {
               </div>
               <div>
                 <div className="text-white font-semibold text-sm group-hover:text-gold-300 transition-colors">
-                  {item.creator_display_name ?? "Creator"}
+                  {item.creator_display_name ?? t("creator")}
                 </div>
                 <div className="text-zinc-500 text-xs">
                   @{item.creator_username ?? item.creator_id.slice(0, 8)}
@@ -269,7 +271,7 @@ export default function WatchPage() {
               className="flex items-center gap-2 bg-gold-400/15 hover:bg-gold-400/25 text-gold-300 border border-gold-400/30 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             >
               <ZuvaSunIcon size={14} />
-              Send Suns
+              {t("sendSuns")}
             </button>
           </div>
 
@@ -310,6 +312,7 @@ export default function WatchPage() {
 }
 
 function OrientationBadge({ orientation }: { orientation: Orientation }) {
+  const t = useTranslations("Watch");
   return (
     <span
       className={`text-xs px-2.5 py-1 rounded-full font-medium border ${
@@ -318,7 +321,7 @@ function OrientationBadge({ orientation }: { orientation: Orientation }) {
           : "text-blue-300 bg-blue-400/15 border-blue-400/30"
       }`}
     >
-      {orientation === "vertical" ? "Portrait" : "Landscape"}
+      {orientation === "vertical" ? t("portrait") : t("landscape")}
     </span>
   );
 }

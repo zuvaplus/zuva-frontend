@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 import SiteFooter from "@/components/SiteFooter";
@@ -74,19 +75,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const inputClass =
   "w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-4 py-3 outline-none transition-colors";
 
-// Non-creators land here with ?from=dashboard|upload when they try to
-// reach a creator-only page — a friendlier explanation than a bare
-// redirect, and a nudge toward the form right below it.
-const REDIRECT_MESSAGES: Record<string, string> = {
-  dashboard: "You'll need an approved creator account to access the Creator Dashboard.",
-  upload: "You'll need an approved creator account to upload videos.",
-};
-
 function CreatorSignupForm() {
+  const t = useTranslations("CreatorSignup");
+  const tCategories = useTranslations("Categories");
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const searchParams = useSearchParams();
   const redirectReason = searchParams.get("from");
-  const redirectMessage = redirectReason ? REDIRECT_MESSAGES[redirectReason] : null;
+  // Non-creators land here with ?from=dashboard|upload when they try to
+  // reach a creator-only page — a friendlier explanation than a bare
+  // redirect, and a nudge toward the form right below it.
+  const redirectMessage =
+    redirectReason === "dashboard" ? t("redirect.dashboard")
+    : redirectReason === "upload" ? t("redirect.upload")
+    : null;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,12 +146,12 @@ function CreatorSignupForm() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? `Submission failed (${res.status})`);
+        throw new Error(body?.error ?? t("submissionFailed", { status: res.status }));
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setSubmitting(false);
     }
@@ -162,17 +163,13 @@ function CreatorSignupForm() {
         <div className="flex-1 flex items-center justify-center px-6 py-20">
           <div className="max-w-md text-center">
             <ZuvaSunIcon size={40} glow className="mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-white mb-3">Check your email!</h1>
-            <p className="text-zinc-400 text-sm leading-relaxed">
-              We&apos;ve sent a confirmation link to the email address you provided.
-              Click it to confirm your application — once confirmed, our team will
-              review it and get back to you within a few business days.
-            </p>
+            <h1 className="text-2xl font-bold text-white mb-3">{t("checkYourEmail")}</h1>
+            <p className="text-zinc-400 text-sm leading-relaxed">{t("checkYourEmailBody")}</p>
             <Link
               href="/"
               className="inline-block mt-8 bg-gold-400 hover:bg-gold-300 text-black font-bold px-8 py-3 rounded-xl transition-all shadow-gold"
             >
-              Back to Home
+              {t("backToHome")}
             </Link>
           </div>
         </div>
@@ -188,36 +185,33 @@ function CreatorSignupForm() {
       <div className="bg-surface-300 border-b border-gold-400/10">
         <div className="max-w-2xl mx-auto px-6 py-14 text-center">
           <ZuvaSunIcon size={36} glow className="mx-auto mb-5" />
-          <p className="text-gold-400 text-xs font-semibold uppercase tracking-widest mb-3">Creators</p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">Become a Zuva Creator</h1>
-          <p className="text-zinc-400 text-sm max-w-md mx-auto">
-            Upload your content, reach African &amp; Caribbean audiences worldwide, and earn Suns
-            tips from your fans.
-          </p>
+          <p className="text-gold-400 text-xs font-semibold uppercase tracking-widest mb-3">{t("eyebrow")}</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">{t("heroTitle")}</h1>
+          <p className="text-zinc-400 text-sm max-w-md mx-auto">{t("heroBody")}</p>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
         {redirectMessage && (
           <div className="bg-gold-400/10 border border-gold-400/25 text-gold-300 text-sm rounded-2xl px-5 py-4 mb-6">
-            {redirectMessage} Apply below — if you already have a pending application, we'll email you as soon as there's a decision.
+            {redirectMessage} {t("redirect.applyBelow")}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="bg-surface-200 border border-gold-400/15 rounded-2xl p-6 sm:p-8 space-y-5">
 
-          <Field label="Full Name">
+          <Field label={t("fields.fullName")}>
             <input
               type="text"
               required
               value={form.fullName}
               onChange={(e) => update("fullName", e.target.value)}
               className={inputClass}
-              placeholder="Your full name"
+              placeholder={t("fullNamePlaceholder")}
             />
           </Field>
 
-          <Field label="Email Address">
+          <Field label={t("fields.email")}>
             <input
               type="email"
               required
@@ -228,35 +222,35 @@ function CreatorSignupForm() {
             />
           </Field>
 
-          <Field label="Country">
+          <Field label={t("fields.country")}>
             <select
               required
               value={form.country}
               onChange={(e) => update("country", e.target.value)}
               className={inputClass}
             >
-              <option value="" disabled>Select your country</option>
+              <option value="" disabled>{t("selectCountry")}</option>
               {AFRICAN_CARIBBEAN_COUNTRIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </Field>
 
-          <Field label="Primary Platform">
+          <Field label={t("fields.primaryPlatform")}>
             <select
               required
               value={form.primaryPlatform}
               onChange={(e) => update("primaryPlatform", e.target.value)}
               className={inputClass}
             >
-              <option value="" disabled>Select a platform</option>
+              <option value="" disabled>{t("selectPlatform")}</option>
               {PLATFORMS.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
             </select>
           </Field>
 
-          <Field label="Social Media Handle">
+          <Field label={t("fields.socialHandle")}>
             <input
               type="text"
               required
@@ -267,28 +261,28 @@ function CreatorSignupForm() {
             />
           </Field>
 
-          <Field label="Content Category">
+          <Field label={t("fields.contentCategory")}>
             <select
               required
               value={form.contentCategory}
               onChange={(e) => update("contentCategory", e.target.value)}
               className={inputClass}
             >
-              <option value="" disabled>Select a category</option>
+              <option value="" disabled>{t("selectCategory")}</option>
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>{tCategories(c)}</option>
               ))}
             </select>
           </Field>
 
-          <Field label="Approximate Follower Count">
+          <Field label={t("fields.followerCount")}>
             <select
               required
               value={form.followerCount}
               onChange={(e) => update("followerCount", e.target.value)}
               className={inputClass}
             >
-              <option value="" disabled>Select a range</option>
+              <option value="" disabled>{t("selectRange")}</option>
               {FOLLOWER_RANGES.map((r) => (
                 <option key={r} value={r}>{r}</option>
               ))}
@@ -306,11 +300,11 @@ function CreatorSignupForm() {
                 className="mt-0.5 accent-gold-400 w-4 h-4 shrink-0"
               />
               <span>
-                I agree to Zuva.TV&apos;s{" "}
-                <Link href="/terms" target="_blank" className="text-gold-400 hover:underline">Terms of Service</Link>
-                {" "}and{" "}
-                <Link href="/privacy" target="_blank" className="text-gold-400 hover:underline">Privacy Policy</Link>.
-                <span className="text-zinc-600"> (required)</span>
+                {t("agreeToTermsPrefix")}{" "}
+                <Link href="/terms" target="_blank" className="text-gold-400 hover:underline">{t("termsOfService")}</Link>
+                {" "}{t("and")}{" "}
+                <Link href="/privacy" target="_blank" className="text-gold-400 hover:underline">{t("privacyPolicy")}</Link>.
+                <span className="text-zinc-600"> {t("required")}</span>
               </span>
             </label>
 
@@ -322,9 +316,8 @@ function CreatorSignupForm() {
                 className="mt-0.5 accent-gold-400 w-4 h-4 shrink-0"
               />
               <span>
-                I would like to receive marketing emails from Zuva.TV about creator programmes, features, and
-                promotions. You can unsubscribe at any time.
-                <span className="text-zinc-600"> (optional)</span>
+                {t("marketingConsentBody")}
+                <span className="text-zinc-600"> {t("optional")}</span>
               </span>
             </label>
           </div>
@@ -342,10 +335,7 @@ function CreatorSignupForm() {
                 onError={() => setTurnstileToken(null)}
               />
             ) : (
-              <p className="text-red-400 text-xs">
-                Turnstile site key not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY in .env.local to a real
-                Cloudflare Turnstile site key.
-              </p>
+              <p className="text-red-400 text-xs">{t("turnstileNotConfigured")}</p>
             )}
           </div>
 
@@ -360,7 +350,7 @@ function CreatorSignupForm() {
             disabled={!canSubmit}
             className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-gold"
           >
-            {submitting ? "Submitting..." : "Submit Application"}
+            {submitting ? t("submittingEllipsis") : t("submitApplication")}
           </button>
         </form>
       </div>

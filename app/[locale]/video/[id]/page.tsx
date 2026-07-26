@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { Eye, Clock, Tag, Flag, X, Film, Heart } from "lucide-react";
@@ -17,7 +18,17 @@ import CommentsSection from "@/components/CommentsSection";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
-const REPORT_REASONS = ["Inappropriate content", "Copyright violation", "Spam", "Other"];
+// Canonical (English) values submitted to the backend — REPORT_REASONS is
+// free text in the DB, but keeping the wire value English keeps admin
+// moderation views consistent regardless of the reporter's UI locale.
+// Only the displayed label is translated (Video.report.reasons.*).
+const REPORT_REASON_KEYS = ["inappropriate", "copyright", "spam", "other"] as const;
+const REPORT_REASON_VALUES: Record<(typeof REPORT_REASON_KEYS)[number], string> = {
+  inappropriate: "Inappropriate content",
+  copyright: "Copyright violation",
+  spam: "Spam",
+  other: "Other",
+};
 
 function VideoSkeleton() {
   return (
@@ -30,15 +41,16 @@ function VideoSkeleton() {
 }
 
 function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
+  const t = useTranslations("Video.report");
   const { getToken } = useAuth();
-  const [reason, setReason]     = useState("");
+  const [reasonKey, setReasonKey] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]       = useState<string | null>(null);
   const [done, setDone]         = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!reason) return;
+    if (!reasonKey) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -51,15 +63,15 @@ function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => voi
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify({ reason: REPORT_REASON_VALUES[reasonKey as keyof typeof REPORT_REASON_VALUES] }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? "Could not submit report");
+        throw new Error(body?.error ?? t("submitError"));
       }
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not submit report");
+      setError(err instanceof Error ? err.message : t("submitError"));
     } finally {
       setSubmitting(false);
     }
@@ -78,38 +90,38 @@ function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => voi
         {done ? (
           <div className="text-center py-4">
             <Flag size={32} className="text-gold-400 mx-auto mb-3" />
-            <p className="text-white font-semibold mb-1">Report submitted</p>
-            <p className="text-zinc-500 text-sm">Thanks for helping keep Zuva safe.</p>
+            <p className="text-white font-semibold mb-1">{t("submitted")}</p>
+            <p className="text-zinc-500 text-sm">{t("thanks")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <h2 className="text-white font-bold text-lg mb-4">Report this video</h2>
+            <h2 className="text-white font-bold text-lg mb-4">{t("title")}</h2>
             <div className="space-y-2 mb-5">
-              {REPORT_REASONS.map((r) => (
+              {REPORT_REASON_KEYS.map((key) => (
                 <label
-                  key={r}
+                  key={key}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm cursor-pointer transition-colors
-                    ${reason === r ? "border-gold-400/50 bg-gold-400/10 text-white" : "border-gold-400/15 text-zinc-400 hover:border-gold-400/30"}`}
+                    ${reasonKey === key ? "border-gold-400/50 bg-gold-400/10 text-white" : "border-gold-400/15 text-zinc-400 hover:border-gold-400/30"}`}
                 >
                   <input
                     type="radio"
                     name="reason"
-                    value={r}
-                    checked={reason === r}
-                    onChange={() => setReason(r)}
+                    value={key}
+                    checked={reasonKey === key}
+                    onChange={() => setReasonKey(key)}
                     className="accent-gold-400"
                   />
-                  {r}
+                  {t(`reasons.${key}`)}
                 </label>
               ))}
             </div>
             {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
             <button
               type="submit"
-              disabled={!reason || submitting}
+              disabled={!reasonKey || submitting}
               className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-40"
             >
-              {submitting ? "Submitting…" : "Submit Report"}
+              {submitting ? t("submitting") : t("submit")}
             </button>
           </form>
         )}
@@ -143,6 +155,7 @@ function AutoLinkedText({ text }: { text: string }) {
 }
 
 function Description({ text }: { text: string }) {
+  const t = useTranslations("Video");
   const [expanded, setExpanded] = useState(false);
   // Cheap heuristic for whether the collapse control is worth showing.
   const isLong = text.length > 180 || text.split("\n").length > 3;
@@ -161,7 +174,7 @@ function Description({ text }: { text: string }) {
           onClick={() => setExpanded((e) => !e)}
           className="text-zinc-500 hover:text-gold-400 text-xs font-semibold mt-1.5 transition-colors"
         >
-          {expanded ? "Show less" : "...more"}
+          {expanded ? t("showLess") : t("showMore")}
         </button>
       )}
       {/* Links / merch shelf lands here in the upcoming monetization task */}
@@ -170,6 +183,8 @@ function Description({ text }: { text: string }) {
 }
 
 export default function VideoPlayerPage() {
+  const t = useTranslations("Video");
+  const tCategories = useTranslations("Categories");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { getToken } = useAuth();
@@ -200,7 +215,7 @@ export default function VideoPlayerPage() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? "Video not found");
+        throw new Error(body?.error ?? t("notFound"));
       }
       const json: VideoResponse = await res.json();
       setData(json);
@@ -209,11 +224,11 @@ export default function VideoPlayerPage() {
       setSubscribed(json.viewer?.is_subscribed ?? false);
       setFollowerCount(json.creator.follower_count ?? 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Video not found");
+      setError(err instanceof Error ? err.message : t("notFound"));
     } finally {
       setLoading(false);
     }
-  }, [id, getToken]);
+  }, [id, getToken, t]);
 
   useEffect(() => {
     load();
@@ -279,10 +294,10 @@ export default function VideoPlayerPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <Film size={40} className="mx-auto mb-4 text-zinc-700" />
-        <h1 className="text-white font-bold text-xl mb-2">Video not found</h1>
+        <h1 className="text-white font-bold text-xl mb-2">{t("notFound")}</h1>
         <p className="text-zinc-500 text-sm mb-6">{error}</p>
         <Link href="/feed" className="bg-gold-400/15 text-gold-400 border border-gold-400/25 px-6 py-2.5 rounded-xl font-medium">
-          Back to Feed
+          {t("backToFeed")}
         </Link>
       </div>
     );
@@ -311,12 +326,12 @@ export default function VideoPlayerPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-x-3 text-zinc-500 text-sm">
           <span className="flex items-center gap-1.5">
-            <Eye size={14} /> {formatCount(video.view_count)} views
+            <Eye size={14} /> {t("viewsCount", { count: formatCount(video.view_count) })}
           </span>
           <span aria-hidden>·</span>
           <span>{timeAgoLong(video.created_at)}</span>
           <span className="bg-gold-400/10 text-gold-400 border border-gold-400/25 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-            {video.category}
+            {tCategories.has(video.category) ? tCategories(video.category) : video.category}
           </span>
         </div>
 
@@ -339,7 +354,7 @@ export default function VideoPlayerPage() {
           <button
             onClick={() => setShowReport(true)}
             className="text-zinc-600 hover:text-red-400 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
-            title="Report this video"
+            title={t("reportThisVideo")}
           >
             <Flag size={15} />
           </button>
@@ -362,7 +377,9 @@ export default function VideoPlayerPage() {
               {creatorName}
             </p>
             <p className="text-zinc-500 text-xs">
-              {formatCount(followerCount)} {followerCount === 1 ? "follower" : "followers"}
+              {followerCount === 1
+                ? t("followerCountOne", { count: formatCount(followerCount) })
+                : t("followerCountOther", { count: formatCount(followerCount) })}
             </p>
           </div>
         </Link>
@@ -376,7 +393,7 @@ export default function VideoPlayerPage() {
               : "bg-gold-400 hover:bg-gold-300 text-black shadow-gold"
             }`}
         >
-          {subBusy ? "…" : subscribed ? "Subscribed" : "Subscribe"}
+          {subBusy ? "…" : subscribed ? t("subscribed") : t("subscribe")}
         </button>
       </div>
 
@@ -403,7 +420,7 @@ export default function VideoPlayerPage() {
       {/* Related videos */}
       {related_videos.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">More like this</h2>
+          <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">{t("moreLikeThis")}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {related_videos.map((rv) => (
               <Link
@@ -424,7 +441,7 @@ export default function VideoPlayerPage() {
                 </div>
                 <div className="p-2.5">
                   <p className="text-white text-sm font-medium truncate">{rv.title}</p>
-                  <p className="text-zinc-500 text-[11px] mt-1">{formatCount(rv.view_count)} views</p>
+                  <p className="text-zinc-500 text-[11px] mt-1">{t("viewsCount", { count: formatCount(rv.view_count) })}</p>
                 </div>
               </Link>
             ))}

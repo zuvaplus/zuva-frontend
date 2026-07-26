@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAuth } from "@clerk/nextjs";
 import type { CreatorEarnings } from "@/lib/types";
@@ -12,6 +13,8 @@ import TipModal from "@/components/TipModal";
 import { ProfileSkeleton } from "@/components/LoadingSkeleton";
 
 export default function CreatorProfilePage() {
+  const t = useTranslations("CreatorProfile");
+  const tTiers = useTranslations("Tiers");
   const { username } = useParams<{ username: string }>();
   const { getToken } = useAuth();
   const [creator, setCreator] = useState<CreatorEarnings | null>(null);
@@ -27,13 +30,13 @@ export default function CreatorProfilePage() {
         const data = await getCreatorEarnings(token, username);
         setCreator(data.earnings);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Creator not found");
+        setError(err instanceof Error ? err.message : t("notFound"));
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [username, getToken]);
+  }, [username, getToken, t]);
 
   if (loading) return <div className="max-w-2xl mx-auto px-4 py-8"><ProfileSkeleton /></div>;
 
@@ -41,16 +44,17 @@ export default function CreatorProfilePage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <ZuvaSunIcon size={48} className="mx-auto mb-4 opacity-30" />
-        <h1 className="text-white font-bold text-xl mb-2">Creator not found</h1>
+        <h1 className="text-white font-bold text-xl mb-2">{t("notFound")}</h1>
         <p className="text-zinc-500 text-sm mb-6">{error}</p>
         <Link href="/feed" className="bg-gold-400/15 text-gold-400 border border-gold-400/25 px-6 py-2.5 rounded-xl font-medium">
-          Back to Feed
+          {t("backToFeed")}
         </Link>
       </div>
     );
   }
 
   const tier = tierInfo(creator.tier);
+  const tierLabel = tTiers.has(creator.tier) ? tTiers(creator.tier) : tier.label;
 
   return (
     <>
@@ -65,7 +69,7 @@ export default function CreatorProfilePage() {
               </div>
               <span
                 className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-surface-200 flex items-center justify-center"
-                style={{ backgroundColor: tier.color }} title={tier.label}
+                style={{ backgroundColor: tier.color }} title={tierLabel}
               >
                 <ZuvaSunIcon size={12} />
               </span>
@@ -79,7 +83,7 @@ export default function CreatorProfilePage() {
                 className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border"
                 style={{ color: tier.color, borderColor: `${tier.color}40`, backgroundColor: `${tier.color}15` }}
               >
-                <ZuvaSunIcon size={11} /> {tier.label}
+                <ZuvaSunIcon size={11} /> {tierLabel}
               </span>
             </div>
 
@@ -88,7 +92,7 @@ export default function CreatorProfilePage() {
               onClick={() => setShowTip(true)}
               className="shrink-0 flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-black font-bold px-4 py-2.5 rounded-xl transition-all shadow-gold text-sm"
             >
-              <ZuvaSunIcon size={16} /> Tip
+              <ZuvaSunIcon size={16} /> {t("tip")}
             </button>
           </div>
 
@@ -98,11 +102,11 @@ export default function CreatorProfilePage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Balance"      value={<><ZuvaSunIcon size={13} className="inline mr-0.5" />{formatSuns(creator.balance_suns)}</>}       sub={`$${creator.balance_usd} USD`} />
-            <StatCard label="Total Earned" value={<><ZuvaSunIcon size={13} className="inline mr-0.5" />{formatSuns(creator.total_earned_suns)}</>}  sub={`$${creator.earned_usd} USD`}  />
-            <StatCard label="Creator Split" value={`${creator.creator_share_pct}%`} sub={`${creator.platform_share_pct}% platform`} />
+            <StatCard label={t("balance")}      value={<><ZuvaSunIcon size={13} className="inline mr-0.5" />{formatSuns(creator.balance_suns)}</>}       sub={`$${creator.balance_usd} USD`} />
+            <StatCard label={t("totalEarned")} value={<><ZuvaSunIcon size={13} className="inline mr-0.5" />{formatSuns(creator.total_earned_suns)}</>}  sub={`$${creator.earned_usd} USD`}  />
+            <StatCard label={t("creatorSplit")} value={`${creator.creator_share_pct}%`} sub={t("platformPct", { pct: creator.platform_share_pct })} />
             {creator.follower_count != null && (
-              <StatCard label="Followers" value={formatSuns(creator.follower_count)} sub="" />
+              <StatCard label={t("followers")} value={formatSuns(creator.follower_count)} sub="" />
             )}
           </div>
         </div>
@@ -110,23 +114,21 @@ export default function CreatorProfilePage() {
         {/* Revenue split */}
         <div className="bg-surface-200 border border-gold-400/12 rounded-2xl p-5 mb-5">
           <h2 className="text-gold-400 font-semibold text-sm mb-3 flex items-center gap-2">
-            <ZuvaSunIcon size={14} /> Revenue Split
+            <ZuvaSunIcon size={14} /> {t("revenueSplit")}
           </h2>
           <div className="flex gap-0.5 h-3 rounded-full overflow-hidden mb-2">
             <div className="bg-gold-400 transition-all rounded-l-full" style={{ width: `${creator.creator_share_pct}%` }} />
             <div className="bg-surface-50 transition-all rounded-r-full" style={{ width: `${creator.platform_share_pct}%` }} />
           </div>
           <div className="flex justify-between text-xs">
-            <span className="text-gold-400">{creator.creator_share_pct}% Creator</span>
-            <span className="text-zinc-600">{creator.platform_share_pct}% Platform</span>
+            <span className="text-gold-400">{t("creatorPct", { pct: creator.creator_share_pct })}</span>
+            <span className="text-zinc-600">{t("platformPct", { pct: creator.platform_share_pct })}</span>
           </div>
-          <p className="text-zinc-700 text-xs mt-3">
-            Commission deducted at tip time — no second cut at cashout.
-          </p>
+          <p className="text-zinc-700 text-xs mt-3">{t("commissionNote")}</p>
         </div>
 
         <div className="text-center">
-          <Link href="/feed" className="text-zinc-600 hover:text-gold-400 text-sm transition-colors">← Back to Feed</Link>
+          <Link href="/feed" className="text-zinc-600 hover:text-gold-400 text-sm transition-colors">{t("backToFeedArrow")}</Link>
         </div>
       </div>
 

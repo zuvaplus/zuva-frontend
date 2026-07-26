@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { MapPin, Users, Film, Eye, Clock, Pencil, X } from "lucide-react";
@@ -31,6 +32,7 @@ function ChannelSkeleton() {
 }
 
 export default function ChannelPage() {
+  const t = useTranslations("Channel");
   const { username } = useParams<{ username: string }>();
   const { user } = useUser();
   const { getToken } = useAuth();
@@ -54,7 +56,7 @@ export default function ChannelPage() {
       const res = await fetch(`${BACKEND_URL}/api/channel/${encodeURIComponent(username)}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? "Creator not found");
+        throw new Error(body?.error ?? t("creatorNotFound"));
       }
       const json: ChannelResponse = await res.json();
       setData(json);
@@ -62,11 +64,11 @@ export default function ChannelPage() {
       setBio(json.creator.bio ?? "");
       setCountryCode(json.creator.country_code ?? "");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Creator not found");
+      setError(err instanceof Error ? err.message : t("creatorNotFound"));
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [username, t]);
 
   useEffect(() => {
     load();
@@ -95,12 +97,12 @@ export default function ChannelPage() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? "Could not update channel");
+        throw new Error(body?.error ?? t("updateError"));
       }
       setEditing(false);
       await load();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Could not update channel");
+      setSaveError(err instanceof Error ? err.message : t("updateError"));
     } finally {
       setSaving(false);
     }
@@ -112,10 +114,10 @@ export default function ChannelPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <Film size={40} className="mx-auto mb-4 text-zinc-700" />
-        <h1 className="text-white font-bold text-xl mb-2">Channel not found</h1>
+        <h1 className="text-white font-bold text-xl mb-2">{t("channelNotFound")}</h1>
         <p className="text-zinc-500 text-sm mb-6">{error}</p>
         <Link href="/feed" className="bg-gold-400/15 text-gold-400 border border-gold-400/25 px-6 py-2.5 rounded-xl font-medium">
-          Back to Feed
+          {t("backToFeed")}
         </Link>
       </div>
     );
@@ -150,10 +152,12 @@ export default function ChannelPage() {
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <Users size={14} /> {creator.follower_count.toLocaleString()} followers
+                <Users size={14} /> {t("followersCount", { count: creator.follower_count.toLocaleString() })}
               </span>
               <span className="flex items-center gap-1.5">
-                <Film size={14} /> {videos.length} video{videos.length === 1 ? "" : "s"}
+                <Film size={14} /> {videos.length === 1
+                  ? t("videoCountOne", { count: videos.length })
+                  : t("videoCountOther", { count: videos.length })}
               </span>
             </div>
           </div>
@@ -163,7 +167,7 @@ export default function ChannelPage() {
               onClick={() => setEditing(true)}
               className="shrink-0 flex items-center gap-2 border border-gold-400/30 text-gold-400 hover:bg-gold-400/10 text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
             >
-              <Pencil size={15} /> Edit Channel
+              <Pencil size={15} /> {t("editChannel")}
             </button>
           )}
         </div>
@@ -177,14 +181,14 @@ export default function ChannelPage() {
         {isOwner && editing && (
           <form onSubmit={handleSave} className="mt-5 border-t border-gold-400/8 pt-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-white font-semibold text-sm">Edit Channel</h2>
+              <h2 className="text-white font-semibold text-sm">{t("editChannel")}</h2>
               <button type="button" onClick={() => setEditing(false)} className="text-zinc-500 hover:text-white p-1">
                 <X size={18} />
               </button>
             </div>
 
             <div>
-              <label className="block text-zinc-300 text-xs font-medium mb-1.5">Display Name</label>
+              <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("displayName")}</label>
               <input
                 type="text"
                 value={displayName}
@@ -194,7 +198,7 @@ export default function ChannelPage() {
             </div>
 
             <div>
-              <label className="block text-zinc-300 text-xs font-medium mb-1.5">Bio</label>
+              <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("bio")}</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
@@ -205,7 +209,7 @@ export default function ChannelPage() {
             </div>
 
             <div>
-              <label className="block text-zinc-300 text-xs font-medium mb-1.5">Country Code (2 letters, e.g. NG, JM)</label>
+              <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("countryCodeLabel")}</label>
               <input
                 type="text"
                 value={countryCode}
@@ -223,14 +227,14 @@ export default function ChannelPage() {
                 disabled={saving}
                 className="bg-gold-400 hover:bg-gold-300 text-black font-semibold text-sm px-5 py-2 rounded-xl transition-all disabled:opacity-50"
               >
-                {saving ? "Saving…" : "Save Changes"}
+                {saving ? t("savingEllipsis") : t("saveChanges")}
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="text-zinc-400 hover:text-white text-sm px-5 py-2 rounded-xl transition-colors"
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </form>
@@ -239,7 +243,7 @@ export default function ChannelPage() {
 
       {/* Video grid */}
       {videos.length === 0 ? (
-        <p className="text-zinc-500 text-sm text-center py-12">No published videos yet.</p>
+        <p className="text-zinc-500 text-sm text-center py-12">{t("noVideosPublished")}</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {videos.map((video) => (

@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Hash } from "lucide-react";
 import type { SearchResponse } from "@/lib/types";
@@ -26,6 +27,7 @@ function SearchSkeleton() {
 }
 
 function SearchResults() {
+  const t = useTranslations("Search");
   const searchParams = useSearchParams();
   const q = searchParams.get("q")?.trim() ?? "";
 
@@ -50,7 +52,7 @@ function SearchResults() {
         if (!cancelled) setResults(data);
       })
       .catch(() => {
-        if (!cancelled) setError("Failed to load search results");
+        if (!cancelled) setError(t("loadError"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -68,24 +70,24 @@ function SearchResults() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <h1 className="text-white font-bold text-xl mb-6">
-        {q ? `Results for "${q}"` : "Search"}
+        {q ? t("resultsFor", { query: q }) : t("search")}
       </h1>
 
-      {!q && <p className="text-zinc-500 text-sm">Type something in the search bar to get started.</p>}
+      {!q && <p className="text-zinc-500 text-sm">{t("typeToStart")}</p>}
 
       {q && loading && <SearchSkeleton />}
 
       {q && !loading && error && <p className="text-red-400 text-sm">{error}</p>}
 
       {q && !loading && !error && !hasResults && (
-        <p className="text-zinc-500 text-sm">No results found.</p>
+        <p className="text-zinc-500 text-sm">{t("noResults")}</p>
       )}
 
       {q && !loading && !error && results && hasResults && (
         <div className="space-y-10">
           {results.creators.length > 0 && (
             <section>
-              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">Creators</h2>
+              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">{t("creators")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {results.creators.map((creator) => (
                   <Link
@@ -107,7 +109,7 @@ function SearchResults() {
                       {creator.display_name || creator.username}
                     </p>
                     <p className="text-zinc-500 text-xs">
-                      {creator.follower_count.toLocaleString()} followers
+                      {t("followersCount", { count: creator.follower_count.toLocaleString() })}
                     </p>
                   </Link>
                 ))}
@@ -117,7 +119,7 @@ function SearchResults() {
 
           {results.videos.length > 0 && (
             <section>
-              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">Videos</h2>
+              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">{t("videos")}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {results.videos.map((video) => (
                   <Link
@@ -136,7 +138,7 @@ function SearchResults() {
                     <div className="p-2.5">
                       <p className="text-white text-sm font-medium truncate">{video.title}</p>
                       <p className="text-zinc-500 text-xs truncate">{video.creator_name}</p>
-                      <p className="text-zinc-600 text-[11px]">{video.view_count.toLocaleString()} views</p>
+                      <p className="text-zinc-600 text-[11px]">{t("viewsCount", { count: video.view_count.toLocaleString() })}</p>
                     </div>
                   </Link>
                 ))}
@@ -146,7 +148,7 @@ function SearchResults() {
 
           {results.tags.length > 0 && (
             <section>
-              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">Tags</h2>
+              <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">{t("tags")}</h2>
               <div className="flex flex-wrap gap-2">
                 {results.tags.map((tag) => (
                   <Link

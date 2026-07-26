@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import type { WalletBalance, Transaction, FiatCurrency } from "@/lib/types";
 import { getWalletBalance, getLedger, purchaseSuns, ApiError } from "@/lib/api";
@@ -17,12 +18,14 @@ const FIAT_CURRENCIES: { value: FiatCurrency; label: string; symbol: string }[] 
 ];
 
 type ActiveTab = "overview" | "history" | "buy" | "cashout";
+const TABS: ActiveTab[] = ["overview", "history", "buy", "cashout"];
 
 // kind: "coming-soon" is the pre-launch state — the backend answers 503
 // PURCHASES_NOT_LIVE until a pay-in provider is wired up. Not an error.
 type BuyResult = { kind: "success" | "error" | "coming-soon"; msg: string };
 
 export default function WalletPage() {
+  const t = useTranslations("Wallet");
   const { getToken } = useAuth();
   const [wallet, setWallet] = useState<WalletBalance | null>(null);
   const [txs, setTxs] = useState<Transaction[]>([]);
@@ -53,11 +56,11 @@ export default function WalletPage() {
       setHasMoreTxs((ledgerData.transactions?.length ?? 0) === 20);
       setTxPage(1);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not load wallet");
+      setError(err instanceof Error ? err.message : t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [getToken]);
+  }, [getToken, t]);
 
   useEffect(() => {
     loadWallet();
@@ -90,7 +93,7 @@ export default function WalletPage() {
       // Redirect to the provider's checkout in a new tab
       if (resp.checkoutUrl) {
         window.open(resp.checkoutUrl, "_blank");
-        setBuyResult({ kind: "success", msg: `${resp.message} — checkout opened in a new tab.` });
+        setBuyResult({ kind: "success", msg: t("checkoutOpened", { message: resp.message }) });
       } else {
         setBuyResult({ kind: "success", msg: resp.message });
       }
@@ -98,14 +101,11 @@ export default function WalletPage() {
       await loadWallet();
     } catch (err: unknown) {
       if (err instanceof ApiError && (err.code === "PURCHASES_NOT_LIVE" || err.status === 503)) {
-        setBuyResult({
-          kind: "coming-soon",
-          msg: "Suns purchases are coming soon — we're putting the finishing touches on payments. Check back shortly!",
-        });
+        setBuyResult({ kind: "coming-soon", msg: t("comingSoonMsg") });
       } else {
         setBuyResult({
           kind: "error",
-          msg: err instanceof Error ? err.message : "Purchase failed",
+          msg: err instanceof Error ? err.message : t("purchaseFailed"),
         });
       }
     } finally {
@@ -128,12 +128,12 @@ export default function WalletPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <ZuvaSunIcon size={48} className="mx-auto mb-4 opacity-40" />
-        <p className="text-zinc-400 mb-4">{error ?? "Could not load wallet"}</p>
+        <p className="text-zinc-400 mb-4">{error ?? t("loadError")}</p>
         <button
           onClick={loadWallet}
           className="bg-gold-400/20 text-gold-300 border border-gold-400/30 px-6 py-2.5 rounded-xl font-medium"
         >
-          Retry
+          {t("retry")}
         </button>
       </div>
     );
@@ -147,7 +147,7 @@ export default function WalletPage() {
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gold-400/10 blur-3xl pointer-events-none" />
 
         <div className="relative">
-          <p className="text-zinc-400 text-sm mb-1">Available Balance</p>
+          <p className="text-zinc-400 text-sm mb-1">{t("availableBalance")}</p>
           <div className="flex items-end gap-3 mb-4">
             <ZuvaSunIcon size={44} glow />
             <div>
@@ -162,26 +162,26 @@ export default function WalletPage() {
 
           {/* Lifetime stats */}
           <div className="grid grid-cols-3 gap-3">
-            <MiniStat label="Earned" value={formatSuns(wallet.total_earned_suns)} />
-            <MiniStat label="Spent" value={formatSuns(wallet.total_spent_suns)} />
-            <MiniStat label="Cashed Out" value={formatSuns(wallet.total_cashed_out_suns)} />
+            <MiniStat label={t("earned")} value={formatSuns(wallet.total_earned_suns)} />
+            <MiniStat label={t("spent")} value={formatSuns(wallet.total_spent_suns)} />
+            <MiniStat label={t("cashedOut")} value={formatSuns(wallet.total_cashed_out_suns)} />
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex bg-surface-300 p-1 rounded-xl border border-gold-400/15 mb-6">
-        {(["overview", "history", "buy", "cashout"] as ActiveTab[]).map((t) => (
+        {TABS.map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setActiveTab(t)}
+            key={tabKey}
+            onClick={() => setActiveTab(tabKey)}
             className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize
-              ${activeTab === t
+              ${activeTab === tabKey
                 ? "bg-gold-400 text-black shadow-gold"
                 : "text-zinc-400 hover:text-gold-300"
               }`}
           >
-            {t === "buy" ? "Buy Suns" : t === "cashout" ? "Cash Out" : t === "history" ? "History" : "Overview"}
+            {t(`tabs.${tabKey}`)}
           </button>
         ))}
       </div>
@@ -238,6 +238,7 @@ function OverviewTab({
   onBuyClick: () => void;
   onCashoutClick: () => void;
 }) {
+  const t = useTranslations("Wallet");
   return (
     <div className="space-y-4">
       {/* Quick actions */}
@@ -247,15 +248,15 @@ function OverviewTab({
           className="flex flex-col items-center gap-2 bg-gold-400 hover:bg-gold-300 text-black font-bold py-4 rounded-2xl transition-all shadow-gold"
         >
           <PlusIcon />
-          <span className="text-sm">Buy Suns</span>
+          <span className="text-sm">{t("tabs.buy")}</span>
         </button>
         <button
           onClick={onCashoutClick}
           className="flex flex-col items-center gap-2 bg-surface-200 border border-gold-400/20 text-zinc-300 font-bold py-4 rounded-2xl hover:border-gold-400/50 transition-all"
         >
           <CashoutIcon />
-          <span className="text-sm">Cash Out</span>
-          <span className="text-[10px] font-normal text-zinc-500">Creator only</span>
+          <span className="text-sm">{t("tabs.cashout")}</span>
+          <span className="text-[10px] font-normal text-zinc-500">{t("creatorOnly")}</span>
         </button>
       </div>
 
@@ -263,7 +264,7 @@ function OverviewTab({
       <div className="bg-surface-200 border border-gold-400/15 rounded-2xl p-4">
         <h3 className="text-gold-400 font-semibold text-sm mb-3 flex items-center gap-2">
           <ZuvaSunIcon size={14} />
-          Exchange Rate
+          {t("exchangeRate")}
         </h3>
         <div className="space-y-2 text-sm">
           {[
@@ -274,27 +275,20 @@ function OverviewTab({
             <div key={suns} className="flex justify-between text-zinc-400">
               <span className="flex items-center gap-1">
                 <ZuvaSunIcon size={12} className="text-gold-400" />
-                {suns.toLocaleString()} Suns
+                {t("sunsCount", { count: suns.toLocaleString() })}
               </span>
               <span className="text-gold-400 font-medium">${usd} USD</span>
             </div>
           ))}
         </div>
-        <p className="text-zinc-600 text-xs mt-3">
-          1,000 Suns = $1.00 USD. Minimum cashout depends on your region:
-          5,000 Suns ($5) for mobile money &amp; cash pickup, 20,000 Suns ($20) for bank transfers.
-        </p>
+        <p className="text-zinc-600 text-xs mt-3">{t("exchangeRateNote")}</p>
       </div>
 
       {/* Minimum cashout info */}
       {wallet.balance_suns >= 5000 && (
         <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4">
-          <p className="text-green-400 text-sm font-semibold">
-            You have enough Suns to cash out!
-          </p>
-          <p className="text-zinc-400 text-xs mt-1">
-            Open the Cash Out tab to withdraw via mobile money or bank transfer.
-          </p>
+          <p className="text-green-400 text-sm font-semibold">{t("readyToCashOutTitle")}</p>
+          <p className="text-zinc-400 text-xs mt-1">{t("readyToCashOutBody")}</p>
         </div>
       )}
     </div>
@@ -313,14 +307,13 @@ function HistoryTab({
   loadingMore: boolean;
   onLoadMore: () => void;
 }) {
+  const t = useTranslations("Wallet");
   if (txs.length === 0) {
     return (
       <div className="text-center py-16">
         <ZuvaSunIcon size={40} className="mx-auto mb-3 opacity-30" />
-        <p className="text-zinc-400">No transactions yet</p>
-        <p className="text-zinc-600 text-sm mt-1">
-          Buy Suns or tip a creator to get started.
-        </p>
+        <p className="text-zinc-400">{t("noTransactions")}</p>
+        <p className="text-zinc-600 text-sm mt-1">{t("noTransactionsBody")}</p>
       </div>
     );
   }
@@ -338,7 +331,7 @@ function HistoryTab({
           disabled={loadingMore}
           className="w-full py-3 bg-surface-200 border border-gold-400/15 text-gold-300 text-sm font-medium rounded-xl hover:bg-surface-100 transition-colors disabled:opacity-50"
         >
-          {loadingMore ? "Loading..." : "Load more"}
+          {loadingMore ? t("loadingEllipsis") : t("loadMore")}
         </button>
       )}
     </div>
@@ -346,6 +339,7 @@ function HistoryTab({
 }
 
 function TxRow({ tx }: { tx: Transaction }) {
+  const t = useTranslations("Wallet");
   const isCredit = tx.direction === "credit";
   const colorClass = isCredit ? "text-green-400" : "text-red-400";
   const sign = isCredit ? "+" : "−";
@@ -358,7 +352,7 @@ function TxRow({ tx }: { tx: Transaction }) {
           <p className="text-white text-sm font-medium truncate">{txLabel(tx.type)}</p>
           {tx.counterparty_name && (
             <p className="text-zinc-500 text-xs truncate">
-              {isCredit ? "from" : "to"} @{tx.counterparty_username ?? tx.counterparty_name}
+              {isCredit ? t("from") : t("to")} @{tx.counterparty_username ?? tx.counterparty_name}
             </p>
           )}
           {tx.memo && !tx.counterparty_name && (
@@ -410,10 +404,11 @@ function BuyTab({
   setBuyResult: (r: null) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
+  const t = useTranslations("Wallet");
   return (
     <div className="bg-surface-200 border border-gold-400/20 rounded-2xl p-5">
       <h2 className="text-white font-bold text-base mb-4 flex items-center gap-2">
-        <ZuvaSunIcon size={18} glow /> Buy Suns
+        <ZuvaSunIcon size={18} glow /> {t("tabs.buy")}
       </h2>
 
       {buyResult ? (
@@ -423,15 +418,13 @@ function BuyTab({
             {buyResult.msg}
           </p>
           {buyResult.kind === "coming-soon" ? (
-            <p className="text-zinc-500 text-sm mt-2">
-              Your wallet is ready — tipping with earned Suns already works.
-            </p>
+            <p className="text-zinc-500 text-sm mt-2">{t("walletReadyNote")}</p>
           ) : (
             <button
               onClick={() => setBuyResult(null)}
               className="mt-4 w-full bg-gold-400/20 text-gold-300 border border-gold-400/30 rounded-xl py-2.5 font-medium"
             >
-              {buyResult.kind === "success" ? "Buy More" : "Try Again"}
+              {buyResult.kind === "success" ? t("buyMore") : t("tryAgain")}
             </button>
           )}
         </div>
@@ -439,7 +432,7 @@ function BuyTab({
         <form onSubmit={onSubmit} className="space-y-4">
           {/* Currency selector */}
           <div>
-            <label className="block text-zinc-300 text-sm mb-1.5 font-medium">Currency</label>
+            <label className="block text-zinc-300 text-sm mb-1.5 font-medium">{t("currency")}</label>
             <div className="grid grid-cols-2 gap-2">
               {FIAT_CURRENCIES.map(({ value, label, symbol }) => (
                 <button
@@ -461,7 +454,7 @@ function BuyTab({
           {/* Amount */}
           <div>
             <label className="block text-zinc-300 text-sm mb-1.5 font-medium">
-              Amount ({buyCurrency})
+              {t("amountLabel", { currency: buyCurrency })}
             </label>
             <input
               type="number"
@@ -475,16 +468,14 @@ function BuyTab({
 
           {/* Preview */}
           <div className="bg-surface-300 border border-gold-400/15 rounded-xl p-4 text-center">
-            <p className="text-zinc-400 text-xs mb-1">You will receive approximately</p>
+            <p className="text-zinc-400 text-xs mb-1">{t("youWillReceive")}</p>
             <div className="flex items-center justify-center gap-2">
               <ZuvaSunIcon size={24} glow />
               <span className="text-3xl font-bold text-gold-400 tabular-nums">
                 {sunsPreview.toLocaleString()}
               </span>
             </div>
-            <p className="text-zinc-500 text-xs mt-1">
-              Exact amount confirmed at checkout based on live exchange rate
-            </p>
+            <p className="text-zinc-500 text-xs mt-1">{t("exactAmountNote")}</p>
           </div>
 
           <button
@@ -493,18 +484,16 @@ function BuyTab({
             className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 shadow-gold flex items-center justify-center gap-2"
           >
             {buying ? (
-              <span className="animate-pulse">Processing...</span>
+              <span className="animate-pulse">{t("processingEllipsis")}</span>
             ) : (
               <>
                 <ZuvaSunIcon size={18} />
-                Buy {sunsPreview.toLocaleString()} Suns
+                {t("buyAmountSuns", { count: sunsPreview.toLocaleString() })}
               </>
             )}
           </button>
 
-          <p className="text-zinc-600 text-xs text-center">
-            Secure card, bank & mobile money payments.
-          </p>
+          <p className="text-zinc-600 text-xs text-center">{t("securePayments")}</p>
         </form>
       )}
     </div>

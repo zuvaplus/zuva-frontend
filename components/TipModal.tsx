@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import type { Orientation } from "@/lib/types";
 import { tipCreator } from "@/lib/api";
@@ -18,6 +19,7 @@ interface TipModalProps {
 }
 
 export default function TipModal({ creatorId, creatorName, contentId, orientation, onClose }: TipModalProps) {
+  const t = useTranslations("TipModal");
   const { getToken } = useAuth();
   const [amount,  setAmount]  = useState(50);
   const [message, setMessage] = useState("");
@@ -31,7 +33,7 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
       const resp = await tipCreator(token, creatorId, amount, { contentId, orientation, message: message || undefined });
       setResult({ success: true, msg: resp.message });
     } catch (err: unknown) {
-      setResult({ success: false, msg: err instanceof Error ? err.message : "Tip failed" });
+      setResult({ success: false, msg: err instanceof Error ? err.message : t("tipFailed") });
     } finally {
       setLoading(false);
     }
@@ -47,8 +49,8 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-white font-bold text-lg">Send Suns</h2>
-            <p className="text-zinc-500 text-sm">to @{creatorName}</p>
+            <h2 className="text-white font-bold text-lg">{t("sendSuns")}</h2>
+            <p className="text-zinc-500 text-sm">{t("toCreator", { creatorName })}</p>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors p-1">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -66,7 +68,7 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
               </>
             ) : (
               <>
-                <p className="text-red-400 font-semibold mb-1">Tip failed</p>
+                <p className="text-red-400 font-semibold mb-1">{t("tipFailed")}</p>
                 <p className="text-zinc-500 text-sm">{result.msg}</p>
               </>
             )}
@@ -74,7 +76,7 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
               onClick={onClose}
               className="mt-5 w-full bg-gold-400/15 text-gold-400 border border-gold-400/25 rounded-xl py-2.5 font-medium hover:bg-gold-400/25 transition-colors"
             >
-              {result.success ? "Done" : "Close"}
+              {result.success ? t("done") : t("close")}
             </button>
           </div>
         ) : (
@@ -119,7 +121,7 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value.slice(0, 280))}
-              placeholder="Add a message… (optional)"
+              placeholder={t("messagePlaceholder")}
               rows={2}
               className="w-full bg-surface-100 border border-gold-400/15 text-white text-sm rounded-xl px-4 py-3 mb-3 resize-none outline-none focus:border-gold-400/40 placeholder-zinc-700"
             />
@@ -136,9 +138,9 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
               className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-gold"
             >
               {loading ? (
-                <span className="animate-pulse">Sending…</span>
+                <span className="animate-pulse">{t("sendingEllipsis")}</span>
               ) : (
-                <><ZuvaSunIcon size={18} /> Send {amount.toLocaleString()} Suns</>
+                <><ZuvaSunIcon size={18} /> {t("sendAmountSuns", { count: amount.toLocaleString() })}</>
               )}
             </button>
           </>

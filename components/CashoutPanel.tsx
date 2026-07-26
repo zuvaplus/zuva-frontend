@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import type { PayoutMethodOption, PayoutRecord } from "@/lib/types";
 import { getPayoutOptions, getPayoutHistory, cashoutSuns, ApiError } from "@/lib/api";
@@ -11,12 +12,8 @@ const SUNS_PER_USD = 1000;
 
 type Step = "form" | "confirm" | "done";
 
-const METHOD_LABELS: Record<string, string> = {
-  mobile_money: "Mobile Money",
-  bank_transfer: "Bank Transfer",
-  cash_pickup: "Cash Pickup",
-};
-
+// Provider names (Flutterwave, Mukuru, WiPay, Wise) are brand names —
+// never translated.
 const PROVIDER_LABELS: Record<string, string> = {
   flutterwave: "Flutterwave",
   mukuru: "Mukuru",
@@ -38,7 +35,15 @@ export default function CashoutPanel({
   balanceSuns: number;
   onCashoutComplete: () => void;
 }) {
+  const t = useTranslations("Cashout");
+  const tStatus = useTranslations("Status");
   const { getToken } = useAuth();
+
+  const METHOD_LABELS: Record<string, string> = {
+    mobile_money: t("methods.mobileMoney"),
+    bank_transfer: t("methods.bankTransfer"),
+    cash_pickup: t("methods.cashPickup"),
+  };
 
   // null = loading; "not-creator" = 403 from the options endpoint
   const [methods, setMethods] = useState<PayoutMethodOption[] | "not-creator" | null>(null);
@@ -78,13 +83,13 @@ export default function CashoutPanel({
         if (err instanceof ApiError && err.status === 403) {
           setMethods("not-creator");
         } else {
-          setOptionsError(err instanceof Error ? err.message : "Could not load payout options");
+          setOptionsError(err instanceof Error ? err.message : t("errors.loadOptions"));
         }
         return;
       }
       loadHistory();
     })();
-  }, [getToken, loadHistory]);
+  }, [getToken, loadHistory, t]);
 
   const usdAmount = amountSuns / SUNS_PER_USD;
   const amountValid =
@@ -124,10 +129,10 @@ export default function CashoutPanel({
     } catch (err) {
       const msg =
         err instanceof ApiError && err.code === "PAYOUTS_NOT_CONFIGURED"
-          ? "This payout method isn't live yet — your Suns were not touched. Check back soon!"
+          ? t("errors.notConfigured")
           : err instanceof Error
             ? err.message
-            : "Cashout failed";
+            : t("errors.cashoutFailed");
       setResult({ ok: false, msg });
       setStep("done");
       onCashoutComplete(); // refresh balance either way — failures re-credit
@@ -156,10 +161,8 @@ export default function CashoutPanel({
     return (
       <div className="bg-surface-200 border border-gold-400/15 rounded-2xl p-8 text-center">
         <ZuvaSunIcon size={32} className="mx-auto mb-3 opacity-40" />
-        <p className="text-white font-semibold mb-1">Cashing out is for creators</p>
-        <p className="text-zinc-500 text-sm">
-          Apply to become a Zuva creator to earn Suns and withdraw them as real money.
-        </p>
+        <p className="text-white font-semibold mb-1">{t("creatorsOnlyTitle")}</p>
+        <p className="text-zinc-500 text-sm">{t("creatorsOnlyBody")}</p>
       </div>
     );
   }
@@ -179,17 +182,17 @@ export default function CashoutPanel({
       {/* ── Cashout card ───────────────────────────────────────── */}
       <div className="bg-surface-200 border border-gold-400/20 rounded-2xl p-5">
         <h2 className="text-white font-bold text-base mb-1 flex items-center gap-2">
-          <ZuvaSunIcon size={18} glow /> Cash Out
+          <ZuvaSunIcon size={18} glow /> {t("title")}
         </h2>
         <p className="text-zinc-500 text-xs mb-4">
-          Balance: <span className="text-gold-300 font-semibold">{formatSuns(balanceSuns)} Suns</span>
+          {t("balanceLabel")}{" "}
+          <span className="text-gold-300 font-semibold">{formatSuns(balanceSuns)} Suns</span>
           {" "}≈ ${(balanceSuns / SUNS_PER_USD).toFixed(2)} USD
         </p>
 
         {methodList.length === 0 ? (
           <p className="text-zinc-400 text-sm bg-surface-300 border border-gold-400/10 rounded-xl px-4 py-3">
-            Payouts aren&apos;t available in your country yet. We&apos;re adding new regions —
-            check back soon.
+            {t("noMethodsForCountry")}
           </p>
         ) : step === "done" && result ? (
           <div className="text-center py-4">
@@ -198,65 +201,60 @@ export default function CashoutPanel({
               {result.msg}
             </p>
             {!result.ok && (
-              <p className="text-zinc-500 text-sm mt-2">
-                Your Suns balance is unchanged.
-              </p>
+              <p className="text-zinc-500 text-sm mt-2">{t("balanceUnchanged")}</p>
             )}
             <button
               onClick={resetFlow}
               className="mt-4 w-full bg-gold-400/20 text-gold-300 border border-gold-400/30 rounded-xl py-2.5 font-medium"
             >
-              Done
+              {t("done")}
             </button>
           </div>
         ) : step === "confirm" && selected ? (
           <div className="space-y-4">
             <div className="bg-surface-300 border border-gold-400/15 rounded-xl p-4 space-y-2 text-sm">
-              <Row label="You cash out">
+              <Row label={t("youCashOut")}>
                 <span className="text-gold-300 font-bold">{formatSuns(amountSuns)} Suns</span>
               </Row>
-              <Row label="You'll receive">
+              <Row label={t("youllReceive")}>
                 <span className="text-white font-bold">${usdAmount.toFixed(2)} USD</span>
                 {selected.currency && selected.currency !== "USD" && (
-                  <span className="text-zinc-500"> (paid in {selected.currency})</span>
+                  <span className="text-zinc-500"> {t("paidIn", { currency: selected.currency })}</span>
                 )}
               </Row>
-              <Row label="Method">
+              <Row label={t("method")}>
                 <span className="text-white">
                   {METHOD_LABELS[selected.method]}
                   {selected.network ? ` · ${selected.network}` : ""}
-                  {" via "}
+                  {" "}{t("via")}{" "}
                   {PROVIDER_LABELS[selected.provider] ?? selected.provider}
                 </span>
               </Row>
-              <Row label="Recipient">
+              <Row label={t("recipient")}>
                 <span className="text-white">{firstName.trim()} {lastName.trim()}</span>
               </Row>
               {selected.method === "mobile_money" && (
-                <Row label="Phone"><span className="text-white">{phoneNumber.trim()}</span></Row>
+                <Row label={t("phone")}><span className="text-white">{phoneNumber.trim()}</span></Row>
               )}
               {selected.method === "bank_transfer" && (
-                <Row label="Account"><span className="text-white">{bankAccountRef.trim()}</span></Row>
+                <Row label={t("account")}><span className="text-white">{bankAccountRef.trim()}</span></Row>
               )}
             </div>
-            <p className="text-zinc-600 text-xs">
-              The exact local-currency amount is set by the payout partner&apos;s exchange rate at
-              processing time. If the payout fails, your Suns are automatically returned.
-            </p>
+            <p className="text-zinc-600 text-xs">{t("confirmNote")}</p>
             <div className="flex gap-2">
               <button
                 onClick={() => setStep("form")}
                 disabled={submitting}
                 className="flex-1 bg-surface-300 text-zinc-300 border border-gold-400/20 rounded-xl py-3 font-medium"
               >
-                Back
+                {t("back")}
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={submitting}
                 className="flex-1 bg-gold-400 hover:bg-gold-300 text-black font-bold rounded-xl py-3 transition-all disabled:opacity-50 shadow-gold"
               >
-                {submitting ? "Sending..." : "Confirm Cashout"}
+                {submitting ? t("sendingEllipsis") : t("confirmCashout")}
               </button>
             </div>
           </div>
@@ -264,7 +262,7 @@ export default function CashoutPanel({
           <div className="space-y-4">
             {/* Method selection */}
             <div>
-              <label className="block text-zinc-300 text-sm mb-1.5 font-medium">Payout method</label>
+              <label className="block text-zinc-300 text-sm mb-1.5 font-medium">{t("payoutMethod")}</label>
               <div className="space-y-2">
                 {methodList.map((m) => {
                   const isSelected = selected?.provider === m.provider && selected?.method === m.method;
@@ -288,13 +286,16 @@ export default function CashoutPanel({
                           {m.network ? ` (${m.network})` : ""}
                         </div>
                         <div className="text-zinc-500 text-xs">
-                          via {PROVIDER_LABELS[m.provider] ?? m.provider} · min{" "}
-                          {formatSuns(m.minSuns)} Suns (${m.minUSD})
+                          {t("viaMin", {
+                            provider: PROVIDER_LABELS[m.provider] ?? m.provider,
+                            minSuns: formatSuns(m.minSuns),
+                            minUSD: m.minUSD,
+                          })}
                         </div>
                       </div>
                       {!m.configured && (
                         <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-gold-400/10 text-gold-400 border border-gold-400/25">
-                          Coming Soon
+                          {t("comingSoon")}
                         </span>
                       )}
                     </button>
@@ -308,7 +309,7 @@ export default function CashoutPanel({
                 {/* Amount */}
                 <div>
                   <label className="block text-zinc-300 text-sm mb-1.5 font-medium">
-                    Amount (Suns)
+                    {t("amountSuns")}
                   </label>
                   <input
                     type="number"
@@ -321,23 +322,22 @@ export default function CashoutPanel({
                     className="w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-lg font-bold rounded-xl px-4 py-3 outline-none"
                   />
                   <p className="text-zinc-500 text-xs mt-1">
-                    ≈ ${usdAmount.toFixed(2)} USD · minimum {formatSuns(selected.minSuns)} Suns
-                    (${selected.minUSD})
+                    {t("minimumNote", { usd: usdAmount.toFixed(2), minSuns: formatSuns(selected.minSuns), minUSD: selected.minUSD })}
                   </p>
                   {amountSuns > balanceSuns && (
-                    <p className="text-red-400 text-xs mt-1">More than your balance.</p>
+                    <p className="text-red-400 text-xs mt-1">{t("moreThanBalance")}</p>
                   )}
                 </div>
 
                 {/* Legal name */}
                 <div>
-                  <label className="block text-zinc-300 text-sm mb-1.5 font-medium">Legal name</label>
+                  <label className="block text-zinc-300 text-sm mb-1.5 font-medium">{t("legalName")}</label>
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       value={firstName}
                       maxLength={100}
-                      placeholder="First name"
+                      placeholder={t("firstName")}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white rounded-xl px-4 py-3 outline-none text-sm"
                     />
@@ -345,27 +345,24 @@ export default function CashoutPanel({
                       type="text"
                       value={lastName}
                       maxLength={100}
-                      placeholder="Last name"
+                      placeholder={t("lastName")}
                       onChange={(e) => setLastName(e.target.value)}
                       className="bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white rounded-xl px-4 py-3 outline-none text-sm"
                     />
                   </div>
-                  <p className="text-zinc-600 text-xs mt-1.5">
-                    Must match your government ID — our payout partners require it to
-                    process payments in your name.
-                  </p>
+                  <p className="text-zinc-600 text-xs mt-1.5">{t("legalNameNote")}</p>
                 </div>
 
                 {/* Destination */}
                 {selected.method === "mobile_money" && (
                   <div>
                     <label className="block text-zinc-300 text-sm mb-1.5 font-medium">
-                      Mobile money number
+                      {t("mobileMoneyNumber")}
                     </label>
                     <input
                       type="tel"
                       value={phoneNumber}
-                      placeholder="e.g. 233201234567 (include country code)"
+                      placeholder={t("mobileMoneyPlaceholder")}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       className="w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white rounded-xl px-4 py-3 outline-none text-sm"
                     />
@@ -374,19 +371,19 @@ export default function CashoutPanel({
                 {selected.method === "bank_transfer" && (
                   <div className="space-y-2">
                     <label className="block text-zinc-300 text-sm mb-1.5 font-medium">
-                      Bank account
+                      {t("bankAccount")}
                     </label>
                     <input
                       type="text"
                       value={bankAccountRef}
-                      placeholder="Account number"
+                      placeholder={t("accountNumber")}
                       onChange={(e) => setBankAccountRef(e.target.value)}
                       className="w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white rounded-xl px-4 py-3 outline-none text-sm"
                     />
                     <input
                       type="text"
                       value={bankCode}
-                      placeholder="Bank code"
+                      placeholder={t("bankCode")}
                       onChange={(e) => setBankCode(e.target.value)}
                       className="w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white rounded-xl px-4 py-3 outline-none text-sm"
                     />
@@ -398,7 +395,7 @@ export default function CashoutPanel({
                   disabled={!amountValid || !detailsValid}
                   className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-gold"
                 >
-                  Review Cashout
+                  {t("reviewCashout")}
                 </button>
               </>
             )}
@@ -408,11 +405,11 @@ export default function CashoutPanel({
 
       {/* ── Payout history ─────────────────────────────────────── */}
       <div className="bg-surface-200 border border-gold-400/15 rounded-2xl p-5">
-        <h3 className="text-white font-bold text-sm mb-3">Payout History</h3>
+        <h3 className="text-white font-bold text-sm mb-3">{t("payoutHistory")}</h3>
         {history === null ? (
-          <p className="text-zinc-600 text-sm">Loading…</p>
+          <p className="text-zinc-600 text-sm">{t("loadingEllipsis")}</p>
         ) : history.length === 0 ? (
-          <p className="text-zinc-600 text-sm">No payouts yet.</p>
+          <p className="text-zinc-600 text-sm">{t("noPayouts")}</p>
         ) : (
           <div className="space-y-2">
             {history.map((p) => (
@@ -426,20 +423,18 @@ export default function CashoutPanel({
                   </p>
                   <p className="text-zinc-500 text-xs">
                     {METHOD_LABELS[p.channel] ?? p.channel}
-                    {p.provider ? ` via ${PROVIDER_LABELS[p.provider] ?? p.provider}` : ""}
+                    {p.provider ? ` ${t("via")} ${PROVIDER_LABELS[p.provider] ?? p.provider}` : ""}
                     {" · "}
                     {timeAgo(p.created_at)}
                   </p>
                   {p.status === "failed" && (
-                    <p className="text-zinc-500 text-xs mt-0.5">
-                      Suns were returned to your balance.
-                    </p>
+                    <p className="text-zinc-500 text-xs mt-0.5">{t("sunsReturned")}</p>
                   )}
                 </div>
                 <span
                   className={`shrink-0 ml-3 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${STATUS_STYLES[p.status] ?? STATUS_STYLES.pending}`}
                 >
-                  {p.status}
+                  {tStatus.has(p.status) ? tStatus(p.status) : p.status}
                 </span>
               </div>
             ))}

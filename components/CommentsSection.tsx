@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { MessageCircle, Trash2, CornerDownRight } from "lucide-react";
@@ -37,7 +38,8 @@ function CommentBody({
   deletingId: string | null;
   isReply?: boolean;
 }) {
-  const name = comment.user.display_name || comment.user.username || "User";
+  const t = useTranslations("Comments");
+  const name = comment.user.display_name || comment.user.username || t("user");
   const deleted = comment.status === "deleted";
 
   return (
@@ -45,11 +47,11 @@ function CommentBody({
       <Avatar name={deleted ? "?" : name} avatarUrl={deleted ? null : comment.user.avatar_url} size={isReply ? 28 : 36} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white text-sm font-semibold">{deleted ? "Deleted" : name}</span>
+          <span className="text-white text-sm font-semibold">{deleted ? t("deleted") : name}</span>
           <span className="text-zinc-600 text-xs">{timeAgoLong(comment.created_at)}</span>
         </div>
         {deleted ? (
-          <p className="text-zinc-600 text-sm italic mt-0.5">This comment was deleted.</p>
+          <p className="text-zinc-600 text-sm italic mt-0.5">{t("wasDeleted")}</p>
         ) : (
           <p className="text-zinc-300 text-sm mt-0.5 whitespace-pre-wrap break-words">{comment.body}</p>
         )}
@@ -60,7 +62,7 @@ function CommentBody({
                 onClick={() => onReply(comment)}
                 className="flex items-center gap-1 text-zinc-500 hover:text-gold-400 text-xs font-medium transition-colors"
               >
-                <CornerDownRight size={12} /> Reply
+                <CornerDownRight size={12} /> {t("reply")}
               </button>
             )}
             {comment.is_own && (
@@ -69,7 +71,7 @@ function CommentBody({
                 disabled={deletingId === comment.id}
                 className="flex items-center gap-1 text-zinc-600 hover:text-red-400 text-xs font-medium transition-colors disabled:opacity-50"
               >
-                <Trash2 size={12} /> {deletingId === comment.id ? "Deleting…" : "Delete"}
+                <Trash2 size={12} /> {deletingId === comment.id ? t("deletingEllipsis") : t("delete")}
               </button>
             )}
           </div>
@@ -86,6 +88,7 @@ export default function CommentsSection({
   videoId: string;
   initialCount: number;
 }) {
+  const t = useTranslations("Comments");
   const { getToken } = useAuth();
   const { isSignedIn, user } = useUser();
 
@@ -112,10 +115,10 @@ export default function CommentsSection({
         setPage(data.page);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not load comments");
+        setError(err instanceof Error ? err.message : t("loadError"));
       }
     },
-    [getToken, videoId]
+    [getToken, videoId, t]
   );
 
   useEffect(() => {
@@ -144,7 +147,7 @@ export default function CommentsSection({
       setDraft("");
       setReplyTo(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not post comment");
+      setError(err instanceof Error ? err.message : t("postError"));
     } finally {
       setSubmitting(false);
     }
@@ -172,7 +175,7 @@ export default function CommentsSection({
       });
       setCount((n) => Math.max(0, n - 1));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete comment");
+      setError(err instanceof Error ? err.message : t("deleteError"));
     } finally {
       setDeletingId(null);
     }
@@ -182,7 +185,7 @@ export default function CommentsSection({
     <section className="mt-8">
       <h2 className="flex items-center gap-2 text-white font-bold text-base mb-4">
         <MessageCircle size={18} className="text-gold-400" />
-        {formatCount(count)} {count === 1 ? "Comment" : "Comments"}
+        {formatCount(count)} {count === 1 ? t("commentOne") : t("commentOther")}
       </h2>
 
       {/* Composer */}
@@ -191,7 +194,7 @@ export default function CommentsSection({
           {replyTo && (
             <div className="flex items-center justify-between bg-surface-200 border border-gold-400/15 rounded-t-xl px-3 py-1.5 text-xs text-zinc-400">
               <span className="truncate">
-                Replying to{" "}
+                {t("replyingTo")}{" "}
                 <span className="text-gold-400">
                   {replyTo.user.display_name || replyTo.user.username}
                 </span>
@@ -212,7 +215,7 @@ export default function CommentsSection({
                 onChange={(e) => setDraft(e.target.value)}
                 maxLength={2000}
                 rows={2}
-                placeholder={replyTo ? "Write a reply…" : "Add a comment…"}
+                placeholder={replyTo ? t("writeReply") : t("addComment")}
                 className={`w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-4 py-3 outline-none resize-y ${replyTo ? "rounded-t-none" : ""}`}
               />
               <div className="flex items-center justify-between mt-1.5">
@@ -222,7 +225,7 @@ export default function CommentsSection({
                   disabled={!draft.trim() || submitting}
                   className="bg-gold-400 hover:bg-gold-300 text-black text-sm font-bold px-5 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {submitting ? "Posting…" : replyTo ? "Reply" : "Comment"}
+                  {submitting ? t("postingEllipsis") : replyTo ? t("reply") : t("comment")}
                 </button>
               </div>
             </div>
@@ -230,12 +233,12 @@ export default function CommentsSection({
         </form>
       ) : (
         <div className="bg-surface-200 border border-gold-400/15 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-3">
-          <p className="text-zinc-400 text-sm">Sign in to join the conversation.</p>
+          <p className="text-zinc-400 text-sm">{t("signInToJoin")}</p>
           <Link
             href="/sign-in"
             className="shrink-0 bg-gold-400/15 text-gold-400 border border-gold-400/30 text-sm font-semibold px-4 py-1.5 rounded-lg hover:bg-gold-400/25 transition-colors"
           >
-            Sign In
+            {t("signIn")}
           </Link>
         </div>
       )}
@@ -260,9 +263,7 @@ export default function CommentsSection({
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-zinc-600 text-sm py-6 text-center">
-          No comments yet — be the first.
-        </p>
+        <p className="text-zinc-600 text-sm py-6 text-center">{t("noComments")}</p>
       ) : (
         <div className="space-y-5">
           {comments.map((c) => (
@@ -301,7 +302,7 @@ export default function CommentsSection({
           disabled={loadingMore}
           className="mt-5 w-full py-2.5 bg-surface-200 border border-gold-400/15 text-gold-300 text-sm font-medium rounded-xl hover:bg-surface-100 transition-colors disabled:opacity-50"
         >
-          {loadingMore ? "Loading…" : "Load more comments"}
+          {loadingMore ? t("loadingEllipsis") : t("loadMoreComments")}
         </button>
       )}
     </section>
