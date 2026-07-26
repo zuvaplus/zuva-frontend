@@ -150,10 +150,11 @@ export default function CreatorSignupPage() {
         <div className="flex-1 flex items-center justify-center px-6 py-20">
           <div className="max-w-md text-center">
             <ZuvaSunIcon size={40} glow className="mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-white mb-3">Application received!</h1>
+            <h1 className="text-2xl font-bold text-white mb-3">Check your email!</h1>
             <p className="text-zinc-400 text-sm leading-relaxed">
-              Thanks for applying to become a Zuva creator. Our team will review your application and reach out
-              to the email address you provided within a few business days.
+              We&apos;ve sent a confirmation link to the email address you provided.
+              Click it to confirm your application — once confirmed, our team will
+              review it and get back to you within a few business days.
             </p>
             <Link
               href="/"

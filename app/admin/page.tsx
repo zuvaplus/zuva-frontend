@@ -18,7 +18,9 @@ interface Application {
   social_handle: string;
   content_category: string;
   follower_count: string;
-  status: "pending" | "approved" | "rejected";
+  status: "unconfirmed" | "pending" | "approved" | "rejected";
+  awaiting_signup: boolean;
+  approved_user_id: string | null;
   created_at: string;
 }
 
@@ -49,6 +51,7 @@ function formatDate(value: string | null) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
+  unconfirmed: "bg-zinc-500/5 text-zinc-600 border-zinc-600/20",
   pending:   "bg-zinc-500/10 text-zinc-400 border-zinc-500/25",
   approved:  "bg-green-500/10 text-green-400 border-green-500/25",
   active:    "bg-green-500/10 text-green-400 border-green-500/25",
@@ -378,20 +381,27 @@ export default function AdminPage() {
                   <td className="px-4 py-3 text-zinc-400">{a.primary_platform}</td>
                   <td className="px-4 py-3 text-zinc-400">{a.social_handle}</td>
                   <td className="px-4 py-3 text-zinc-400">{a.follower_count}</td>
-                  <td className="px-4 py-3"><StatusBadge status={a.status} /></td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={a.status} />
+                    {a.status === "approved" && a.awaiting_signup && (
+                      <div className="text-zinc-600 text-[10px] mt-1">awaiting sign-up</div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-zinc-500 whitespace-nowrap">{formatDate(a.created_at)}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5">
+                      {/* Unconfirmed applications aren't reviewable yet — the
+                          applicant must click their email confirm link first */}
                       <ActionButton
                         label="Approve"
                         variant="approve"
-                        disabled={appActionId === a.id || a.status === "approved"}
+                        disabled={appActionId === a.id || a.status === "approved" || a.status === "unconfirmed"}
                         onClick={() => handleApplicationStatus(a.id, "approved")}
                       />
                       <ActionButton
                         label="Reject"
                         variant="reject"
-                        disabled={appActionId === a.id || a.status === "rejected"}
+                        disabled={appActionId === a.id || a.status === "rejected" || a.status === "unconfirmed"}
                         onClick={() => handleApplicationStatus(a.id, "rejected")}
                       />
                     </div>
