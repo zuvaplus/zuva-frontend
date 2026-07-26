@@ -83,13 +83,14 @@ async function apiFetch<T>(
 // ─── Feed ────────────────────────────────────────────────────
 export function getFeed(
   token: string | null,
-  limit = 30,
-  offset = 0
+  opts: { limit?: number; offset?: number; contentCategory?: string; country?: string } = {}
 ): Promise<FeedResponse> {
-  return apiFetch<FeedResponse>(
-    `/api/feed?limit=${limit}&offset=${offset}`,
-    token
-  );
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 30));
+  params.set("offset", String(opts.offset ?? 0));
+  if (opts.contentCategory) params.set("content_category", opts.contentCategory);
+  if (opts.country) params.set("country", opts.country);
+  return apiFetch<FeedResponse>(`/api/feed?${params.toString()}`, token);
 }
 
 // Fired periodically (every 10-15s of playback) and on pause/unload —

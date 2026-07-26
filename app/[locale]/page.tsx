@@ -1,189 +1,102 @@
-import { getTranslations } from "next-intl/server";
-import { auth } from "@clerk/nextjs/server";
-import { Link, redirect } from "@/i18n/navigation";
-import ZuvaSunIcon from "@/components/ZuvaSunIcon";
-import SiteFooter from "@/components/SiteFooter";
+"use client";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Search } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
+import { COUNTRIES } from "@/lib/countries";
+import VideoGrid from "@/components/VideoGrid";
 
-// Root ("/") is where post-sign-in landing is decided — see
-// signInFallbackRedirectUrl/signUpFallbackRedirectUrl in ../layout.tsx,
-// both pointed at "/" rather than a fixed page, specifically so this
-// server-side check runs right after auth. Signed-out visitors fall
-// through to the marketing page below unchanged; signed-in visitors are
-// redirected before any marketing JSX renders (no client-side flash).
-//
-// next-intl's server-side redirect() needs an explicit locale (there's
-// no request-scoped "current locale" hook available outside client
-// components in this navigation build), hence the explicit param here
-// rather than reading it from context.
-async function redirectSignedInUser(locale: string) {
-  const { userId, getToken } = await auth();
-  if (!userId) return;
+// Matches CONTENT_CATEGORIES in zuva-backend/zuva-api.js — kept as an
+// explicit ordered list (rather than deriving from the ContentCategory
+// union type) so the bar's order is deliberate, not whatever order the
+// type happens to declare its members in.
+const CONTENT_CATEGORY_ORDER = [
+  "entertainment", "music", "comedy", "drama_series", "documentary",
+  "discussion_debate", "interview", "lifestyle_culture", "news", "nature", "other",
+];
 
-  let role: "creator" | "viewer" = "viewer";
-  try {
-    const token = await getToken();
-    const res = await fetch(`${BACKEND_URL}/api/user/role`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      cache: "no-store",
-    });
-    if (res.ok) {
-      const data = await res.json();
-      role = data.role === "creator" ? "creator" : "viewer";
-    }
-  } catch {
-    // Backend unreachable — fall through to the viewer default (/feed)
-    // rather than stranding a signed-in user on the marketing page.
+// The universal "/" experience — same page for signed-in and signed-out
+// visitors alike (see HomePage.md notes / CLAUDE.md). The grid itself
+// (VideoGrid, no filters) is where the personalization actually
+// happens: GET /api/feed decides server-side between the personalized
+// computeFeedScore ranking (signed in with watch history) and the
+// shuffled top-ranked fallback (signed out, or signed in with none) —
+// this page doesn't need to know which one it's getting.
+export default function HomePage() {
+  const t = useTranslations("Homepage");
+  const tContentCategories = useTranslations("ContentCategories");
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    router.push(`/search?q=${encodeURIComponent(q)}`);
   }
 
-  // redirect() throws internally — must be called outside any try/catch
-  // above, or Next.js's own redirect signal would get swallowed as if it
-  // were a normal error.
-  redirect({ href: role === "creator" ? "/creator-dashboard" : "/feed", locale });
-}
-
-export default async function LandingPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  await redirectSignedInUser(locale);
-
-  const t = await getTranslations({ locale, namespace: "Landing" });
   return (
-    <div className="flex flex-col min-h-[calc(100vh-56px)] bg-black">
-
-      {/* ── HERO ─────────────────────────────────────────── */}
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-24 relative overflow-hidden">
-        {/* Ambient glow behind logo */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 40% at 50% 45%, rgba(243,123,13,0.12) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Logo — responsive: 280px mobile, 480px desktop */}
-        <div className="mb-8 animate-fade-in">
-          <img src="/zuva-logo.svg" alt="Zuva"
-            className="block md:hidden"
-            style={{ width: "280px", height: "auto", background: "transparent" }} />
-          <img src="/zuva-logo.svg" alt="Zuva"
-            className="hidden md:block"
-            style={{ width: "480px", height: "auto", background: "transparent" }} />
+    <div>
+      {/* Thin banner — deliberately compact (logo + one-line slogan,
+          not a full hero) so at least 1.5 rows of the grid below stay
+          above the fold on a standard desktop viewport. */}
+      <div className="border-b border-gold-400/10">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/zuva-logo.svg" alt="Zuva" className="h-7 w-auto shrink-0" />
+          <span className="text-zinc-500 text-sm font-medium truncate">{t("slogan")}</span>
         </div>
+      </div>
 
-        {/* Tagline */}
-        <h1
-          className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 max-w-2xl animate-fade-in"
-          style={{ animationDelay: "0.1s" }}
-        >
-          {t("headline")}{" "}
-          <span className="gold-shimmer">{t("headlineHighlight")}</span>
-        </h1>
+      {/* Search bar */}
+      <div className="max-w-5xl mx-auto px-4 pt-3">
+        <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto">
+          <div className="relative">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
+              className="w-full bg-surface-200 border border-gold-400/15 focus:border-gold-400/40 rounded-full pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none transition-colors"
+            />
+          </div>
+        </form>
+      </div>
 
-        <p
-          className="text-zinc-400 text-base sm:text-lg max-w-md mb-10 leading-relaxed animate-fade-in"
-          style={{ animationDelay: "0.2s" }}
-        >
-          {t("subhead")}
-        </p>
-
-        {/* CTAs */}
-        <div
-          className="flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
-          style={{ animationDelay: "0.3s" }}
-        >
-          <Link
-            href="/feed"
-            className="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-black font-bold px-8 py-3.5 rounded-full text-base transition-all shadow-gold hover:shadow-gold-lg hover:-translate-y-0.5"
-          >
-            <ZuvaSunIcon size={20} />
-            {t("watchNow")}
-          </Link>
-          <Link
-            href="/sign-in"
-            className="text-zinc-400 hover:text-gold-400 text-sm font-medium transition-colors underline-offset-4 hover:underline"
-          >
-            {t("signIn")}
-          </Link>
-        </div>
-      </section>
-
-      {/* ── FEATURES ─────────────────────────────────────── */}
-      <section className="px-6 pb-16 pt-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {FEATURE_ICONS.map(({ key, icon }) => (
-            <div
-              key={key}
-              className="bg-surface-300 border border-gold-400/12 rounded-2xl p-6 text-center group hover:border-gold-400/30 transition-colors"
+      {/* Category / country bar — clicking either navigates to the
+          filtered /feed view (?content_category= or ?country=) rather
+          than filtering this grid in place. */}
+      <div className="max-w-5xl mx-auto px-4 py-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          {CONTENT_CATEGORY_ORDER.map((c) => (
+            <Link
+              key={c}
+              href={`/feed?content_category=${c}`}
+              className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gold-400/10 text-gold-400 border border-gold-400/25 hover:bg-gold-400/20 transition-colors whitespace-nowrap"
             >
-              <div className="flex justify-center mb-4">{icon}</div>
-              <h3 className="text-white font-bold text-base mb-2">{t(`features.${key}.title`)}</h3>
-              <p className="text-zinc-500 text-sm leading-relaxed">{t(`features.${key}.body`)}</p>
-            </div>
+              {tContentCategories(c)}
+            </Link>
+          ))}
+          <span className="shrink-0 w-px h-5 bg-gold-400/15 mx-1" aria-hidden />
+          {COUNTRIES.map((country) => (
+            <Link
+              key={country.code}
+              href={`/feed?country=${country.code}`}
+              className="shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium bg-surface-200 text-zinc-400 border border-white/10 hover:text-gold-300 hover:border-gold-400/25 transition-colors whitespace-nowrap"
+            >
+              {country.name}
+            </Link>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* ── TRUST STRIP ──────────────────────────────────── */}
-      <section className="border-t border-gold-400/10 py-10 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-zinc-500 text-sm mb-6">
-            {t("trustStrip")}
-          </p>
-          <div className="flex flex-wrap justify-center gap-8 text-zinc-600 text-xs font-medium uppercase tracking-widest">
-            {["Lagos", "London", "Kingston", "Accra", "Toronto", "Nairobi"].map((city) => (
-              <span key={city}>{city}</span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ───────────────────────────────────────── */}
-      <SiteFooter />
+      {/* Grid */}
+      <div className="max-w-5xl mx-auto px-4 pb-10">
+        <VideoGrid />
+      </div>
     </div>
   );
 }
-
-// ── Feature card icons — titles/bodies live in messages ("Landing.features.*") ──
-const FEATURE_ICONS = [
-  {
-    key: "bridges",
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
-        <circle cx="20" cy="20" r="19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.3" />
-        <path d="M20 1C20 1 12 10 12 20s8 19 8 19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M20 1C20 1 28 10 28 20s-8 19-8 19" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M1 20h38" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.7" />
-        <path d="M3 12h34M3 28h34" stroke="#f37b0d" strokeWidth="1" strokeOpacity="0.4" />
-      </svg>
-    ),
-  },
-  {
-    key: "earn",
-    icon: (
-      <svg viewBox="0 0 56 56" width="40" height="40" fill="none">
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(90, 28, 28)"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(180, 28, 28)"/>
-        <path d="M 41 28 C 43 25.3 45.5 30.7 47.5 28 C 49.5 25.3 51.5 29 53 28" stroke="#f37b0d" strokeWidth="2.4" strokeLinecap="round" transform="rotate(270, 28, 28)"/>
-        <circle cx="28" cy="28" r="10" fill="#f37b0d"/>
-      </svg>
-    ),
-  },
-  {
-    key: "free",
-    icon: (
-      <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
-        <rect x="2" y="8" width="36" height="24" rx="4" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.6"/>
-        <path d="M2 16h36" stroke="#f37b0d" strokeWidth="1.5" strokeOpacity="0.6"/>
-        <rect x="7" y="22" width="10" height="3" rx="1.5" fill="#f37b0d" fillOpacity="0.5"/>
-        <rect x="23" y="22" width="10" height="3" rx="1.5" fill="#f37b0d" fillOpacity="0.3"/>
-      </svg>
-    ),
-  },
-];

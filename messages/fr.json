@@ -23,8 +23,11 @@
     "following": "Abonnements",
     "watchHistory": "Historique",
     "savedVideos": "Vidéos enregistrées",
+    "myChannel": "Ma chaîne",
     "creatorDashboard": "Tableau de bord créateur",
     "uploadVideo": "Mettre en ligne une vidéo",
+    "goLive": "Diffuser en direct",
+    "comingSoon": "Bientôt",
     "flares": "Flares"
   },
   "BottomNav": {
@@ -46,8 +49,7 @@
     "becomeCreator": "Devenir créateur",
     "myChannel": "Ma chaîne",
     "creatorDashboard": "Tableau de bord créateur",
-    "uploadVideo": "Mettre en ligne une vidéo",
-    "switchToViewer": "Passer en mode spectateur"
+    "uploadVideo": "Mettre en ligne une vidéo"
   },
   "BecomeCreatorModal": {
     "title": "Devenir créateur",
@@ -111,7 +113,12 @@
     "loadError": "Impossible de charger le fil",
     "tryAgain": "Réessayer",
     "emptyTitle": "Aucun contenu pour l'instant",
-    "emptyBody": "Le fil se remplira au fur et à mesure que les créateurs publieront du contenu."
+    "emptyBody": "Le fil se remplira au fur et à mesure que les créateurs publieront du contenu.",
+    "clearFilter": "Effacer le filtre"
+  },
+  "Homepage": {
+    "slogan": "Nos histoires. Notre scène.",
+    "searchPlaceholder": "Rechercher des créateurs, vidéos, tags..."
   },
   "Status": {
     "unconfirmed": "Non confirmé",
@@ -243,6 +250,12 @@
     "selectCategory": "Choisissez une catégorie",
     "selectContentCategory": "Choisissez une catégorie de contenu",
     "contentCategoryHint": "Utilisée pour classer et recommander votre vidéo — choisissez ce qui convient le mieux.",
+    "aiDisclosure": {
+      "question": "Cette vidéo contient-elle un contenu réaliste généré ou modifié par IA qui pourrait être confondu avec des images ou événements réels ?",
+      "hint": "Les scripts écrits par IA, les miniatures, les sous-titres et le contenu clairement animé ou stylisé ne nécessitent pas cette déclaration.",
+      "yes": "Oui",
+      "no": "Non"
+    },
     "tagsPlaceholder": "comédie, dakar, sketchs (séparés par des virgules)",
     "chooseImage": "Choisissez une image (facultatif)",
     "uploadingPct": "Mise en ligne… {pct} %",
@@ -388,6 +401,8 @@
     "showLess": "Voir moins",
     "showMore": "...plus",
     "moreLikeThis": "Vidéos similaires",
+    "aiDisclosureBadge": "IA",
+    "aiDisclosureBadgeTooltip": "Déclaré par le créateur : contient un contenu réaliste généré ou modifié par IA",
     "report": {
       "title": "Signaler cette vidéo",
       "submitted": "Signalement envoyé",
@@ -586,6 +601,7 @@
     "comedy": "Comédie",
     "drama_series": "Série dramatique",
     "news": "Actualités",
+    "nature": "Nature",
     "other": "Autre",
     "documentary": "Documentaire",
     "discussion_debate": "Discussion & Débat",

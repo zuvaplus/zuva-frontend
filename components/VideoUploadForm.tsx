@@ -16,7 +16,7 @@ const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "
 // DOC_DISCUSSION_CATEGORIES in zuva-backend/zuva-api.js. The umbrella
 // grouping is a UI/code-level concept only, not a DB one.
 const GENERAL_CONTENT_CATEGORIES: ContentCategory[] = [
-  "entertainment", "music", "comedy", "drama_series", "news", "other",
+  "entertainment", "music", "comedy", "drama_series", "news", "nature", "other",
 ];
 const DOC_DISCUSSION_CONTENT_CATEGORIES: ContentCategory[] = [
   "documentary", "discussion_debate", "interview", "lifestyle_culture",
@@ -125,6 +125,9 @@ export default function VideoUploadForm({
   const [description, setDescription] = useState("");
   const [category, setCategory]       = useState("");
   const [contentCategory, setContentCategory] = useState<ContentCategory | "">("");
+  // Self-disclosure only, no automated detection. null = unanswered —
+  // deliberately no default so the creator has to make an active choice.
+  const [containsSyntheticMedia, setContainsSyntheticMedia] = useState<boolean | null>(null);
   const [tags, setTags]               = useState("");
   const [isFlare, setIsFlare]         = useState(false);
 
@@ -285,7 +288,7 @@ export default function VideoUploadForm({
 
   const canSubmit =
     !!videoFile && !fileError && title.trim() !== "" && category !== ""
-    && contentCategory !== "" && !uploading;
+    && contentCategory !== "" && containsSyntheticMedia !== null && !uploading;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -303,6 +306,7 @@ export default function VideoUploadForm({
     formData.append("description", description.trim());
     formData.append("category", category);
     formData.append("content_category", contentCategory);
+    formData.append("contains_synthetic_media", String(containsSyntheticMedia));
     formData.append("tags", tags);
     formData.append("is_flare", String(isFlare));
     if (userId) formData.append("creator_id", userId);
@@ -359,6 +363,7 @@ export default function VideoUploadForm({
     setDescription("");
     setCategory("");
     setContentCategory("");
+    setContainsSyntheticMedia(null);
     setTags("");
     setProgress(0);
     setPendingCaptions([]);
@@ -549,6 +554,39 @@ export default function VideoUploadForm({
           </optgroup>
         </select>
         <p className="text-zinc-600 text-xs mt-1.5">{t("contentCategoryHint")}</p>
+      </Field>
+
+      {/* AI-content disclosure — self-disclosure only, no automated
+          detection. Deliberately no default selection (neither button
+          starts "active") so submitting requires an active choice. */}
+      <Field label={t("aiDisclosure.question")}>
+        <p className="text-zinc-500 text-xs mb-2.5 leading-relaxed">{t("aiDisclosure.hint")}</p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setContainsSyntheticMedia(true)}
+            aria-pressed={containsSyntheticMedia === true}
+            className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all
+              ${containsSyntheticMedia === true
+                ? "bg-gold-400 text-black border-gold-400 shadow-gold"
+                : "bg-surface-100 text-zinc-300 border-gold-400/15 hover:border-gold-400/30"
+              }`}
+          >
+            {t("aiDisclosure.yes")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setContainsSyntheticMedia(false)}
+            aria-pressed={containsSyntheticMedia === false}
+            className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all
+              ${containsSyntheticMedia === false
+                ? "bg-gold-400 text-black border-gold-400 shadow-gold"
+                : "bg-surface-100 text-zinc-300 border-gold-400/15 hover:border-gold-400/30"
+              }`}
+          >
+            {t("aiDisclosure.no")}
+          </button>
+        </div>
       </Field>
 
       <Field label={t("fields.tags")}>

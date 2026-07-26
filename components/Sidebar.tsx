@@ -16,6 +16,8 @@ import {
   LayoutDashboard,
   UploadCloud,
   Flame,
+  Tv,
+  Radio,
 } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
 
@@ -27,8 +29,12 @@ const AMBER = "#f37b0d";
 // via the shared "Categories" namespace (also used by VideoUploadForm).
 const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "Education", "Other"];
 
+// "Home" points at "/" (the universal homepage), not "/feed" — creators
+// and viewers land on and browse from the exact same place, no separate
+// "viewer mode". "/feed" is now the filtered-results view reached from
+// the homepage's category/country bar.
 const MAIN_LINKS = [
-  { href: "/feed",     labelKey: "home",     icon: Home },
+  { href: "/",         labelKey: "home",     icon: Home },
   { href: "/trending", labelKey: "trending", icon: TrendingUp },
 ];
 
@@ -38,10 +44,17 @@ const LIBRARY_LINKS = [
   { href: "/saved",     labelKey: "savedVideos",   icon: Bookmark },
 ];
 
-const STUDIO_LINKS = [
-  { href: "/creator-dashboard", labelKey: "creatorDashboard", icon: LayoutDashboard },
-  { href: "/upload",            labelKey: "uploadVideo",      icon: UploadCloud },
-];
+// Studio order per spec: My Channel, Creator Dashboard, Upload Video,
+// Go Live. My Channel needs the creator's own username (mirrors
+// ProfileMenu.tsx's creatorItems()), so this is a function rather than
+// a static array like the others above.
+function studioLinks(username: string | null) {
+  return [
+    { href: username ? `/channel/${username}` : "/channel", labelKey: "myChannel",       icon: Tv },
+    { href: "/creator-dashboard",                            labelKey: "creatorDashboard", icon: LayoutDashboard },
+    { href: "/upload",                                       labelKey: "uploadVideo",      icon: UploadCloud },
+  ];
+}
 
 function SidebarLink({
   href,
@@ -87,6 +100,26 @@ function FlaresLink({ active }: { active: boolean }) {
   );
 }
 
+// Go Live — no live-streaming build exists yet, so this renders as a
+// disabled placeholder (same "coming soon" convention as unconfigured
+// payout methods elsewhere in the app) rather than a dead link. Swap
+// for a real SidebarLink once live-streaming actually ships.
+function StudioGoLive() {
+  const t = useTranslations("Sidebar");
+  return (
+    <div
+      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 cursor-not-allowed"
+      aria-disabled="true"
+    >
+      <Radio size={18} />
+      <span className="flex-1">{t("goLive")}</span>
+      <span className="text-[9px] font-semibold uppercase tracking-wide text-zinc-600 bg-white/5 px-1.5 py-0.5 rounded">
+        {t("comingSoon")}
+      </span>
+    </div>
+  );
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
@@ -100,7 +133,7 @@ export default function Sidebar() {
   const tCategories = useTranslations("Categories");
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const { role } = useUserRole();
+  const { role, username } = useUserRole();
 
   return (
     <aside className="hidden md:flex md:flex-col fixed top-14 left-0 bottom-0 w-60 bg-black border-r border-gold-400/10 overflow-y-auto scrollbar-hide z-40">
@@ -120,9 +153,10 @@ export default function Sidebar() {
           <>
             <SectionLabel>{t("studio")}</SectionLabel>
             <div className="space-y-0.5">
-              {STUDIO_LINKS.map(({ href, labelKey, icon }) => (
+              {studioLinks(username).map(({ href, labelKey, icon }) => (
                 <SidebarLink key={href} href={href} label={t(labelKey)} icon={icon} active={pathname === href} />
               ))}
+              <StudioGoLive />
             </div>
           </>
         )}

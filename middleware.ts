@@ -12,7 +12,14 @@ const handleI18nRouting = createIntlMiddleware(routing);
 // useUserRole, but that leaves a moment of exposed content for a
 // signed-out visitor before the JS-side redirect fires. Added here for
 // parity with the other creator-only routes.
-const PROTECTED_PATHS = ["/feed", "/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard"];
+//
+// "/feed" is deliberately NOT here (removed) — it's now the filtered-
+// results view reached from the homepage's category/country bar, which
+// anonymous visitors browse too (GET /api/feed already supports
+// optionalAuth with the shuffled-fallback ranking for anyone with no
+// watch history). "/" itself was never protected either, for the same
+// reason — the homepage is the universal signed-in/signed-out experience.
+const PROTECTED_PATHS = ["/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard"];
 
 const isProtectedRoute = createRouteMatcher(
   routing.locales.flatMap((locale) => PROTECTED_PATHS.map((p) => `/${locale}${p}(.*)`))

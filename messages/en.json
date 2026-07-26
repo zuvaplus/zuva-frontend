@@ -23,8 +23,11 @@
     "following": "Following",
     "watchHistory": "Watch History",
     "savedVideos": "Saved Videos",
+    "myChannel": "My Channel",
     "creatorDashboard": "Creator Dashboard",
     "uploadVideo": "Upload Video",
+    "goLive": "Go Live",
+    "comingSoon": "Soon",
     "flares": "Flares"
   },
   "BottomNav": {
@@ -46,8 +49,7 @@
     "becomeCreator": "Become a Creator",
     "myChannel": "My Channel",
     "creatorDashboard": "Creator Dashboard",
-    "uploadVideo": "Upload Video",
-    "switchToViewer": "Switch to Viewer Mode"
+    "uploadVideo": "Upload Video"
   },
   "BecomeCreatorModal": {
     "title": "Become a Creator",
@@ -111,7 +113,12 @@
     "loadError": "Could not load feed",
     "tryAgain": "Try again",
     "emptyTitle": "No content yet",
-    "emptyBody": "Feed will fill up as creators publish content."
+    "emptyBody": "Feed will fill up as creators publish content.",
+    "clearFilter": "Clear filter"
+  },
+  "Homepage": {
+    "slogan": "Our Stories. Our Stage.",
+    "searchPlaceholder": "Search creators, videos, tags..."
   },
   "Status": {
     "unconfirmed": "Unconfirmed",
@@ -243,6 +250,12 @@
     "selectCategory": "Select a category",
     "selectContentCategory": "Select a content category",
     "contentCategoryHint": "Used to rank and recommend your video — pick whichever fits best.",
+    "aiDisclosure": {
+      "question": "Does this video contain realistic AI-generated or altered content that could be mistaken for real footage or real events?",
+      "hint": "AI-written scripts, thumbnails, captions, and clearly animated or stylized content do not require this.",
+      "yes": "Yes",
+      "no": "No"
+    },
     "tagsPlaceholder": "comedy, lagos, skits (comma-separated)",
     "chooseImage": "Choose an image (optional)",
     "uploadingPct": "Uploading… {pct}%",
@@ -388,6 +401,8 @@
     "showLess": "Show less",
     "showMore": "...more",
     "moreLikeThis": "More like this",
+    "aiDisclosureBadge": "AI",
+    "aiDisclosureBadgeTooltip": "Creator-disclosed: contains realistic AI-generated or altered content",
     "report": {
       "title": "Report this video",
       "submitted": "Report submitted",
@@ -586,6 +601,7 @@
     "comedy": "Comedy",
     "drama_series": "Drama Series",
     "news": "News",
+    "nature": "Nature",
     "other": "Other",
     "documentary": "Documentary",
     "discussion_debate": "Discussion & Debate",

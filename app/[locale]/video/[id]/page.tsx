@@ -156,14 +156,14 @@ function AutoLinkedText({ text }: { text: string }) {
   );
 }
 
-function Description({ text }: { text: string }) {
+function Description({ text, containsSyntheticMedia }: { text: string; containsSyntheticMedia?: boolean }) {
   const t = useTranslations("Video");
   const [expanded, setExpanded] = useState(false);
   // Cheap heuristic for whether the collapse control is worth showing.
   const isLong = text.length > 180 || text.split("\n").length > 3;
 
   return (
-    <div className="bg-surface-200 border border-gold-400/10 rounded-xl px-4 py-3 mb-5">
+    <div className="relative bg-surface-200 border border-gold-400/10 rounded-xl px-4 py-3 pb-7 mb-5">
       <p
         className={`text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap ${
           expanded ? "" : "line-clamp-3"
@@ -180,6 +180,19 @@ function Description({ text }: { text: string }) {
         </button>
       )}
       {/* Links / merch shelf lands here in the upcoming monetization task */}
+
+      {/* AI-content disclosure badge — self-disclosed by the creator at
+          upload (contains_synthetic_media), same compact "CC"-style pill
+          convention: just big enough for the two letters, amber-outlined,
+          tucked in the corner rather than a banner across the player. */}
+      {containsSyntheticMedia && (
+        <span
+          title={t("aiDisclosureBadgeTooltip")}
+          className="absolute bottom-2.5 right-3 inline-flex items-center justify-center px-1.5 py-0.5 rounded border border-gold-400/70 text-gold-400 text-[10px] font-bold leading-none tracking-wide"
+        >
+          {t("aiDisclosureBadge")}
+        </span>
+      )}
     </div>
   );
 }
@@ -442,7 +455,12 @@ export default function VideoPlayerPage() {
       </div>
 
       {/* Description (collapsed to 3 lines, auto-linked URLs) */}
-      {video.description && <Description text={video.description} />}
+      {/* Renders even with no description text when the AI badge needs
+          somewhere to live — the badge's home is this box, not the
+          player, per the disclosure requirement. */}
+      {(video.description || video.contains_synthetic_media) && (
+        <Description text={video.description ?? ""} containsSyntheticMedia={video.contains_synthetic_media} />
+      )}
 
       {/* Tags */}
       {video.tags.length > 0 && (

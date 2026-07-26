@@ -26,8 +26,11 @@ export default function BottomNav({ onOpenProfileMenu }: BottomNavProps) {
     <>
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-t border-gold-400/10 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around py-2 px-2">
-          <Link href="/feed" className={`flex flex-col items-center gap-1 px-3 py-1 ${isActive("/feed") ? "text-gold-400" : "text-zinc-500"}`}>
-            <Home size={20} color={isActive("/feed") ? AMBER : MUTED} />
+          {/* "/" is the universal homepage now — pathname === "/" only
+              (not the isActive() prefix helper, which would trivially
+              match every route since they all start with "/"). */}
+          <Link href="/" className={`flex flex-col items-center gap-1 px-3 py-1 ${pathname === "/" ? "text-gold-400" : "text-zinc-500"}`}>
+            <Home size={20} color={pathname === "/" ? AMBER : MUTED} />
             <span className="text-[10px] font-medium">{t("home")}</span>
           </Link>
 

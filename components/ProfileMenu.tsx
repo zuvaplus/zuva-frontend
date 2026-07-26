@@ -14,7 +14,6 @@ import {
   Tv,
   LayoutDashboard,
   UploadCloud,
-  Repeat,
 } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -34,6 +33,11 @@ const VIEWER_ITEMS: MenuItem[] = [
   { href: "/creator-signup", labelKey: "becomeCreator",   icon: UserPlus },
 ];
 
+// No separate "viewer mode" — creators get the same Home/wallet/
+// history/saved/settings items as everyone else, plus their Studio
+// items (channel/dashboard/upload) at the top. There is deliberately
+// no "switch to viewer" item — creators and viewers see identical
+// browse navigation at all times.
 function creatorItems(username: string | null): MenuItem[] {
   return [
     { href: username ? `/channel/${username}` : "/channel", labelKey: "myChannel",       icon: Tv },
@@ -43,7 +47,6 @@ function creatorItems(username: string | null): MenuItem[] {
     { href: "/history",                                      labelKey: "watchHistory",     icon: History },
     { href: "/saved",                                        labelKey: "savedVideos",      icon: Bookmark },
     { href: "/settings",                                     labelKey: "accountSettings",  icon: Settings },
-    { href: "/feed",                                         labelKey: "switchToViewer",   icon: Repeat },
   ];
 }
 

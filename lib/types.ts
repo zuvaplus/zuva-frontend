@@ -234,7 +234,7 @@ export type VideoCategory =
 // zuva-backend's DOC_DISCUSSION_CATEGORIES — see VideoUploadForm.tsx).
 export type ContentCategory =
   | "entertainment" | "music" | "comedy" | "drama_series" | "documentary"
-  | "discussion_debate" | "interview" | "lifestyle_culture" | "news" | "other";
+  | "discussion_debate" | "interview" | "lifestyle_culture" | "news" | "nature" | "other";
 
 export type VideoStatus = "pending" | "published" | "rejected";
 
@@ -254,6 +254,10 @@ export interface UploadedVideo {
   like_count: number;
   comment_count: number;
   is_flare?: boolean;
+  // Self-disclosure only, no automated detection — see the AI-content
+  // toggle in VideoUploadForm.tsx. Not read by computeFeedScore; no
+  // effect on ranking/discoverability/monetization.
+  contains_synthetic_media: boolean;
   created_at: string;
 }
 

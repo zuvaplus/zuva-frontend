@@ -73,7 +73,9 @@ In dev `BACKEND_URL` defaults to `http://localhost:3000`. No CORS issues.
 
 ### Auth (Clerk) — fully wired
 - `app/layout.tsx` wraps everything in `<ClerkProvider>`
-- `middleware.ts` uses `clerkMiddleware` + `createRouteMatcher` to protect `/feed`, `/wallet`, `/creator/*`, `/admin`
+- `middleware.ts` uses `clerkMiddleware` + `createRouteMatcher` to protect `/wallet`, `/creator/*`, `/admin`,
+  `/upload`, `/creator-dashboard`. `/` and `/feed` are deliberately NOT protected — both are browsable
+  signed-out (see Homepage & Navigation below)
 - `app/sign-in/[[...sign-in]]/page.tsx` — Clerk `<SignIn>` with Zuva branding wrapper
 - `app/sign-up/[[...sign-up]]/page.tsx` — Clerk `<SignUp>` with Zuva branding wrapper
 - `lib/clerk-appearance.ts` — shared appearance config (vantablack `#000000` bg, amber `#F5A623` primary)
@@ -93,6 +95,35 @@ Catch-all routes (`[[...sign-in]]` / `[[...sign-up]]`) are required for Clerk's 
 
 ### Turbopack
 Dev server uses Turbopack for fast HMR: `npm run dev` → `next dev --turbopack`
+
+### Homepage & Navigation
+- `app/[locale]/page.tsx` ("/") is the **universal homepage** — identical for
+  signed-in and signed-out visitors, and identical for creators and viewers
+  (no separate "viewer mode"). Thin logo+slogan banner → search bar →
+  category/country bar → `<VideoGrid />` (no filters). All the personalization
+  happens server-side inside `GET /api/feed` — this page doesn't know or care
+  whether it got the personalized ranking or the shuffled fallback
+- `components/VideoGrid.tsx` — the shared fetch/pagination/grid component
+  behind `GET /api/feed`, parameterized by optional `contentCategory`/`country`.
+  Used by both the homepage (unfiltered) and `/feed` (filtered results)
+- `app/[locale]/feed/page.tsx` is now the **filtered-results view** — reached
+  by clicking a category or country pill on the homepage
+  (`/feed?content_category=documentary`, `/feed?country=NG`), not a "Home" nav
+  destination itself. Country codes come from `lib/countries.ts` (ISO alpha-2,
+  matches `users.country_code`), the same list `creator-signup` derives its
+  (names-only) country dropdown from
+- Sidebar's "Home" and BottomNav's Home both point at `/`, not `/feed`
+- Sidebar's Studio section (creator-only): My Channel, Creator Dashboard,
+  Upload Video, Go Live — Go Live renders as a disabled "Soon" placeholder
+  since no live-streaming build exists yet, not a dead link
+- No "Switch to Viewer Mode" anywhere — removed from `ProfileMenu.tsx`.
+  Creators and viewers see identical Home/Trending/Flares/Following/Watch
+  History/Saved Videos navigation at all times
+- **Known gap, pre-existing**: Trending/Following/Watch History/Saved Videos
+  are linked from the sidebar/profile menu but the pages themselves don't
+  exist yet (dead links) — out of scope for the nav-simplification work above,
+  which was specifically about removing the viewer/creator split, not building
+  those four features
 
 ## Running Locally
 ```bash

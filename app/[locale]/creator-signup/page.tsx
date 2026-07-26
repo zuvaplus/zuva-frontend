@@ -7,25 +7,13 @@ import { Link } from "@/i18n/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 import SiteFooter from "@/components/SiteFooter";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
+import { COUNTRIES } from "@/lib/countries";
 
-const AFRICAN_CARIBBEAN_COUNTRIES = [
-  // Africa
-  "Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi",
-  "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros",
-  "Congo (Brazzaville)", "Congo (DRC)", "Djibouti", "Egypt",
-  "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon",
-  "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya",
-  "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali",
-  "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger",
-  "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles",
-  "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan",
-  "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe",
-  // Caribbean
-  "Antigua and Barbuda", "Bahamas", "Barbados", "Cuba", "Dominica",
-  "Dominican Republic", "Grenada", "Haiti", "Jamaica",
-  "Saint Kitts and Nevis", "Saint Lucia",
-  "Saint Vincent and the Grenadines", "Trinidad and Tobago",
-];
+// Names only here — this form stores the plain country name on the
+// application (creator_applications.country is free text), unlike
+// users.country_code which needs the ISO code from lib/countries.ts's
+// COUNTRIES (also used by the homepage's country filter bar).
+const AFRICAN_CARIBBEAN_COUNTRIES = COUNTRIES.map((c) => c.name);
 
 const PLATFORMS = ["YouTube", "TikTok", "Instagram", "Facebook", "Other"];
 
