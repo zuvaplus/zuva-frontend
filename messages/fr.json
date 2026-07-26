@@ -231,7 +231,8 @@
       "description": "Description",
       "category": "Catégorie",
       "tags": "Tags",
-      "thumbnail": "Miniature (facultatif)"
+      "thumbnail": "Miniature (facultatif)",
+      "captions": "Sous-titres (facultatif)"
     },
     "chooseVideo": "Cliquez pour choisir une vidéo (MP4, MOV, AVI — jusqu'à 2 Go)",
     "titlePlaceholder": "Donnez un titre à votre vidéo",
@@ -241,7 +242,18 @@
     "chooseImage": "Choisissez une image (facultatif)",
     "uploadingPct": "Mise en ligne… {pct} %",
     "uploading": "Mise en ligne…",
-    "uploadVideo": "Mettre en ligne la vidéo"
+    "uploadVideo": "Mettre en ligne la vidéo",
+    "captions": {
+      "addTrack": "Ajouter une piste de sous-titres",
+      "hint": "Ajoutez des sous-titres dans une ou plusieurs langues (.srt ou .vtt).",
+      "chooseFile": "Choisissez un fichier .srt ou .vtt",
+      "removeTrack": "Supprimer la piste de sous-titres",
+      "uploadingTitle": "Mise en ligne des sous-titres…",
+      "uploaded": "Mis en ligne",
+      "uploadFailed": "Échec de la mise en ligne",
+      "uploadingEllipsis": "Mise en ligne…",
+      "waiting": "En attente…"
+    }
   },
   "CreatorLinks": {
     "title": "Liens",

@@ -16,6 +16,8 @@ import type {
   UpdateChannelResponse,
   CreatorLinksResponse,
   CreatorLink,
+  CaptionLanguage,
+  CaptionsListResponse,
   EarningsResponse,
   InterestsResponse,
   FiatCurrency,
@@ -240,6 +242,45 @@ export function unsubscribeCreator(
 // ─── Creator dashboard ────────────────────────────────────────
 export function getMyVideos(token: string | null): Promise<MyVideosResponse> {
   return apiFetch<MyVideosResponse>("/api/creator/videos", token);
+}
+
+export function getVideoCaptions(
+  token: string | null,
+  videoId: string
+): Promise<CaptionsListResponse> {
+  return apiFetch<CaptionsListResponse>(`/api/upload/video/${videoId}/captions`, token);
+}
+
+// Multipart upload — bypasses apiFetch's JSON Content-Type default, same
+// pattern as the raw XHR used for the video file itself.
+export async function uploadCaptionTrack(
+  token: string | null,
+  videoId: string,
+  language: CaptionLanguage,
+  file: File
+): Promise<{ success: boolean; language: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("language", language);
+
+  const res = await fetch(`${BASE_URL}/api/upload/video/${videoId}/captions`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body?.error ?? `HTTP ${res.status}`, res.status, body?.code);
+  }
+  return res.json();
+}
+
+export function deleteCaptionTrack(
+  token: string | null,
+  videoId: string,
+  language: string
+): Promise<{ success: boolean }> {
+  return apiFetch(`/api/upload/video/${videoId}/captions/${language}`, token, { method: "DELETE" });
 }
 
 export function getUploadStatus(

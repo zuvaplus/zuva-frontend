@@ -231,7 +231,8 @@
       "description": "Description",
       "category": "Category",
       "tags": "Tags",
-      "thumbnail": "Thumbnail (optional)"
+      "thumbnail": "Thumbnail (optional)",
+      "captions": "Captions (optional)"
     },
     "chooseVideo": "Click to choose a video (MP4, MOV, AVI — up to 2GB)",
     "titlePlaceholder": "Give your video a title",
@@ -241,7 +242,18 @@
     "chooseImage": "Choose an image (optional)",
     "uploadingPct": "Uploading… {pct}%",
     "uploading": "Uploading…",
-    "uploadVideo": "Upload Video"
+    "uploadVideo": "Upload Video",
+    "captions": {
+      "addTrack": "Add caption track",
+      "hint": "Add subtitles in one or more languages (.srt or .vtt).",
+      "chooseFile": "Choose .srt or .vtt file",
+      "removeTrack": "Remove caption track",
+      "uploadingTitle": "Uploading captions…",
+      "uploaded": "Uploaded",
+      "uploadFailed": "Upload failed",
+      "uploadingEllipsis": "Uploading…",
+      "waiting": "Waiting…"
+    }
   },
   "CreatorLinks": {
     "title": "Links",

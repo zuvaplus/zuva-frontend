@@ -308,6 +308,19 @@ export interface UploadStatusResponse {
   video: UploadedVideo;
 }
 
+export type CaptionLanguage = "en" | "fr" | "pt" | "sw" | "ar" | "es" | "ht" | "yo" | "ha" | "zu" | "am";
+
+export interface CaptionTrack {
+  language: string;
+  label: string;
+  status: string;
+}
+
+export interface CaptionsListResponse {
+  success: boolean;
+  captions: CaptionTrack[];
+}
+
 export interface CreatorLink {
   id: string;
   title: string;

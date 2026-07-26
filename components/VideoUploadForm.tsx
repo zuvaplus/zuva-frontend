@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle } from "lucide-react";
-import type { UploadedVideo, UploadProcessingStatus } from "@/lib/types";
-import { getUploadStatus } from "@/lib/api";
+import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle, Captions, Plus, Trash2 } from "lucide-react";
+import type { UploadedVideo, UploadProcessingStatus, CaptionLanguage } from "@/lib/types";
+import { getUploadStatus, uploadCaptionTrack } from "@/lib/api";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -14,6 +14,33 @@ const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "
 const MAX_VIDEO_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/avi"];
 const ACCEPTED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"];
+
+// Curated languages matching the platform's African & Caribbean audience —
+// must match CAPTION_LANGUAGES in zuva-backend/zuva-api.js. Labels are
+// autonyms (each language's own name for itself), same convention as
+// LanguageSwitcher's locale labels.
+const CAPTION_LANGUAGES: { code: CaptionLanguage; label: string }[] = [
+  { code: "en", label: "English" },
+  { code: "fr", label: "Français" },
+  { code: "pt", label: "Português" },
+  { code: "sw", label: "Kiswahili" },
+  { code: "ar", label: "العربية" },
+  { code: "es", label: "Español" },
+  { code: "ht", label: "Kreyòl Ayisyen" },
+  { code: "yo", label: "Yorùbá" },
+  { code: "ha", label: "Hausa" },
+  { code: "zu", label: "isiZulu" },
+  { code: "am", label: "አማርኛ" },
+];
+const ACCEPTED_CAPTION_EXTENSIONS = [".srt", ".vtt"];
+
+interface PendingCaption {
+  id: string;
+  language: CaptionLanguage;
+  file: File | null;
+}
+
+type CaptionUploadState = "pending" | "uploading" | "done" | "error";
 
 // Cloudflare Stream encoding is separate from our moderation status — a
 // video can already be "published" in our DB (thumbnail-based moderation
@@ -70,6 +97,14 @@ export default function VideoUploadForm({
   const [processing, setProcessing] = useState<UploadProcessingStatus | null>(null);
   const [pollGaveUp, setPollGaveUp] = useState(false);
 
+  // Caption tracks the creator configures before submitting — uploaded
+  // one-by-one right after the main video upload succeeds (Cloudflare's
+  // captions API is keyed by video UID, so a track can't exist before
+  // the video does; encoding readiness doesn't matter, only the UID).
+  const [pendingCaptions, setPendingCaptions] = useState<PendingCaption[]>([]);
+  const [captionStatus, setCaptionStatus] = useState<Record<string, CaptionUploadState>>({});
+  const captionsStartedRef = useRef(false);
+
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -116,6 +151,46 @@ export default function VideoUploadForm({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadedVideo?.id]);
+
+  // Fires once, the moment the video upload succeeds — not on the repeat
+  // setUploadedVideo calls from status polling (captionsStartedRef guards
+  // that), and independent of encoding progress.
+  useEffect(() => {
+    if (!uploadedVideo || captionsStartedRef.current || pendingCaptions.length === 0) return;
+    captionsStartedRef.current = true;
+
+    (async () => {
+      for (const cap of pendingCaptions) {
+        if (!cap.file) continue;
+        setCaptionStatus((prev) => ({ ...prev, [cap.id]: "uploading" }));
+        try {
+          const token = await getToken();
+          await uploadCaptionTrack(token, uploadedVideo.id, cap.language, cap.file);
+          setCaptionStatus((prev) => ({ ...prev, [cap.id]: "done" }));
+        } catch {
+          setCaptionStatus((prev) => ({ ...prev, [cap.id]: "error" }));
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploadedVideo?.id]);
+
+  function addCaptionRow() {
+    const usedLanguages = new Set(pendingCaptions.map((c) => c.language));
+    const nextLanguage = CAPTION_LANGUAGES.find((l) => !usedLanguages.has(l.code))?.code ?? "en";
+    setPendingCaptions((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random()}`, language: nextLanguage, file: null },
+    ]);
+  }
+
+  function updateCaptionRow(id: string, patch: Partial<PendingCaption>) {
+    setPendingCaptions((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }
+
+  function removeCaptionRow(id: string) {
+    setPendingCaptions((prev) => prev.filter((c) => c.id !== id));
+  }
 
   function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -211,6 +286,9 @@ export default function VideoUploadForm({
     setCategory("");
     setTags("");
     setProgress(0);
+    setPendingCaptions([]);
+    setCaptionStatus({});
+    captionsStartedRef.current = false;
   }
 
   if (uploadedVideo) {
@@ -256,6 +334,31 @@ export default function VideoUploadForm({
             </div>
           )}
         </div>
+
+        {/* Caption upload progress */}
+        {pendingCaptions.length > 0 && (
+          <div className="bg-surface-300 border border-gold-400/10 rounded-xl px-4 py-3.5 mb-6 text-left space-y-2">
+            <p className="text-zinc-300 text-sm font-medium mb-1">{t("captions.uploadingTitle")}</p>
+            {pendingCaptions.map((cap) => {
+              const status = captionStatus[cap.id] ?? "pending";
+              const label = CAPTION_LANGUAGES.find((l) => l.code === cap.language)?.label ?? cap.language;
+              return (
+                <div key={cap.id} className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-400">{label}</span>
+                  {status === "done" ? (
+                    <span className="flex items-center gap-1 text-green-400"><CheckCircle2 size={13} /> {t("captions.uploaded")}</span>
+                  ) : status === "error" ? (
+                    <span className="flex items-center gap-1 text-red-400"><XCircle size={13} /> {t("captions.uploadFailed")}</span>
+                  ) : status === "uploading" ? (
+                    <span className="text-gold-400">{t("captions.uploadingEllipsis")}</span>
+                  ) : (
+                    <span className="text-zinc-600">{t("captions.waiting")}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <button
           onClick={resetForm}
@@ -353,6 +456,72 @@ export default function VideoUploadForm({
           />
         </label>
       </Field>
+
+      {/* Captions (optional) — one row per language; uploaded right after
+          the main video succeeds, since Cloudflare needs the video's UID
+          to exist before a caption track can attach to it. */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-zinc-300 text-sm font-medium">{t("fields.captions")}</label>
+          {pendingCaptions.length < CAPTION_LANGUAGES.length && (
+            <button
+              type="button"
+              onClick={addCaptionRow}
+              className="flex items-center gap-1 text-gold-400 hover:text-gold-300 text-xs font-semibold transition-colors"
+            >
+              <Plus size={13} /> {t("captions.addTrack")}
+            </button>
+          )}
+        </div>
+        {pendingCaptions.length === 0 ? (
+          <p className="text-zinc-600 text-xs">{t("captions.hint")}</p>
+        ) : (
+          <div className="space-y-2">
+            {pendingCaptions.map((cap) => (
+              <div key={cap.id} className="flex items-center gap-2">
+                <Captions size={16} className="text-gold-400 shrink-0" />
+                <select
+                  value={cap.language}
+                  onChange={(e) => updateCaptionRow(cap.id, { language: e.target.value as CaptionLanguage })}
+                  className="bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-3 py-2 outline-none shrink-0"
+                >
+                  {CAPTION_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+                <label
+                  htmlFor={`caption-file-${cap.id}`}
+                  className={`flex-1 min-w-0 text-sm rounded-xl px-3 py-2 border cursor-pointer truncate transition-colors
+                    ${cap.file ? "border-gold-400/40 bg-gold-400/5 text-zinc-300" : "border-dashed border-gold-400/20 hover:border-gold-400/40 text-zinc-500"}`}
+                >
+                  {cap.file ? cap.file.name : t("captions.chooseFile")}
+                  <input
+                    id={`caption-file-${cap.id}`}
+                    type="file"
+                    accept=".srt,.vtt"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      if (file && !ACCEPTED_CAPTION_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext))) {
+                        return;
+                      }
+                      updateCaptionRow(cap.id, { file });
+                    }}
+                    className="hidden"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeCaptionRow(cap.id)}
+                  className="p-2 text-zinc-500 hover:text-red-400 transition-colors shrink-0"
+                  aria-label={t("captions.removeTrack")}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {uploading && (
         <div>
