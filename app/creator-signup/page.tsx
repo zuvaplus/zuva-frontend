@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 import SiteFooter from "@/components/SiteFooter";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
@@ -73,8 +74,19 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const inputClass =
   "w-full bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-4 py-3 outline-none transition-colors";
 
-export default function CreatorSignupPage() {
+// Non-creators land here with ?from=dashboard|upload when they try to
+// reach a creator-only page — a friendlier explanation than a bare
+// redirect, and a nudge toward the form right below it.
+const REDIRECT_MESSAGES: Record<string, string> = {
+  dashboard: "You'll need an approved creator account to access the Creator Dashboard.",
+  upload: "You'll need an approved creator account to upload videos.",
+};
+
+function CreatorSignupForm() {
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
+  const searchParams = useSearchParams();
+  const redirectReason = searchParams.get("from");
+  const redirectMessage = redirectReason ? REDIRECT_MESSAGES[redirectReason] : null;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,13 +191,19 @@ export default function CreatorSignupPage() {
           <p className="text-gold-400 text-xs font-semibold uppercase tracking-widest mb-3">Creators</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">Become a Zuva Creator</h1>
           <p className="text-zinc-400 text-sm max-w-md mx-auto">
-            Upload your content, reach African &amp; Caribbean audiences worldwide, and earn ad revenue and Suns
-            tips paid out via Chimoney.
+            Upload your content, reach African &amp; Caribbean audiences worldwide, and earn Suns
+            tips from your fans.
           </p>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-6 py-12">
+        {redirectMessage && (
+          <div className="bg-gold-400/10 border border-gold-400/25 text-gold-300 text-sm rounded-2xl px-5 py-4 mb-6">
+            {redirectMessage} Apply below — if you already have a pending application, we'll email you as soon as there's a decision.
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="bg-surface-200 border border-gold-400/15 rounded-2xl p-6 sm:p-8 space-y-5">
 
           <Field label="Full Name">
@@ -349,5 +367,13 @@ export default function CreatorSignupPage() {
 
       <SiteFooter />
     </div>
+  );
+}
+
+export default function CreatorSignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+      <CreatorSignupForm />
+    </Suspense>
   );
 }

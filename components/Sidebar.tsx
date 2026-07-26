@@ -13,7 +13,10 @@ import {
   Info,
   FileText,
   UserPlus,
+  LayoutDashboard,
+  UploadCloud,
 } from "lucide-react";
+import { useUserRole } from "./UserRoleProvider";
 
 const AMBER = "#f37b0d";
 
@@ -28,6 +31,11 @@ const LIBRARY_LINKS = [
   { href: "/following", label: "Following",     icon: Users },
   { href: "/history",   label: "Watch History", icon: History },
   { href: "/saved",     label: "Saved Videos",  icon: Bookmark },
+];
+
+const STUDIO_LINKS = [
+  { href: "/creator-dashboard", label: "Creator Dashboard", icon: LayoutDashboard },
+  { href: "/upload",            label: "Upload Video",      icon: UploadCloud },
 ];
 
 function SidebarLink({
@@ -64,6 +72,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const { role } = useUserRole();
 
   return (
     <aside className="hidden md:flex md:flex-col fixed top-14 left-0 bottom-0 w-60 bg-black border-r border-gold-400/10 overflow-y-auto scrollbar-hide z-40">
@@ -74,6 +83,17 @@ export default function Sidebar() {
             <SidebarLink key={href} href={href} label={label} icon={icon} active={pathname === href} />
           ))}
         </div>
+
+        {role === "creator" && (
+          <>
+            <SectionLabel>Studio</SectionLabel>
+            <div className="space-y-0.5">
+              {STUDIO_LINKS.map(({ href, label, icon }) => (
+                <SidebarLink key={href} href={href} label={label} icon={icon} active={pathname === href} />
+              ))}
+            </div>
+          </>
+        )}
 
         <SectionLabel>Library</SectionLabel>
         <div className="space-y-0.5">
@@ -123,10 +143,12 @@ export default function Sidebar() {
           <FileText size={16} />
           Terms
         </Link>
-        <Link href="/creator-signup" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-gold-300 hover:bg-white/5 transition-colors">
-          <UserPlus size={16} />
-          Creator Sign Up
-        </Link>
+        {role !== "creator" && (
+          <Link href="/creator-signup" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-gold-300 hover:bg-white/5 transition-colors">
+            <UserPlus size={16} />
+            Creator Sign Up
+          </Link>
+        )}
       </div>
     </aside>
   );

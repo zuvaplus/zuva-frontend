@@ -281,6 +281,45 @@ export interface ChannelResponse {
   videos: ChannelVideoSummary[];
 }
 
+export interface UpdateChannelResponse {
+  success: boolean;
+  user: ChannelCreator;
+}
+
+// ─── Creator dashboard ───────────────────────────────────────
+export interface MyVideosResponse {
+  success: boolean;
+  videos: UploadedVideo[];
+}
+
+// Cloudflare Stream's own processing state, surfaced verbatim by
+// GET /api/upload/status/:videoId — state is typically one of
+// pendingupload | downloading | queued | inprogress | ready | error.
+export interface UploadProcessingStatus {
+  state: string;
+  pctComplete?: string;
+  errorReasonCode?: string;
+  errorReasonText?: string;
+}
+
+export interface UploadStatusResponse {
+  success: boolean;
+  processing_status: UploadProcessingStatus;
+  video: UploadedVideo;
+}
+
+export interface CreatorLink {
+  id: string;
+  title: string;
+  url: string;
+  position: number;
+}
+
+export interface CreatorLinksResponse {
+  success: boolean;
+  links: CreatorLink[];
+}
+
 export interface VideoPlayerCreator {
   id: string;
   username: string;

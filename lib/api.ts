@@ -11,6 +11,11 @@ import type {
   VideoComment,
   LikeResponse,
   SubscribeResponse,
+  MyVideosResponse,
+  UploadStatusResponse,
+  UpdateChannelResponse,
+  CreatorLinksResponse,
+  CreatorLink,
   EarningsResponse,
   InterestsResponse,
   FiatCurrency,
@@ -229,6 +234,70 @@ export function unsubscribeCreator(
 ): Promise<SubscribeResponse> {
   return apiFetch<SubscribeResponse>(`/api/creator/${creatorId}/subscribe`, token, {
     method: "DELETE",
+  });
+}
+
+// ─── Creator dashboard ────────────────────────────────────────
+export function getMyVideos(token: string | null): Promise<MyVideosResponse> {
+  return apiFetch<MyVideosResponse>("/api/creator/videos", token);
+}
+
+export function getUploadStatus(
+  token: string | null,
+  videoId: string
+): Promise<UploadStatusResponse> {
+  return apiFetch<UploadStatusResponse>(`/api/upload/status/${videoId}`, token);
+}
+
+export function updateChannel(
+  token: string | null,
+  payload: { display_name?: string; bio?: string; avatar_url?: string; country_code?: string }
+): Promise<UpdateChannelResponse> {
+  return apiFetch<UpdateChannelResponse>("/api/channel/update", token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getCreatorLinks(token: string | null): Promise<CreatorLinksResponse> {
+  return apiFetch<CreatorLinksResponse>("/api/creator/links", token);
+}
+
+export function createCreatorLink(
+  token: string | null,
+  payload: { title: string; url: string }
+): Promise<{ success: boolean; link: CreatorLink }> {
+  return apiFetch("/api/creator/links", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCreatorLink(
+  token: string | null,
+  id: string,
+  payload: { title?: string; url?: string }
+): Promise<{ success: boolean; link: CreatorLink }> {
+  return apiFetch(`/api/creator/links/${id}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteCreatorLink(
+  token: string | null,
+  id: string
+): Promise<{ success: boolean }> {
+  return apiFetch(`/api/creator/links/${id}`, token, { method: "DELETE" });
+}
+
+export function reorderCreatorLinks(
+  token: string | null,
+  orderedIds: string[]
+): Promise<{ success: boolean }> {
+  return apiFetch("/api/creator/links/reorder", token, {
+    method: "PATCH",
+    body: JSON.stringify({ orderedIds }),
   });
 }
 
