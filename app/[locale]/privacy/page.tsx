@@ -129,7 +129,7 @@ export default function PrivacyPage() {
           <Section id="who-we-are" title="1. Who We Are">
             <p>
               Zuva.TV Inc. is the data controller responsible for personal data collected through the Platform.
-              We are incorporated under the laws of the Province of Ontario, Canada.
+              We are incorporated under the laws of the Province of British Columbia, Canada.
             </p>
             <Sub title="Data Protection Contact">
               <p>For all privacy-related inquiries, requests, or complaints:</p>
@@ -441,12 +441,29 @@ export default function PrivacyPage() {
               </p>
             </Sub>
 
-            <Sub title="9.3 Rights Under PIPEDA (Canada)">
+            <Sub title="9.3 Rights Under PIPEDA and BC PIPA (Canada)">
+              {/* LEGAL REVIEW FLAGGED: paragraph below added because Zuva.TV
+                  Inc. is now incorporated in British Columbia. BC's Personal
+                  Information Protection Act (PIPA) has been declared
+                  "substantially similar" to PIPEDA by the federal government,
+                  which generally means PIPA — not PIPEDA — governs purely
+                  intra-provincial commercial activity in BC, while PIPEDA
+                  continues to apply to federally regulated activity and
+                  interprovincial/international data flows. This paragraph
+                  deliberately does not attempt to allocate which of our
+                  specific processing activities falls under which statute —
+                  confirm that allocation, and the wording below, with counsel
+                  before relying on it. */}
+              <p>
+                Zuva.TV Inc. is incorporated in British Columbia and, as an organization operating there, is also
+                subject to British Columbia&apos;s Personal Information Protection Act (PIPA), in addition to the
+                federal PIPEDA.
+              </p>
               <Ul items={[
                 "Right to access your personal information held by Zuva",
                 "Right to challenge the accuracy and completeness of your information",
                 "Right to withdraw consent for collection, use, or disclosure of personal information",
-                "Right to complain to the Office of the Privacy Commissioner of Canada (OPC)",
+                "Right to complain to the Office of the Privacy Commissioner of Canada (OPC) or, for matters governed by BC PIPA, the Office of the Information and Privacy Commissioner for British Columbia (OIPC BC)",
               ]} />
             </Sub>
 
@@ -568,7 +585,7 @@ export default function PrivacyPage() {
                 <span className="text-zinc-500">Response time:</span> 30 days (standard); 72 hours (data breach)
               </p>
               <p className="text-zinc-400 text-sm mt-1">
-                <span className="text-zinc-500">Governing jurisdiction:</span> Province of Ontario, Canada
+                <span className="text-zinc-500">Governing jurisdiction:</span> Province of British Columbia, Canada
               </p>
             </div>
             <p className="text-zinc-500 text-xs mt-4">

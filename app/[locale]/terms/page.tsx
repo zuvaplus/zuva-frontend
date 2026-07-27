@@ -305,9 +305,9 @@ export default function TermsPage() {
             <p>
               These Terms and any dispute arising out of or related to them or the Platform will be governed by
               and construed in accordance with the laws of the{" "}
-              <strong className="text-white">Province of Ontario, Canada</strong>, without regard to its conflict
+              <strong className="text-white">Province of British Columbia, Canada</strong>, without regard to its conflict
               of laws principles. You agree to submit to the exclusive jurisdiction of the courts located in
-              Ontario, Canada for the resolution of any disputes.
+              British Columbia, Canada for the resolution of any disputes.
             </p>
           </Section>
 
@@ -321,7 +321,7 @@ export default function TermsPage() {
                 <a href={`mailto:${LEGAL_CONTACT}`} className="text-gold-400 hover:underline">{LEGAL_CONTACT}</a>
               </p>
               <p className="text-zinc-400 text-sm mt-1">
-                <span className="text-zinc-500">Governing jurisdiction:</span> Province of Ontario, Canada
+                <span className="text-zinc-500">Governing jurisdiction:</span> Province of British Columbia, Canada
               </p>
             </div>
           </Section>
