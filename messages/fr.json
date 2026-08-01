@@ -141,7 +141,8 @@
     "tabs": {
       "applications": "Candidatures",
       "content": "Contenu",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "reports": "Signalements"
     },
     "stats": {
       "pending": "En attente",
@@ -187,7 +188,52 @@
       "updateContent": "Échec de la mise à jour du contenu",
       "removeContent": "Échec de la suppression du contenu",
       "suspendUser": "Échec de la suspension de l'utilisateur",
-      "removeUser": "Échec de la suppression de l'utilisateur"
+      "removeUser": "Échec de la suppression de l'utilisateur",
+      "loadReports": "Échec du chargement des signalements",
+      "loadStats": "Échec du chargement des statistiques de signalement",
+      "resolveReport": "Échec de la résolution du signalement"
+    },
+    "reports": {
+      "from": "Du",
+      "to": "Au",
+      "applyRange": "Appliquer",
+      "stats": {
+        "resolved": "Résolus",
+        "restored": "Restaurées",
+        "removed": "Supprimées",
+        "avgResolution": "Résolution moy."
+      },
+      "allCategories": "Tous",
+      "categories": {
+        "nudity": "Nudité",
+        "minors": "Mineurs",
+        "violence": "Violence",
+        "animal_cruelty": "Cruauté envers les animaux",
+        "hate_speech": "Discours de haine",
+        "misinformation": "Désinformation",
+        "spam": "Spam",
+        "copyright": "Droit d'auteur",
+        "other": "Autre"
+      },
+      "status": {
+        "pending": "En attente",
+        "resolved": "Résolus"
+      },
+      "columns": {
+        "category": "Catégorie",
+        "reporter": "Signalé par",
+        "details": "Détails"
+      },
+      "anonymous": "Anonyme",
+      "loading": "Chargement des signalements…",
+      "empty": "Aucun signalement trouvé.",
+      "actions": {
+        "restore": "Restaurer",
+        "remove": "Supprimer"
+      },
+      "prevPage": "Précédent",
+      "nextPage": "Suivant",
+      "page": "Page {page}"
     }
   },
   "CreatorDashboard": {
@@ -225,6 +271,7 @@
       "flareTooLong": "Les Flares doivent durer {max} secondes maximum — cette vidéo dure {actual}s."
     },
     "uploadedTitle": "Vidéo mise en ligne !",
+    "uploadedMessage": "Vidéo mise en ligne avec succès et déjà en direct.",
     "processingComplete": "Traitement terminé — prête à être lue.",
     "processingFailed": "Échec du traitement",
     "processingVideo": "Traitement de la vidéo…",
@@ -405,16 +452,31 @@
     "aiDisclosureBadgeTooltip": "Déclaré par le créateur : contient un contenu réaliste généré ou modifié par IA",
     "report": {
       "title": "Signaler cette vidéo",
+      "subtitle": "Aidez-nous à comprendre le problème",
       "submitted": "Signalement envoyé",
       "thanks": "Merci de nous aider à garder Zuva sûr.",
       "submitError": "Impossible d'envoyer le signalement",
       "submitting": "Envoi…",
       "submit": "Envoyer le signalement",
-      "reasons": {
-        "inappropriate": "Contenu inapproprié",
+      "detailsLabel": "Détails supplémentaires (facultatif)",
+      "detailsPlaceholder": "Autre chose qui pourrait nous aider à examiner ce contenu ?",
+      "categories": {
+        "nudity": "Nudité ou contenu sexuel",
+        "minors": "Met un mineur en danger",
+        "violence": "Violence ou contenu choquant",
+        "animal_cruelty": "Cruauté envers les animaux",
+        "hate_speech": "Discours de haine ou harcèlement",
+        "misinformation": "Désinformation",
+        "spam": "Spam ou arnaque",
         "copyright": "Violation de droits d'auteur",
-        "spam": "Spam",
-        "other": "Autre"
+        "other": "Autre chose"
+      },
+      "copyright": {
+        "title": "Non traité ici",
+        "body": "Les questions de droits d'auteur passent par un processus de notification de retrait séparé, pas par ce formulaire de signalement.",
+        "hint": "Sélectionner cette option ne créera pas de signalement — envoyez plutôt les détails à {email}.",
+        "emailButton": "Envoyer un e-mail à {email}",
+        "continueButton": "Continuer"
       }
     }
   },

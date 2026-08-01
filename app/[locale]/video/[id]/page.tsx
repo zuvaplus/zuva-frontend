@@ -6,31 +6,30 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
-import { Eye, Clock, Tag, Flag, X, Film, Heart } from "lucide-react";
-import type { VideoResponse } from "@/lib/types";
+import { Eye, Clock, Tag, Flag, X, Film, Heart, Mail } from "lucide-react";
+import type { VideoResponse, ReportCategory } from "@/lib/types";
 import {
   likeVideo,
   unlikeVideo,
   subscribeCreator,
   unsubscribeCreator,
   recordWatchProgress,
+  reportVideo,
 } from "@/lib/api";
 import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
 import CommentsSection from "@/components/CommentsSection";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
-// Canonical (English) values submitted to the backend — REPORT_REASONS is
-// free text in the DB, but keeping the wire value English keeps admin
-// moderation views consistent regardless of the reporter's UI locale.
-// Only the displayed label is translated (Video.report.reasons.*).
-const REPORT_REASON_KEYS = ["inappropriate", "copyright", "spam", "other"] as const;
-const REPORT_REASON_VALUES: Record<(typeof REPORT_REASON_KEYS)[number], string> = {
-  inappropriate: "Inappropriate content",
-  copyright: "Copyright violation",
-  spam: "Spam",
-  other: "Other",
-};
+// Canonical wire values — must match REPORT_CATEGORIES in
+// zuva-backend/zuva-api.js. Only the displayed label is translated
+// (Video.report.categories.*).
+const REPORT_CATEGORIES: ReportCategory[] = [
+  "nudity", "minors", "violence", "animal_cruelty", "hate_speech",
+  "misinformation", "spam", "copyright", "other",
+];
+
+const LEGAL_CONTACT = "legal@zuva.tv";
 
 function VideoSkeleton() {
   return (
@@ -45,32 +44,27 @@ function VideoSkeleton() {
 function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => void }) {
   const t = useTranslations("Video.report");
   const { getToken } = useAuth();
-  const [reasonKey, setReasonKey] = useState<string>("");
+  const [category, setCategory] = useState<ReportCategory | "">("");
+  const [details, setDetails]   = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]       = useState<string | null>(null);
   const [done, setDone]         = useState(false);
 
+  const isCopyright = category === "copyright";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!reasonKey) return;
+    if (!category) return;
     setSubmitting(true);
     setError(null);
     try {
       // Reporting works for signed-out viewers too — only attach a token
       // when one is available so the report can be attributed if signed in.
       const token = await getToken().catch(() => null);
-      const res = await fetch(`${BACKEND_URL}/api/video/${videoId}/report`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ reason: REPORT_REASON_VALUES[reasonKey as keyof typeof REPORT_REASON_VALUES] }),
+      await reportVideo(token, videoId, {
+        category,
+        additional_details: details.trim() || undefined,
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? t("submitError"));
-      }
       setDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("submitError"));
@@ -84,46 +78,85 @@ function ReportModal({ videoId, onClose }: { videoId: string; onClose: () => voi
       className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-sm bg-surface-200 border border-gold-400/20 rounded-t-3xl md:rounded-3xl p-6">
+      <div className="relative w-full max-w-sm bg-surface-200 border border-gold-400/20 rounded-t-3xl md:rounded-3xl p-6 max-h-[85vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors p-1">
           <X size={20} />
         </button>
 
         {done ? (
-          <div className="text-center py-4">
-            <Flag size={32} className="text-gold-400 mx-auto mb-3" />
-            <p className="text-white font-semibold mb-1">{t("submitted")}</p>
-            <p className="text-zinc-500 text-sm">{t("thanks")}</p>
-          </div>
+          isCopyright ? (
+            // Copyright never files a report — this mirrors the backend's
+            // redirect response rather than showing a false "submitted"
+            // confirmation for something that was never recorded.
+            <div className="text-center py-4">
+              <Mail size={32} className="text-gold-400 mx-auto mb-3" />
+              <p className="text-white font-semibold mb-1">{t("copyright.title")}</p>
+              <p className="text-zinc-500 text-sm mb-4">{t("copyright.body")}</p>
+              <a
+                href={`mailto:${LEGAL_CONTACT}`}
+                className="inline-block bg-gold-400 hover:bg-gold-300 text-black font-bold px-6 py-2.5 rounded-xl transition-all"
+              >
+                {t("copyright.emailButton", { email: LEGAL_CONTACT })}
+              </a>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <Flag size={32} className="text-gold-400 mx-auto mb-3" />
+              <p className="text-white font-semibold mb-1">{t("submitted")}</p>
+              <p className="text-zinc-500 text-sm">{t("thanks")}</p>
+            </div>
+          )
         ) : (
           <form onSubmit={handleSubmit}>
-            <h2 className="text-white font-bold text-lg mb-4">{t("title")}</h2>
-            <div className="space-y-2 mb-5">
-              {REPORT_REASON_KEYS.map((key) => (
+            <h2 className="text-white font-bold text-lg mb-1">{t("title")}</h2>
+            <p className="text-zinc-500 text-xs mb-4">{t("subtitle")}</p>
+            <div className="space-y-2 mb-4">
+              {REPORT_CATEGORIES.map((key) => (
                 <label
                   key={key}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm cursor-pointer transition-colors
-                    ${reasonKey === key ? "border-gold-400/50 bg-gold-400/10 text-white" : "border-gold-400/15 text-zinc-400 hover:border-gold-400/30"}`}
+                    ${category === key ? "border-gold-400/50 bg-gold-400/10 text-white" : "border-gold-400/15 text-zinc-400 hover:border-gold-400/30"}`}
                 >
                   <input
                     type="radio"
-                    name="reason"
+                    name="category"
                     value={key}
-                    checked={reasonKey === key}
-                    onChange={() => setReasonKey(key)}
-                    className="accent-gold-400"
+                    checked={category === key}
+                    onChange={() => setCategory(key)}
+                    className="accent-gold-400 shrink-0"
                   />
-                  {t(`reasons.${key}`)}
+                  {t(`categories.${key}`)}
                 </label>
               ))}
             </div>
+
+            {category && !isCopyright && (
+              <div className="mb-4">
+                <label className="block text-zinc-400 text-xs font-medium mb-1.5">{t("detailsLabel")}</label>
+                <textarea
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  rows={3}
+                  maxLength={1000}
+                  placeholder={t("detailsPlaceholder")}
+                  className="w-full bg-surface-100 border border-gold-400/15 focus:border-gold-400/40 rounded-xl px-3 py-2 text-sm text-white placeholder:text-zinc-600 outline-none transition-colors resize-none"
+                />
+              </div>
+            )}
+
+            {isCopyright && (
+              <p className="text-zinc-500 text-xs mb-4 bg-surface-100 border border-gold-400/10 rounded-xl px-3 py-2.5">
+                {t("copyright.hint", { email: LEGAL_CONTACT })}
+              </p>
+            )}
+
             {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
             <button
               type="submit"
-              disabled={!reasonKey || submitting}
+              disabled={!category || submitting}
               className="w-full bg-gold-400 hover:bg-gold-300 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-40"
             >
-              {submitting ? t("submitting") : t("submit")}
+              {submitting ? t("submitting") : isCopyright ? t("copyright.continueButton") : t("submit")}
             </button>
           </form>
         )}

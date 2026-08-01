@@ -26,6 +26,8 @@ import type {
   Orientation,
   WatchProgressPayload,
   FlareSwipeEventPayload,
+  ReportVideoPayload,
+  ReportVideoResponse,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -231,6 +233,19 @@ export function unsubscribeCreator(
 ): Promise<SubscribeResponse> {
   return apiFetch<SubscribeResponse>(`/api/creator/${creatorId}/subscribe`, token, {
     method: "DELETE",
+  });
+}
+
+// Works signed-out too (optionalAuth on the backend) — pass a null token
+// when one isn't available rather than skipping the call.
+export function reportVideo(
+  token: string | null,
+  videoId: string,
+  payload: ReportVideoPayload
+): Promise<ReportVideoResponse> {
+  return apiFetch<ReportVideoResponse>(`/api/video/${videoId}/report`, token, {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }
 

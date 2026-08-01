@@ -442,3 +442,26 @@ export interface SubscribeResponse {
   subscribed: boolean;
   follower_count: number;
 }
+
+// ─── Reporting ────────────────────────────────────────────────
+// Must match REPORT_CATEGORIES in zuva-backend/zuva-api.js.
+export type ReportCategory =
+  | "nudity" | "minors" | "violence" | "animal_cruelty" | "hate_speech"
+  | "misinformation" | "spam" | "copyright" | "other";
+
+export interface ReportVideoPayload {
+  category: ReportCategory;
+  additional_details?: string;
+}
+
+// 'copyright' never files a report — the backend intercepts it and
+// returns redirect/contactEmail/message instead of the tier fields.
+export interface ReportVideoResponse {
+  success: boolean;
+  redirect?: "copyright_process";
+  contactEmail?: string;
+  message?: string;
+  category?: ReportCategory;
+  tier_pending_count?: number;
+  threshold_reached?: boolean;
+}

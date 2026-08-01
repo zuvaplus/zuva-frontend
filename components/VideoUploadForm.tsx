@@ -82,10 +82,11 @@ interface PendingCaption {
 
 type CaptionUploadState = "pending" | "uploading" | "done" | "error";
 
-// Cloudflare Stream encoding is separate from our moderation status — a
-// video can already be "published" in our DB (thumbnail-based moderation
-// ran synchronously) while Cloudflare is still transcoding it. Poll until
-// a terminal encoding state, capped so a stuck job doesn't spin forever.
+// Cloudflare Stream encoding is separate from publishing — every upload
+// is already "published" in our DB immediately (no pre-approval gate;
+// moderation is entirely post-publish now, via reports) while Cloudflare
+// is still transcoding it in the background. Poll until a terminal
+// encoding state, capped so a stuck job doesn't spin forever.
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLL_ATTEMPTS = 40; // ~2 minutes
 
@@ -136,10 +137,12 @@ export default function VideoUploadForm({
   const [uploading, setUploading]   = useState(false);
   const [progress, setProgress]     = useState(0);
 
-  // Set once the upload+moderation response (201) comes back; drives the
+  // Set once the upload response (201) comes back; drives the
   // "processing" phase where we poll Cloudflare's encoding status.
+  // Every upload publishes immediately (no moderation gate), so there's
+  // no longer a variable outcome message to carry through state —
+  // see uploadedMessage in the success screen below.
   const [uploadedVideo, setUploadedVideo] = useState<UploadedVideo | null>(null);
-  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [processing, setProcessing] = useState<UploadProcessingStatus | null>(null);
   const [pollGaveUp, setPollGaveUp] = useState(false);
 
@@ -329,7 +332,6 @@ export default function VideoUploadForm({
         try {
           const body = JSON.parse(xhr.responseText);
           setUploadedVideo(body.video);
-          setUploadMessage(body.message ?? null);
           onUploaded?.(body.video);
         } catch {
           setError(t("errors.unreadableResponse"));
@@ -354,7 +356,6 @@ export default function VideoUploadForm({
 
   function resetForm() {
     setUploadedVideo(null);
-    setUploadMessage(null);
     setProcessing(null);
     setPollGaveUp(false);
     setVideoFile(null);
@@ -383,7 +384,10 @@ export default function VideoUploadForm({
           <UploadCloud size={28} className="text-gold-400" />
         </div>
         <h2 className="text-xl font-bold text-white mb-2">{t("uploadedTitle")}</h2>
-        {uploadMessage && <p className="text-zinc-400 text-sm leading-relaxed mb-5">{uploadMessage}</p>}
+        {/* Publishing is now unconditional (no pre-approval gate), so this
+            is always the same message — shown via a translated string
+            rather than the backend's raw (English-only) response text. */}
+        <p className="text-zinc-400 text-sm leading-relaxed mb-5">{t("uploadedMessage")}</p>
 
         {/* Cloudflare encoding status */}
         <div className="bg-surface-300 border border-gold-400/10 rounded-xl px-4 py-3.5 mb-6 text-left">

@@ -141,7 +141,8 @@
     "tabs": {
       "applications": "Applications",
       "content": "Content",
-      "users": "Users"
+      "users": "Users",
+      "reports": "Reports"
     },
     "stats": {
       "pending": "Pending",
@@ -187,7 +188,52 @@
       "updateContent": "Failed to update content",
       "removeContent": "Failed to remove content",
       "suspendUser": "Failed to suspend user",
-      "removeUser": "Failed to remove user"
+      "removeUser": "Failed to remove user",
+      "loadReports": "Failed to load reports",
+      "loadStats": "Failed to load report stats",
+      "resolveReport": "Failed to resolve report"
+    },
+    "reports": {
+      "from": "From",
+      "to": "To",
+      "applyRange": "Apply",
+      "stats": {
+        "resolved": "Resolved",
+        "restored": "Restored",
+        "removed": "Removed",
+        "avgResolution": "Avg. Resolution"
+      },
+      "allCategories": "All",
+      "categories": {
+        "nudity": "Nudity",
+        "minors": "Minors",
+        "violence": "Violence",
+        "animal_cruelty": "Animal Cruelty",
+        "hate_speech": "Hate Speech",
+        "misinformation": "Misinformation",
+        "spam": "Spam",
+        "copyright": "Copyright",
+        "other": "Other"
+      },
+      "status": {
+        "pending": "Pending",
+        "resolved": "Resolved"
+      },
+      "columns": {
+        "category": "Category",
+        "reporter": "Reporter",
+        "details": "Details"
+      },
+      "anonymous": "Anonymous",
+      "loading": "Loading reports…",
+      "empty": "No reports found.",
+      "actions": {
+        "restore": "Restore",
+        "remove": "Remove"
+      },
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "page": "Page {page}"
     }
   },
   "CreatorDashboard": {
@@ -225,6 +271,7 @@
       "flareTooLong": "Flares must be {max} seconds or under — this video is {actual}s."
     },
     "uploadedTitle": "Video uploaded!",
+    "uploadedMessage": "Video uploaded successfully and is now live.",
     "processingComplete": "Video processing complete — ready to play.",
     "processingFailed": "Processing failed",
     "processingVideo": "Processing video…",
@@ -405,16 +452,31 @@
     "aiDisclosureBadgeTooltip": "Creator-disclosed: contains realistic AI-generated or altered content",
     "report": {
       "title": "Report this video",
+      "subtitle": "Help us understand what's wrong",
       "submitted": "Report submitted",
       "thanks": "Thanks for helping keep Zuva safe.",
       "submitError": "Could not submit report",
       "submitting": "Submitting…",
       "submit": "Submit Report",
-      "reasons": {
-        "inappropriate": "Inappropriate content",
-        "copyright": "Copyright violation",
-        "spam": "Spam",
-        "other": "Other"
+      "detailsLabel": "Additional details (optional)",
+      "detailsPlaceholder": "Anything else that would help us review this?",
+      "categories": {
+        "nudity": "Nudity or sexual content",
+        "minors": "Involves a minor unsafely",
+        "violence": "Violence or graphic content",
+        "animal_cruelty": "Animal cruelty",
+        "hate_speech": "Hate speech or harassment",
+        "misinformation": "Misinformation",
+        "spam": "Spam or a scam",
+        "copyright": "Copyright infringement",
+        "other": "Something else"
+      },
+      "copyright": {
+        "title": "Not handled here",
+        "body": "Copyright issues go through a separate takedown notice process, not this report form.",
+        "hint": "Selecting this won't file a report — email {email} with the details instead.",
+        "emailButton": "Email {email}",
+        "continueButton": "Continue"
       }
     }
   },
