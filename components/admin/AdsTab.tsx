@@ -122,7 +122,7 @@ interface Creative {
   label: string | null;
   created_at: string;
   campaign_name?: string;
-  advertiser_business_name?: string;
+  advertiser_name?: string;
 }
 
 interface DashboardSummary {
@@ -1199,7 +1199,7 @@ export default function AdsTab() {
               creatives.map((cr) => (
                 <tr key={cr.id} className="hover:bg-surface-300/30 transition-colors">
                   <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{cr.label ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-400 whitespace-nowrap">{cr.advertiser_business_name ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-400 whitespace-nowrap">{cr.advertiser_name ?? "—"}</td>
                   <td className="px-4 py-3 text-zinc-400 whitespace-nowrap">{cr.campaign_name ?? "—"}</td>
                   <td className="px-4 py-3 text-zinc-400 capitalize">{cr.type}</td>
                   <td className="px-4 py-3 text-zinc-400">{cr.duration_seconds ? `${cr.duration_seconds}s` : "—"}</td>
