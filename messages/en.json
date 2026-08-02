@@ -142,7 +142,8 @@
       "applications": "Applications",
       "content": "Content",
       "users": "Users",
-      "reports": "Reports"
+      "reports": "Reports",
+      "ads": "Advertisers"
     },
     "stats": {
       "pending": "Pending",

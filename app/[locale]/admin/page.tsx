@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useUser, useClerk, useAuth } from "@clerk/nextjs";
+import AdsTab from "@/components/admin/AdsTab";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-type Tab = "applications" | "content" | "users" | "reports";
-const TABS: Tab[] = ["applications", "content", "users", "reports"];
+type Tab = "applications" | "content" | "users" | "reports" | "ads";
+const TABS: Tab[] = ["applications", "content", "users", "reports", "ads"];
 
 // Must match REPORT_CATEGORIES in zuva-backend/zuva-api.js. 'all' is a
 // frontend-only pseudo-category (no category query param sent).
@@ -783,6 +784,8 @@ export default function AdminPage() {
           </div>
         </div>
       )}
+
+      {tab === "ads" && <AdsTab />}
     </div>
   );
 }
