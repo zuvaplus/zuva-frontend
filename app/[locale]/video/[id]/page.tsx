@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { Stream, StreamPlayerApi } from "@cloudflare/stream-react";
+import type { StreamPlayerApi } from "@cloudflare/stream-react";
 import { Eye, Clock, Tag, Flag, X, Film, Heart, Mail } from "lucide-react";
 import type { VideoResponse, ReportCategory } from "@/lib/types";
 import {
@@ -18,6 +18,8 @@ import {
 } from "@/lib/api";
 import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
 import CommentsSection from "@/components/CommentsSection";
+import VideoPlayerWithAds from "@/components/VideoPlayerWithAds";
+import { useUserRole } from "@/components/UserRoleProvider";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -237,6 +239,9 @@ export default function VideoPlayerPage() {
   const router = useRouter();
   const { getToken } = useAuth();
   const { isSignedIn } = useUser();
+  // DB users.id, not Clerk's user.id — see VideoPlayerWithAds's header
+  // note on why those are two different id spaces.
+  const { userId: viewerDbId } = useUserRole();
 
   const [data, setData]       = useState<VideoResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -389,17 +394,27 @@ export default function VideoPlayerPage() {
 
   const { video, creator, related_videos } = data;
   const creatorName = creator.display_name || creator.username;
+  // Skip pre-roll ads entirely when the viewer is watching their own
+  // upload — matches !!viewerDbId so a null/unresolved viewer id never
+  // accidentally matches a null/undefined creator_id.
+  const isOwnContent = !!viewerDbId && viewerDbId === video.creator_id;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-6 animate-fade-in">
       {/* Player — Stream (not a raw iframe) so streamRef gives us
           imperative currentTime/duration/paused access for watch-progress
           tracking, same verified pattern as FlareSlide.tsx. controls=true
-          here (unlike Flares) since this page has no custom overlay UI. */}
+          here (unlike Flares) since this page has no custom overlay UI.
+          Wrapped in VideoPlayerWithAds for the Zuva Ads pre-roll — city/
+          country are omitted (no geolocation source exists anywhere in
+          this frontend yet), so the backend serves country-agnostic ads. */}
       <div className="aspect-video bg-surface-300 rounded-2xl overflow-hidden mb-5 border border-gold-400/10">
-        <Stream
+        <VideoPlayerWithAds
+          videoId={video.cloudflare_video_id}
+          contentId={video.id}
+          contentCategory={video.content_category}
+          skipAds={isOwnContent}
           streamRef={streamRef}
-          src={video.cloudflare_video_id}
           controls
           responsive={false}
           preload="metadata"
