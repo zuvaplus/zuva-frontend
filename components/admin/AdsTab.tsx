@@ -629,7 +629,6 @@ function CreativeFormModal({
   const [type, setType] = useState<"video" | "image">("video");
   const [fileUrl, setFileUrl] = useState("");
   const [cloudflareAssetId, setCloudflareAssetId] = useState("");
-  const [durationSeconds, setDurationSeconds] = useState("15");
   const [clickThroughUrl, setClickThroughUrl] = useState("");
   const [label, setLabel] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -648,7 +647,7 @@ function CreativeFormModal({
         type,
         file_url: fileUrl,
         cloudflare_asset_id: cloudflareAssetId || undefined,
-        duration_seconds: type === "video" ? Number(durationSeconds) || undefined : undefined,
+        duration_seconds: type === "video" ? 15 : undefined,
         click_through_url: clickThroughUrl || undefined,
         label: label || undefined,
       });
@@ -692,8 +691,11 @@ function CreativeFormModal({
       </Field>
 
       {type === "video" && (
-        <Field label="Duration (seconds) — 15 is the standard pre-roll length">
-          <input type="number" min={0} className={inputClass} value={durationSeconds} onChange={(e) => setDurationSeconds(e.target.value)} />
+        <Field label="Duration">
+          <div className={readOnlyClass}>15 seconds (standard)</div>
+          <p className="text-zinc-600 text-[11px] mt-1">
+            All Zuva Ads creatives are 15 seconds. This is fixed to ensure a consistent viewer experience.
+          </p>
         </Field>
       )}
 

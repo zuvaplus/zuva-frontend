@@ -39,6 +39,10 @@ import { Stream } from "@cloudflare/stream-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
+// A skip below this many seconds doesn't count as an impression — see
+// handleSkip below. A completed view always counts regardless of length.
+const MIN_VIEW_SECONDS_FOR_IMPRESSION = 5;
+
 interface AdServeResponse {
   campaign_id: string;
   creative_id: string;
@@ -71,6 +75,12 @@ interface ImpressionOutcome {
   skipTimeSeconds: number | null;
   completed: boolean;
   clicked: boolean;
+  // Whether this outcome clears MIN_VIEW_SECONDS_FOR_IMPRESSION — false
+  // only reaches here via a skip below the threshold (shouldn't normally
+  // happen, since the skip button doesn't render before skip_after_seconds,
+  // but a timing edge case could still let a click through just under it).
+  // A completed view is always true, regardless of length.
+  meetsMinimumView: boolean;
 }
 
 // ============================================================
@@ -121,11 +131,15 @@ function PrerollPlayer({
   }, []);
 
   function handleSkip() {
+    // Threshold check uses the raw (unrounded) currentTime, matching
+    // "currentTime >= 5 at the moment of the click" exactly — rounding
+    // first (e.g. 4.6 -> 5) could let a sub-threshold skip pass.
     onComplete({
       wasSkipped: true,
       skipTimeSeconds: Math.round(currentTime),
       completed: false,
       clicked: clickedRef.current,
+      meetsMinimumView: currentTime >= MIN_VIEW_SECONDS_FOR_IMPRESSION,
     });
   }
 
@@ -135,6 +149,7 @@ function PrerollPlayer({
       skipTimeSeconds: null,
       completed: true,
       clicked: clickedRef.current,
+      meetsMinimumView: true, // a completion is always a valid view
     });
   }
 
@@ -304,13 +319,17 @@ export default function VideoPlayerWithAds({
   }, [contentId, city, country]);
 
   function handlePrerollComplete(outcome: ImpressionOutcome) {
-    if (ad) fireImpression(outcome, ad);
+    // Below MIN_VIEW_SECONDS_FOR_IMPRESSION, show the main video with
+    // no impression fired — silently, no error state.
+    if (ad && outcome.meetsMinimumView) fireImpression(outcome, ad);
     setPlayerState("main");
   }
 
   function handlePrerollError() {
-    // Creative failed to load/play — show the main video immediately,
-    // no impression (nothing was actually delivered to the viewer).
+    // Creative failed to load/play — show the main video immediately.
+    // Never fires an impression: fireImpression is only ever called
+    // from handlePrerollComplete above, which this path doesn't go
+    // through, so nothing was actually delivered to the viewer.
     setPlayerState("main");
   }
 
