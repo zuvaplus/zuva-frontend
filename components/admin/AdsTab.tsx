@@ -45,6 +45,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { ALL_COUNTRIES } from "@/lib/countries";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -397,7 +398,12 @@ function AdvertiserFormModal({
               <input className={inputClass} value={city} onChange={(e) => setCity(e.target.value)} />
             </Field>
             <Field label="Country *">
-              <input className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)} />
+              <select required className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
+                <option value="" disabled>Select country</option>
+                {ALL_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
             </Field>
           </div>
           <Field label="Business Category *">

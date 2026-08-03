@@ -7,13 +7,16 @@ import { Link } from "@/i18n/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 import SiteFooter from "@/components/SiteFooter";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
-import { COUNTRIES } from "@/lib/countries";
+import { ALL_COUNTRIES } from "@/lib/countries";
 
 // Names only here — this form stores the plain country name on the
-// application (creator_applications.country is free text), unlike
-// users.country_code which needs the ISO code from lib/countries.ts's
-// COUNTRIES (also used by the homepage's country filter bar).
-const AFRICAN_CARIBBEAN_COUNTRIES = COUNTRIES.map((c) => c.name);
+// application (creator_applications.country is free text, displayed
+// as-is in the admin dashboard's Applications tab), unlike
+// users.country_code which needs the ISO code. Sourced from the full
+// ALL_COUNTRIES list rather than the curated Africa+Caribbean
+// COUNTRIES (also used by the homepage's country filter bar) — this
+// form is open to applicants worldwide, not just those two regions.
+const WORLD_COUNTRY_NAMES = ALL_COUNTRIES.map((c) => c.name);
 
 const PLATFORMS = ["YouTube", "TikTok", "Instagram", "Facebook", "Other"];
 
@@ -218,7 +221,7 @@ function CreatorSignupForm() {
               className={inputClass}
             >
               <option value="" disabled>{t("selectCountry")}</option>
-              {AFRICAN_CARIBBEAN_COUNTRIES.map((c) => (
+              {WORLD_COUNTRY_NAMES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>

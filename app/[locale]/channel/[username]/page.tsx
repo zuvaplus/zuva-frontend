@@ -9,6 +9,7 @@ import { MapPin, Users, Film, Eye, Clock, Pencil, X } from "lucide-react";
 import type { ChannelResponse } from "@/lib/types";
 import { formatDuration, timeAgo } from "@/lib/utils";
 import { useUserRole } from "@/components/UserRoleProvider";
+import { ALL_COUNTRIES } from "@/lib/countries";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -210,13 +211,16 @@ export default function ChannelPage() {
 
             <div>
               <label className="block text-zinc-300 text-xs font-medium mb-1.5">{t("countryCodeLabel")}</label>
-              <input
-                type="text"
+              <select
                 value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value.toUpperCase())}
-                maxLength={2}
-                className="w-24 bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-4 py-2.5 outline-none uppercase"
-              />
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="bg-surface-100 border border-gold-400/20 focus:border-gold-400/50 text-white text-sm rounded-xl px-4 py-2.5 outline-none"
+              >
+                <option value="">Select country</option>
+                {ALL_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
             </div>
 
             {saveError && <p className="text-red-400 text-xs">{saveError}</p>}
