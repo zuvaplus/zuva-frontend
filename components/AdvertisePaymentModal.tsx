@@ -86,6 +86,15 @@ export default function AdvertisePaymentModal({ pkg, onClose }: { pkg: PackageSu
   const [linkLoading, setLinkLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // One key for this modal's whole lifetime — generated once at mount,
+  // reused across retries of "Pay with Card" (e.g. a network timeout
+  // followed by clicking again) so the backend's idempotency check
+  // recognizes it as the same attempt instead of creating a duplicate
+  // Stripe customer/checkout session. A fresh modal open (new component
+  // instance) naturally gets a fresh key, which is correct — that's a
+  // genuinely new attempt.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -149,7 +158,10 @@ export default function AdvertisePaymentModal({ pkg, onClose }: { pkg: PackageSu
     setError(null);
     setCardLoading(true);
     try {
-      const data = await callBackend<{ url: string }>("/api/ads/advertise/stripe-checkout", requestPayload());
+      const data = await callBackend<{ url: string }>("/api/ads/advertise/stripe-checkout", {
+        ...requestPayload(),
+        idempotency_key: idempotencyKey,
+      });
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start checkout");
