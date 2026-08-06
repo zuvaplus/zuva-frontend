@@ -8,7 +8,7 @@ import { getPayoutOptions, getPayoutHistory, cashoutSuns, ApiError } from "@/lib
 import { formatSuns, timeAgo } from "@/lib/utils";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
-const SUNS_PER_USD = 1000;
+const SUNS_PER_USD = 100; // 1 Sun = $0.01 USD
 
 type Step = "form" | "confirm" | "done";
 

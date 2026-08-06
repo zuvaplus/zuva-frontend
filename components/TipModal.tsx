@@ -8,6 +8,13 @@ import { tipCreator } from "@/lib/api";
 import { formatSuns } from "@/lib/utils";
 import ZuvaSunIcon from "./ZuvaSunIcon";
 
+// Left as raw Suns figures, not rescaled — the backend's tip minimum
+// (requireAuth POST /suns/tip, amountSuns >= 10) wasn't part of this
+// rate-change task's scope and stays at 10 Suns, now $0.10 instead of
+// $0.01. Rescaling these down to match the old $0.01-$1.00 range would
+// have meant a "1 Sun" quick-amount below that real floor. At the new
+// rate this ladder reads as $0.10/$0.50/$1/$5/$10 — a sensible tipping
+// range on its own, and it stays consistent with the unmoved minimum.
 const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
 
 interface TipModalProps {
@@ -21,7 +28,7 @@ interface TipModalProps {
 export default function TipModal({ creatorId, creatorName, contentId, orientation, onClose }: TipModalProps) {
   const t = useTranslations("TipModal");
   const { getToken } = useAuth();
-  const [amount,  setAmount]  = useState(50);
+  const [amount,  setAmount]  = useState(50); // unchanged Suns figure — now $0.50 instead of $0.05, still well above the 10-Sun minimum
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [result,  setResult]  = useState<{ success: boolean; msg: string } | null>(null);
@@ -89,7 +96,9 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
               </span>
             </div>
 
-            {/* Slider */}
+            {/* Slider — bounds left as raw Suns (10-1000), same reasoning
+                as QUICK_AMOUNTS above: matches the backend's unmoved
+                10-Sun tip minimum, now reads as $0.10-$10.00. */}
             <input
               type="range" min={10} max={1000} step={10}
               value={amount}
@@ -128,7 +137,7 @@ export default function TipModal({ creatorId, creatorName, contentId, orientatio
 
             {/* USD equivalent */}
             <p className="text-center text-zinc-600 text-xs mb-5">
-              ≈ ${(amount / 1000).toFixed(2)} USD
+              ≈ ${(amount / 100).toFixed(2)} USD
             </p>
 
             {/* Send */}

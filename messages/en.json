@@ -353,7 +353,7 @@
     "creatorOnly": "Creator only",
     "exchangeRate": "Exchange Rate",
     "sunsCount": "{count} Suns",
-    "exchangeRateNote": "1,000 Suns = $1.00 USD. Minimum cashout depends on your region: 5,000 Suns ($5) for mobile money & cash pickup, 20,000 Suns ($20) for bank transfers.",
+    "exchangeRateNote": "100 Suns = $1.00 USD. Minimum cashout depends on your region: 500 Suns ($5) for mobile money & cash pickup, 2,000 Suns ($20) for bank transfers.",
     "readyToCashOutTitle": "You have enough Suns to cash out!",
     "readyToCashOutBody": "Open the Cash Out tab to withdraw via mobile money or bank transfer.",
     "noTransactions": "No transactions yet",

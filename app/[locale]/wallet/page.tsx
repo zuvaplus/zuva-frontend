@@ -114,7 +114,7 @@ export default function WalletPage() {
   }
 
   // Estimated Suns for display
-  const sunsPreview = Math.floor(buyAmount * 1000); // simplified; real rate fetched server-side
+  const sunsPreview = Math.floor(buyAmount * 100); // simplified; real rate fetched server-side
 
   if (loading) {
     return (
@@ -268,9 +268,9 @@ function OverviewTab({
         </h3>
         <div className="space-y-2 text-sm">
           {[
-            { suns: 1000, usd: "1.00" },
-            { suns: 5000, usd: "5.00" },
-            { suns: 10000, usd: "10.00" },
+            { suns: 100, usd: "1.00" },
+            { suns: 500, usd: "5.00" },
+            { suns: 1000, usd: "10.00" },
           ].map(({ suns, usd }) => (
             <div key={suns} className="flex justify-between text-zinc-400">
               <span className="flex items-center gap-1">
@@ -284,8 +284,8 @@ function OverviewTab({
         <p className="text-zinc-600 text-xs mt-3">{t("exchangeRateNote")}</p>
       </div>
 
-      {/* Minimum cashout info */}
-      {wallet.balance_suns >= 5000 && (
+      {/* Minimum cashout info — 500 Suns matches the new $5 mobile-money floor */}
+      {wallet.balance_suns >= 500 && (
         <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-4">
           <p className="text-green-400 text-sm font-semibold">{t("readyToCashOutTitle")}</p>
           <p className="text-zinc-400 text-xs mt-1">{t("readyToCashOutBody")}</p>

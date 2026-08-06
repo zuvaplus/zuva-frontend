@@ -353,7 +353,7 @@
     "creatorOnly": "Réservé aux créateurs",
     "exchangeRate": "Taux de change",
     "sunsCount": "{count} Suns",
-    "exchangeRateNote": "1 000 Suns = 1,00 $ USD. Le retrait minimum dépend de votre région : 5 000 Suns (5 $) pour le mobile money et le retrait en espèces, 20 000 Suns (20 $) pour les virements bancaires.",
+    "exchangeRateNote": "100 Suns = 1,00 $ USD. Le retrait minimum dépend de votre région : 500 Suns (5 $) pour le mobile money et le retrait en espèces, 2 000 Suns (20 $) pour les virements bancaires.",
     "readyToCashOutTitle": "Vous avez assez de Suns pour effectuer un retrait !",
     "readyToCashOutBody": "Ouvrez l'onglet Retrait pour retirer vos gains vers votre mobile money ou votre banque.",
     "noTransactions": "Aucune transaction pour l'instant",
