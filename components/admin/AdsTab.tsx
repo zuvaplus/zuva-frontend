@@ -67,7 +67,8 @@ const CAMPAIGN_STATUSES = ["pending_creative", "active", "paused", "completed", 
 // duplicated server-side in routes/ads.js — see that file's own note).
 const CONTENT_CATEGORIES = [
   "entertainment", "music", "comedy", "drama_series", "documentary",
-  "discussion_debate", "interview", "lifestyle_culture", "news", "nature", "other",
+  "discussion_debate", "interview", "lifestyle_culture", "news", "nature",
+  "sports", "tech_innovation", "science_education", "health_wellness", "other",
 ] as const;
 
 const AD_UNITS = ["preroll_main", "flares_preroll", "homepage_banner"] as const;

@@ -13,10 +13,15 @@ const CATEGORIES = ["Comedy", "Drama", "Music", "News", "Sports", "Lifestyle", "
 
 // The ranking-model taxonomy (videos.content_category) — separate from
 // CATEGORIES above, which stays as-is. Must match CONTENT_CATEGORIES /
-// DOC_DISCUSSION_CATEGORIES in zuva-backend/zuva-api.js. The umbrella
-// grouping is a UI/code-level concept only, not a DB one.
+// PROTECTED_CATEGORIES in zuva-backend/zuva-api.js. The umbrella grouping
+// is a UI/code-level concept only, not a DB one. sports/tech_innovation/
+// science_education/health_wellness get PROTECTED_CATEGORIES floor
+// protection on the backend same as the Documentary & Discussion group,
+// but render here in General since none of them thematically fit that
+// umbrella.
 const GENERAL_CONTENT_CATEGORIES: ContentCategory[] = [
-  "entertainment", "music", "comedy", "drama_series", "news", "nature", "other",
+  "entertainment", "music", "comedy", "drama_series", "news", "nature",
+  "sports", "tech_innovation", "science_education", "health_wellness", "other",
 ];
 const DOC_DISCUSSION_CONTENT_CATEGORIES: ContentCategory[] = [
   "documentary", "discussion_debate", "interview", "lifestyle_culture",

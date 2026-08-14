@@ -231,10 +231,15 @@ export type VideoCategory =
 // why these two category fields coexist. "documentary" | "discussion_debate"
 // | "interview" | "lifestyle_culture" are grouped in the UI as the
 // "Documentary & Discussion" umbrella (a code-level grouping only, matching
-// zuva-backend's DOC_DISCUSSION_CATEGORIES — see VideoUploadForm.tsx).
+// zuva-backend's PROTECTED_CATEGORIES — see VideoUploadForm.tsx). "sports" |
+// "tech_innovation" | "science_education" | "health_wellness" also get
+// PROTECTED_CATEGORIES floor protection on the backend, but render in the
+// upload form's "General" optgroup — none of the four thematically fit the
+// "Documentary & Discussion" UI grouping.
 export type ContentCategory =
   | "entertainment" | "music" | "comedy" | "drama_series" | "documentary"
-  | "discussion_debate" | "interview" | "lifestyle_culture" | "news" | "nature" | "other";
+  | "discussion_debate" | "interview" | "lifestyle_culture" | "news" | "nature"
+  | "sports" | "tech_innovation" | "science_education" | "health_wellness" | "other";
 
 export type VideoStatus = "pending" | "published" | "rejected";
 

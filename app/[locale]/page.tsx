@@ -13,7 +13,8 @@ import VideoGrid from "@/components/VideoGrid";
 // type happens to declare its members in.
 const CONTENT_CATEGORY_ORDER = [
   "entertainment", "music", "comedy", "drama_series", "documentary",
-  "discussion_debate", "interview", "lifestyle_culture", "news", "nature", "other",
+  "discussion_debate", "interview", "lifestyle_culture", "news", "nature",
+  "sports", "tech_innovation", "science_education", "health_wellness", "other",
 ];
 
 // The universal "/" experience — same page for signed-in and signed-out
