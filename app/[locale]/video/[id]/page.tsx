@@ -408,7 +408,7 @@ export default function VideoPlayerPage() {
           Wrapped in VideoPlayerWithAds for the Zuva Ads pre-roll — city/
           country are omitted (no geolocation source exists anywhere in
           this frontend yet), so the backend serves country-agnostic ads. */}
-      <div className="aspect-video bg-surface-300 rounded-2xl overflow-hidden mb-5 border border-gold-400/10">
+      <div className="video-stream-fill relative aspect-video bg-surface-300 rounded-2xl overflow-hidden mb-5 border border-gold-400/10">
         <VideoPlayerWithAds
           videoId={video.cloudflare_video_id}
           contentId={video.id}

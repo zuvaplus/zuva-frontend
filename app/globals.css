@@ -129,3 +129,16 @@ input[type="range"].gold-range::-webkit-slider-thumb {
   height: 100%;
   border: none;
 }
+
+/* ── Video watch-page player ───────────────────────────
+   Same responsive={false} + forced-fill issue as the Flares player
+   above — the watch page's aspect-video container needs the same
+   iframe-fill rule; className="w-full h-full" on the Stream wrapper
+   div alone doesn't reach the iframe it renders internally. */
+.video-stream-fill iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
