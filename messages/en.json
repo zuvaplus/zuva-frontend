@@ -122,6 +122,10 @@
     "emptyBody": "Feed will fill up as creators publish content.",
     "clearFilter": "Clear filter"
   },
+  "CategoryPage": {
+    "notFound": "Category not found",
+    "backHome": "Back to Home"
+  },
   "Trending": {
     "title": "Trending",
     "subtitle": "What's popular right now"

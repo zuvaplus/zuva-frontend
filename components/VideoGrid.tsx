@@ -19,10 +19,14 @@ const PAGE_SIZE = 30;
 // (content_category/country from the homepage's category/country bar).
 export default function VideoGrid({
   contentCategory,
+  category,
   country,
   initialSort,
 }: {
   contentCategory?: string;
+  /** Older VALID_VIDEO_CATEGORIES taxonomy (Comedy/Drama/Music/...) —
+   *  separate from contentCategory above. Backs /category/:name. */
+  category?: string;
   country?: string;
   /** Seeds the sort bar's starting selection (e.g. "most_viewed" for
    *  /trending) instead of the personalized-ranking default. Only read
@@ -53,7 +57,7 @@ export default function VideoGrid({
       setError(null);
       try {
         const token = await getToken();
-        const data = await getFeed(token, { limit: PAGE_SIZE, offset: off, contentCategory, country, sort: sort ?? undefined });
+        const data = await getFeed(token, { limit: PAGE_SIZE, offset: off, contentCategory, category, country, sort: sort ?? undefined });
         const items = data.feed ?? [];
         setFeed((prev) => (append ? [...prev, ...items] : items));
         setHasMore(items.length === PAGE_SIZE);
@@ -65,11 +69,11 @@ export default function VideoGrid({
         setLoadingMore(false);
       }
     },
-    [getToken, t, contentCategory, country, sort]
+    [getToken, t, contentCategory, category, country, sort]
   );
 
-  // Re-fires whenever contentCategory/country/sort change too, since
-  // those flow into loadFeed's own dependency array above — always
+  // Re-fires whenever contentCategory/category/country/sort change too,
+  // since those flow into loadFeed's own dependency array above — always
   // resetting to offset 0 so a sort change never appends onto a page
   // that was fetched under a different order.
   useEffect(() => { loadFeed(0, false); }, [loadFeed]);

@@ -122,6 +122,10 @@
     "emptyBody": "Le fil se remplira au fur et à mesure que les créateurs publieront du contenu.",
     "clearFilter": "Effacer le filtre"
   },
+  "CategoryPage": {
+    "notFound": "Catégorie introuvable",
+    "backHome": "Retour à l'accueil"
+  },
   "Trending": {
     "title": "Tendances",
     "subtitle": "Ce qui est populaire en ce moment"
