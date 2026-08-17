@@ -34,7 +34,7 @@ export default function HomePage() {
           least 1.5 rows of the grid below stay above the fold on a
           standard desktop viewport. */}
       <div className="border-b border-gold-400/10">
-        <div className="max-w-5xl mx-auto px-4 py-4 text-center">
+        <div className="px-4 sm:px-6 py-4 text-center">
           <p className="text-zinc-500 text-sm font-medium">{t("slogan")}</p>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function HomePage() {
       {/* Category / country bar — clicking either navigates to the
           filtered /feed view (?content_category= or ?country=) rather
           than filtering this grid in place. */}
-      <div className="max-w-5xl mx-auto px-4 py-3">
+      <div className="px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {CONTENT_CATEGORY_ORDER.map((c) => (
             <Link
@@ -67,7 +67,7 @@ export default function HomePage() {
       </div>
 
       {/* Grid */}
-      <div className="max-w-5xl mx-auto px-4 pb-10">
+      <div className="px-4 sm:px-6 pb-10">
         <VideoGrid />
       </div>
     </div>

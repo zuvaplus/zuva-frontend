@@ -28,9 +28,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <UserRoleProvider>
       <Navbar onOpenProfileMenu={() => setProfileMenuOpen(true)} />
 
-      {signedIn && <Sidebar />}
+      {/* Visible to signed-out visitors too — see Sidebar.tsx for how
+          the library links (Following/Watch History/Saved Videos)
+          redirect to sign-in instead of their real routes while
+          signed out, while Home/Trending/Flares/Categories stay open. */}
+      <Sidebar signedIn={signedIn} />
 
-      <main className={signedIn ? "pt-14 md:pl-60 pb-20 md:pb-6 min-h-screen" : "pt-14 pb-6 min-h-screen"}>
+      <main className={`pt-14 md:pl-60 min-h-screen ${signedIn ? "pb-20 md:pb-6" : "pb-6"}`}>
         {children}
       </main>
 

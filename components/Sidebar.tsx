@@ -38,11 +38,16 @@ const MAIN_LINKS = [
   { href: "/trending", labelKey: "trending", icon: TrendingUp },
 ];
 
-const LIBRARY_LINKS = [
-  { href: "/following", labelKey: "following",    icon: Users },
-  { href: "/history",   labelKey: "watchHistory",  icon: History },
-  { href: "/saved",     labelKey: "savedVideos",   icon: Bookmark },
-];
+// Signed out, these three redirect to sign-in instead of their real
+// routes — everything else in the sidebar (Home/Trending/Flares/
+// Categories) stays open with no auth required.
+function libraryLinks(signedIn: boolean) {
+  return [
+    { href: signedIn ? "/following" : "/sign-in", labelKey: "following",   icon: Users },
+    { href: signedIn ? "/history"   : "/sign-in", labelKey: "watchHistory", icon: History },
+    { href: signedIn ? "/saved"     : "/sign-in", labelKey: "savedVideos",  icon: Bookmark },
+  ];
+}
 
 // Studio order per spec: My Channel, Creator Dashboard, Upload Video,
 // Go Live. My Channel needs the creator's own username (mirrors
@@ -128,7 +133,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ signedIn }: { signedIn: boolean }) {
   const t = useTranslations("Sidebar");
   const tCategories = useTranslations("Categories");
   const pathname = usePathname();
@@ -163,8 +168,8 @@ export default function Sidebar() {
 
         <SectionLabel>{t("library")}</SectionLabel>
         <div className="space-y-0.5">
-          {LIBRARY_LINKS.map(({ href, labelKey, icon }) => (
-            <SidebarLink key={href} href={href} label={t(labelKey)} icon={icon} active={pathname === href} />
+          {libraryLinks(signedIn).map(({ href, labelKey, icon }) => (
+            <SidebarLink key={labelKey} href={href} label={t(labelKey)} icon={icon} active={pathname === href} />
           ))}
         </div>
 
