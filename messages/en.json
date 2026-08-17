@@ -154,6 +154,27 @@
     "loadError": "Could not load your saved videos",
     "tryAgain": "Try again"
   },
+  "Profile": {
+    "redirecting": "Loading your profile..."
+  },
+  "Settings": {
+    "title": "Account Settings",
+    "subtitle": "Manage your account and discovery preferences",
+    "loadError": "Could not load your account",
+    "retry": "Try again",
+    "profileHint": "Want to change your display name, bio, or avatar?",
+    "profileLink": "Edit your profile",
+    "preferencesTitle": "Discovery preferences",
+    "preferredCountryLabel": "Preferred country",
+    "preferredCountryHint": "Helps us surface more content relevant to you",
+    "noPreference": "No preference",
+    "preferredLanguagesLabel": "Preferred languages",
+    "preferredLanguagesHint": "Select the languages you'd like to see more content in",
+    "saveChanges": "Save changes",
+    "savingEllipsis": "Saving...",
+    "saved": "Preferences saved",
+    "saveError": "Could not save your preferences"
+  },
   "Homepage": {
     "slogan": "Our Stories. Our Stage.",
     "searchPlaceholder": "Search creators, videos, tags...",

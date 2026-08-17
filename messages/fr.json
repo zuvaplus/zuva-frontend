@@ -154,6 +154,27 @@
     "loadError": "Impossible de charger vos vidéos enregistrées",
     "tryAgain": "Réessayer"
   },
+  "Profile": {
+    "redirecting": "Chargement de votre profil..."
+  },
+  "Settings": {
+    "title": "Paramètres du compte",
+    "subtitle": "Gérez votre compte et vos préférences de découverte",
+    "loadError": "Impossible de charger votre compte",
+    "retry": "Réessayer",
+    "profileHint": "Vous voulez changer votre nom d'affichage, votre bio ou votre avatar ?",
+    "profileLink": "Modifier votre profil",
+    "preferencesTitle": "Préférences de découverte",
+    "preferredCountryLabel": "Pays préféré",
+    "preferredCountryHint": "Nous aide à vous proposer du contenu plus pertinent",
+    "noPreference": "Aucune préférence",
+    "preferredLanguagesLabel": "Langues préférées",
+    "preferredLanguagesHint": "Sélectionnez les langues dans lesquelles vous aimeriez voir plus de contenu",
+    "saveChanges": "Enregistrer les modifications",
+    "savingEllipsis": "Enregistrement...",
+    "saved": "Préférences enregistrées",
+    "saveError": "Impossible d'enregistrer vos préférences"
+  },
   "Homepage": {
     "slogan": "Nos histoires. Notre scène.",
     "searchPlaceholder": "Rechercher des créateurs, vidéos, tags...",

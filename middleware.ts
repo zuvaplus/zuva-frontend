@@ -23,7 +23,7 @@ const handleI18nRouting = createIntlMiddleware(routing);
 // /saved are personal lists that need a signed-in viewer; Sidebar.tsx
 // already points signed-out visitors at /sign-in instead of these three,
 // this is the server-side backstop for anyone who navigates here directly.
-const PROTECTED_PATHS = ["/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard", "/following", "/history", "/saved"];
+const PROTECTED_PATHS = ["/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard", "/following", "/history", "/saved", "/profile", "/settings"];
 
 const isProtectedRoute = createRouteMatcher(
   routing.locales.flatMap((locale) => PROTECTED_PATHS.map((p) => `/${locale}${p}(.*)`))

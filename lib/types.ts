@@ -477,6 +477,31 @@ export interface FollowedCreatorsResponse {
   creators: FollowedCreator[];
 }
 
+// ─── Account (Settings page) ──────────────────────────────────
+// Backs GET /api/me + PATCH /api/me/preferences. Distinct from
+// ChannelCreator: this is the private account record (email, role,
+// preferred_country/preferred_languages used only by computeFeedScore's
+// ranking, never shown publicly), not the public channel profile.
+export interface MyAccount {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  country_code: string | null;
+  preferred_country: string | null;
+  preferred_languages: string[];
+  follower_count: number;
+  created_at: string;
+}
+
+export interface MyAccountResponse {
+  success: boolean;
+  user: MyAccount;
+}
+
 // ─── Reporting ────────────────────────────────────────────────
 // Must match REPORT_CATEGORIES in zuva-backend/zuva-api.js.
 export type ReportCategory =

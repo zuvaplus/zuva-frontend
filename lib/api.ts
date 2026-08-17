@@ -31,6 +31,7 @@ import type {
   SortOption,
   SaveResponse,
   FollowedCreatorsResponse,
+  MyAccountResponse,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -415,6 +416,21 @@ export function reorderCreatorLinks(
   return apiFetch("/api/creator/links/reorder", token, {
     method: "PATCH",
     body: JSON.stringify({ orderedIds }),
+  });
+}
+
+// ─── Account (Settings page) ──────────────────────────────────
+export function getMyAccount(token: string | null): Promise<MyAccountResponse> {
+  return apiFetch<MyAccountResponse>("/api/me", token);
+}
+
+export function updateMyPreferences(
+  token: string | null,
+  payload: { preferred_country?: string; preferred_languages?: string[] }
+): Promise<MyAccountResponse> {
+  return apiFetch<MyAccountResponse>("/api/me/preferences", token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
 
