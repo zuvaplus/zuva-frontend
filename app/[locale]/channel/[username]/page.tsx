@@ -1,15 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { MapPin, Users, Film, Eye, Clock, Pencil, X } from "lucide-react";
-import type { ChannelResponse } from "@/lib/types";
+import type { ChannelResponse, SortOption } from "@/lib/types";
 import { formatDuration, timeAgo } from "@/lib/utils";
 import { useUserRole } from "@/components/UserRoleProvider";
 import { ALL_COUNTRIES } from "@/lib/countries";
+import SortBar from "@/components/SortBar";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -23,8 +24,8 @@ function ChannelSkeleton() {
           <div className="skeleton h-4 w-32 rounded" />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="skeleton aspect-video rounded-xl" />
         ))}
       </div>
@@ -49,6 +50,11 @@ export default function ChannelPage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio]                 = useState("");
   const [countryCode, setCountryCode] = useState("");
+
+  // No ranking algorithm on this page (unlike the homepage) — the
+  // backend already returns every published video, unpaginated, so
+  // sorting happens entirely client-side over the already-loaded list.
+  const [sort, setSort] = useState<SortOption>("latest");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -108,6 +114,26 @@ export default function ChannelPage() {
       setSaving(false);
     }
   }
+
+  const sortedVideos = useMemo(() => {
+    const list = data?.videos ?? [];
+    const sorted = [...list];
+    switch (sort) {
+      case "oldest":
+        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case "most_viewed":
+        sorted.sort((a, b) => b.view_count - a.view_count);
+        break;
+      case "most_liked":
+        sorted.sort((a, b) => b.like_count - a.like_count);
+        break;
+      case "latest":
+      default:
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return sorted;
+  }, [data?.videos, sort]);
 
   if (loading) return <ChannelSkeleton />;
 
@@ -249,8 +275,10 @@ export default function ChannelPage() {
       {videos.length === 0 ? (
         <p className="text-zinc-500 text-sm text-center py-12">{t("noVideosPublished")}</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {videos.map((video) => (
+        <>
+          <SortBar value={sort} onChange={setSort} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sortedVideos.map((video) => (
             <Link
               key={video.id}
               href={`/video/${video.id}`}
@@ -277,7 +305,8 @@ export default function ChannelPage() {
               </div>
             </Link>
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

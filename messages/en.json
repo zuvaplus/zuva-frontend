@@ -106,6 +106,12 @@
     "trending": "Trending",
     "tip": "Tip"
   },
+  "SortBar": {
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "most_viewed": "Most Viewed",
+    "most_liked": "Most Liked"
+  },
   "Feed": {
     "title": "Discover Creators",
     "subtitle": "Trending & rising — ranked by what keeps people watching",

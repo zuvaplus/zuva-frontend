@@ -106,6 +106,12 @@
     "trending": "Tendance",
     "tip": "Pourboire"
   },
+  "SortBar": {
+    "latest": "Récent",
+    "oldest": "Ancien",
+    "most_viewed": "Les plus vus",
+    "most_liked": "Les plus aimés"
+  },
   "Feed": {
     "title": "Découvrir des créateurs",
     "subtitle": "Tendances et contenu montant — classé selon ce qui capte vraiment l'attention",

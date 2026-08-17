@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import type { FeedItem } from "@/lib/types";
+import type { FeedItem, SortOption } from "@/lib/types";
 import { getFeed } from "@/lib/api";
 import FeedCard from "@/components/FeedCard";
+import SortBar from "@/components/SortBar";
 import { FeedSkeleton } from "@/components/LoadingSkeleton";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
@@ -33,13 +34,21 @@ export default function VideoGrid({
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
 
+  // null = no explicit sort yet — the personalized computeFeedScore
+  // ranking (or shuffled fallback) stays the default. The bar still
+  // shows "Latest" as its active pill for this state (see SortBar
+  // value below), but nothing is sent to the backend until a viewer
+  // actually clicks an option — at which point it's a real, literal
+  // sort that replaces the ranking algorithm's output entirely.
+  const [sort, setSort] = useState<SortOption | null>(null);
+
   const loadFeed = useCallback(
     async (off: number, append = false) => {
       append ? setLoadingMore(true) : setLoading(true);
       setError(null);
       try {
         const token = await getToken();
-        const data = await getFeed(token, { limit: PAGE_SIZE, offset: off, contentCategory, country });
+        const data = await getFeed(token, { limit: PAGE_SIZE, offset: off, contentCategory, country, sort: sort ?? undefined });
         const items = data.feed ?? [];
         setFeed((prev) => (append ? [...prev, ...items] : items));
         setHasMore(items.length === PAGE_SIZE);
@@ -51,11 +60,13 @@ export default function VideoGrid({
         setLoadingMore(false);
       }
     },
-    [getToken, t, contentCategory, country]
+    [getToken, t, contentCategory, country, sort]
   );
 
-  // Re-fires whenever contentCategory/country change too, since those
-  // flow into loadFeed's own dependency array above.
+  // Re-fires whenever contentCategory/country/sort change too, since
+  // those flow into loadFeed's own dependency array above — always
+  // resetting to offset 0 so a sort change never appends onto a page
+  // that was fetched under a different order.
   useEffect(() => { loadFeed(0, false); }, [loadFeed]);
 
   useEffect(() => {
@@ -67,23 +78,31 @@ export default function VideoGrid({
     return () => obs.disconnect();
   }, [hasMore, loadingMore, loading, offset, loadFeed]);
 
-  if (loading) return <FeedSkeleton />;
-  if (error) return <ErrorState message={error} onRetry={() => loadFeed(0)} />;
-  if (feed.length === 0) return <EmptyState />;
-
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {feed.map((item) => <FeedCard key={item.id} item={item} />)}
-      </div>
+      <SortBar value={sort ?? "latest"} onChange={setSort} />
 
-      <div ref={loaderRef} className="mt-10 flex justify-center">
-        {loadingMore && (
-          <span className="flex items-center gap-2 text-gold-400 text-sm animate-pulse">
-            <ZuvaSunIcon size={16} glow /> {t("loadingMore")}
-          </span>
-        )}
-      </div>
+      {loading ? (
+        <FeedSkeleton />
+      ) : error ? (
+        <ErrorState message={error} onRetry={() => loadFeed(0)} />
+      ) : feed.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {feed.map((item) => <FeedCard key={item.id} item={item} />)}
+          </div>
+
+          <div ref={loaderRef} className="mt-10 flex justify-center">
+            {loadingMore && (
+              <span className="flex items-center gap-2 text-gold-400 text-sm animate-pulse">
+                <ZuvaSunIcon size={16} glow /> {t("loadingMore")}
+              </span>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }

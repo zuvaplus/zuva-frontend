@@ -28,6 +28,7 @@ import type {
   FlareSwipeEventPayload,
   ReportVideoPayload,
   ReportVideoResponse,
+  SortOption,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -85,13 +86,14 @@ async function apiFetch<T>(
 // ─── Feed ────────────────────────────────────────────────────
 export function getFeed(
   token: string | null,
-  opts: { limit?: number; offset?: number; contentCategory?: string; country?: string } = {}
+  opts: { limit?: number; offset?: number; contentCategory?: string; country?: string; sort?: SortOption } = {}
 ): Promise<FeedResponse> {
   const params = new URLSearchParams();
   params.set("limit", String(opts.limit ?? 30));
   params.set("offset", String(opts.offset ?? 0));
   if (opts.contentCategory) params.set("content_category", opts.contentCategory);
   if (opts.country) params.set("country", opts.country);
+  if (opts.sort) params.set("sort", opts.sort);
   return apiFetch<FeedResponse>(`/api/feed?${params.toString()}`, token);
 }
 

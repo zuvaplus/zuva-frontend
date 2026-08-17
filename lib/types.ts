@@ -40,6 +40,13 @@ export interface FeedResponse {
   feed: FeedItem[];
 }
 
+// Explicit sort for the homepage/feed and channel-page video grids —
+// distinct from the personalized computeFeedScore ranking, which is
+// what "no sort selected yet" falls back to on the homepage (see
+// VideoGrid.tsx). The channel page has no ranking algorithm to begin
+// with, so "latest" there is just its existing created_at DESC default.
+export type SortOption = "latest" | "oldest" | "most_viewed" | "most_liked";
+
 // ─── Wallet & Transactions ───────────────────────────────────
 export interface WalletBalance {
   balance_suns: number;
@@ -303,6 +310,7 @@ export interface ChannelVideoSummary {
   thumbnail_url: string | null;
   duration_seconds: number | null;
   view_count: number;
+  like_count: number;
   category: string;
   created_at: string;
 }

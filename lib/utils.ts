@@ -78,3 +78,26 @@ export function tierInfo(tier: string): { label: string; color: string } {
 export function clamp(val: number, min: number, max: number): number {
   return Math.min(Math.max(val, min), max);
 }
+
+/** Video card description snippet: first sentence or ~100 characters,
+ *  whichever is shorter, with a trailing ellipsis whenever the full
+ *  text got cut. Backs off to the last whole word when the 100-char
+ *  cap (not the sentence boundary) is what triggered the cut, so it
+ *  never splits mid-word. */
+export function truncateDescription(text: string, maxChars = 100): string {
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+
+  const sentenceMatch = trimmed.match(/^[^.!?]*[.!?]/);
+  const firstSentence = sentenceMatch ? sentenceMatch[0] : trimmed;
+
+  const limit = Math.min(firstSentence.length, maxChars);
+  if (limit >= trimmed.length) return trimmed;
+
+  let snippet = trimmed.slice(0, limit);
+  if (limit === maxChars && limit < firstSentence.length) {
+    const lastSpace = snippet.lastIndexOf(" ");
+    if (lastSpace > 0) snippet = snippet.slice(0, lastSpace);
+  }
+  return snippet.trimEnd().replace(/[.,;:]+$/, "") + "…";
+}
