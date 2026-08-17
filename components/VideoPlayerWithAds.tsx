@@ -362,16 +362,22 @@ export default function VideoPlayerWithAds({
 }: VideoPlayerWithAdsProps) {
   const [playerState, setPlayerState] = useState<PlayerState>(skipAds ? "main" : "checking");
   const [ad, setAd] = useState<AdServeResponse | null>(null);
+  // Set the moment a pre-roll resolves (completed, skipped, or errored) —
+  // separate from the autoplayMain prop (which only covers the "autoplay
+  // next video" cross-load flow) so the main video also autoplays after
+  // its own pre-roll, without needing a click, on a normal first visit.
+  const [autoplayAfterPreroll, setAutoplayAfterPreroll] = useState(false);
 
-  // Fires once, the moment main content actually becomes reachable
-  // (immediately if skipAds/no ad served, or right after a pre-roll
-  // finishes) — see autoplayMain's doc comment on the props interface
-  // for why this can't just be the Stream `autoplay` prop.
+  // Fires once, the moment main content actually becomes reachable —
+  // right after a pre-roll finishes (autoplayAfterPreroll), or via the
+  // "autoplay next video" flow (autoplayMain) — see autoplayMain's doc
+  // comment on the props interface for why this can't just be the
+  // Stream `autoplay` prop.
   useEffect(() => {
-    if (playerState !== "main" || !autoplayMain) return;
+    if (playerState !== "main" || (!autoplayMain && !autoplayAfterPreroll)) return;
     streamProps.streamRef?.current?.play().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerState, autoplayMain]);
+  }, [playerState, autoplayMain, autoplayAfterPreroll]);
 
   const sessionIdRef = useRef<string>("");
   useEffect(() => {
@@ -468,6 +474,7 @@ export default function VideoPlayerWithAds({
     // Below MIN_VIEW_SECONDS_FOR_IMPRESSION, show the main video with
     // no impression fired — silently, no error state.
     if (ad && outcome.meetsMinimumView) fireImpression(outcome, ad);
+    setAutoplayAfterPreroll(true);
     setPlayerState("main");
   }
 
@@ -476,6 +483,7 @@ export default function VideoPlayerWithAds({
     // Never fires an impression: fireImpression is only ever called
     // from handlePrerollComplete above, which this path doesn't go
     // through, so nothing was actually delivered to the viewer.
+    setAutoplayAfterPreroll(true);
     setPlayerState("main");
   }
 
