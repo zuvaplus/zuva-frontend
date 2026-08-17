@@ -6,11 +6,13 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import type { StreamPlayerApi } from "@cloudflare/stream-react";
-import { Eye, Clock, Tag, Flag, X, Film, Heart, Mail } from "lucide-react";
+import { Eye, Clock, Tag, Flag, X, Film, Heart, Mail, Bookmark } from "lucide-react";
 import type { VideoResponse, ReportCategory } from "@/lib/types";
 import {
   likeVideo,
   unlikeVideo,
+  saveVideo,
+  unsaveVideo,
   subscribeCreator,
   unsubscribeCreator,
   recordWatchProgress,
@@ -255,6 +257,8 @@ export default function VideoPlayerPage() {
   const [subscribed, setSubscribed] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [subBusy, setSubBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
 
   const streamRef = useRef<StreamPlayerApi | undefined>(undefined);
 
@@ -262,8 +266,9 @@ export default function VideoPlayerPage() {
     setLoading(true);
     setError(null);
     try {
-      // Send the token when available so viewer.has_liked / is_subscribed
-      // reflect the signed-in user; anonymous viewers get false/false.
+      // Send the token when available so viewer.has_liked / is_subscribed /
+      // has_saved reflect the signed-in user; anonymous viewers get
+      // false/false/false.
       const token = await getToken().catch(() => null);
       const res = await fetch(`${BACKEND_URL}/api/video/${id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -278,6 +283,7 @@ export default function VideoPlayerPage() {
       setLikeCount(json.video.like_count ?? 0);
       setSubscribed(json.viewer?.is_subscribed ?? false);
       setFollowerCount(json.creator.follower_count ?? 0);
+      setSaved(json.viewer?.has_saved ?? false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("notFound"));
     } finally {
@@ -377,6 +383,28 @@ export default function VideoPlayerPage() {
     }
   }
 
+  async function toggleSave() {
+    if (!data || saveBusy) return;
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return;
+    }
+    const prevSaved = saved;
+    setSaved(!prevSaved);
+    setSaveBusy(true);
+    try {
+      const token = await getToken();
+      const resp = prevSaved
+        ? await unsaveVideo(token, data.video.id)
+        : await saveVideo(token, data.video.id);
+      setSaved(resp.saved);
+    } catch {
+      setSaved(prevSaved);
+    } finally {
+      setSaveBusy(false);
+    }
+  }
+
   if (loading) return <VideoSkeleton />;
 
   if (error || !data) {
@@ -453,6 +481,19 @@ export default function VideoPlayerPage() {
           >
             <Heart size={16} className={liked ? "fill-current" : ""} />
             {formatCount(likeCount)}
+          </button>
+          <button
+            onClick={toggleSave}
+            disabled={saveBusy}
+            aria-pressed={saved}
+            title={saved ? t("saved") : t("save")}
+            className={`p-2.5 rounded-full border transition-all disabled:opacity-60
+              ${saved
+                ? "bg-gold-400 text-black border-gold-400 shadow-gold"
+                : "bg-surface-200 text-zinc-300 border-gold-400/25 hover:border-gold-400/60 hover:text-gold-300"
+              }`}
+          >
+            <Bookmark size={16} className={saved ? "fill-current" : ""} />
           </button>
           {/* Tip button slot — filled by the upcoming monetization task */}
           <div className="w-16" aria-hidden />

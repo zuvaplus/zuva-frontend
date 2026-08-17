@@ -20,9 +20,14 @@ const PAGE_SIZE = 30;
 export default function VideoGrid({
   contentCategory,
   country,
+  initialSort,
 }: {
   contentCategory?: string;
   country?: string;
+  /** Seeds the sort bar's starting selection (e.g. "most_viewed" for
+   *  /trending) instead of the personalized-ranking default. Only read
+   *  once, at mount — callers pass a constant, never a changing value. */
+  initialSort?: SortOption;
 }) {
   const t = useTranslations("Feed");
   const { getToken } = useAuth();
@@ -40,7 +45,7 @@ export default function VideoGrid({
   // value below), but nothing is sent to the backend until a viewer
   // actually clicks an option — at which point it's a real, literal
   // sort that replaces the ranking algorithm's output entirely.
-  const [sort, setSort] = useState<SortOption | null>(null);
+  const [sort, setSort] = useState<SortOption | null>(initialSort ?? null);
 
   const loadFeed = useCallback(
     async (off: number, append = false) => {

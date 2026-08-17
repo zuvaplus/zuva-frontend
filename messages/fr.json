@@ -122,6 +122,34 @@
     "emptyBody": "Le fil se remplira au fur et à mesure que les créateurs publieront du contenu.",
     "clearFilter": "Effacer le filtre"
   },
+  "Trending": {
+    "title": "Tendances",
+    "subtitle": "Ce qui est populaire en ce moment"
+  },
+  "Following": {
+    "title": "Abonnements",
+    "subtitle": "Dernières vidéos des créateurs que vous suivez",
+    "emptyTitle": "Vous ne suivez personne pour l'instant",
+    "emptyBody": "Suivez des créateurs pour voir leurs dernières vidéos ici.",
+    "loadError": "Impossible de charger votre fil d'abonnements",
+    "tryAgain": "Réessayer"
+  },
+  "WatchHistory": {
+    "title": "Historique",
+    "subtitle": "Vidéos que vous avez regardées, les plus récentes en premier",
+    "emptyTitle": "Aucun historique pour l'instant",
+    "emptyBody": "Les vidéos que vous regardez apparaîtront ici.",
+    "loadError": "Impossible de charger votre historique",
+    "tryAgain": "Réessayer"
+  },
+  "SavedVideos": {
+    "title": "Vidéos enregistrées",
+    "subtitle": "Vidéos que vous avez enregistrées pour plus tard",
+    "emptyTitle": "Aucune vidéo enregistrée",
+    "emptyBody": "Appuyez sur Enregistrer sur une vidéo pour l'ajouter ici.",
+    "loadError": "Impossible de charger vos vidéos enregistrées",
+    "tryAgain": "Réessayer"
+  },
   "Homepage": {
     "slogan": "Nos histoires. Notre scène.",
     "searchPlaceholder": "Rechercher des créateurs, vidéos, tags..."
@@ -452,6 +480,8 @@
     "followerCountOther": "{count} abonnés",
     "subscribed": "Abonné",
     "subscribe": "S'abonner",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
     "showLess": "Voir moins",
     "showMore": "...plus",
     "moreLikeThis": "Vidéos similaires",

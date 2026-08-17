@@ -19,7 +19,11 @@ const handleI18nRouting = createIntlMiddleware(routing);
 // optionalAuth with the shuffled-fallback ranking for anyone with no
 // watch history). "/" itself was never protected either, for the same
 // reason — the homepage is the universal signed-in/signed-out experience.
-const PROTECTED_PATHS = ["/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard"];
+// "/trending" is public too, same reasoning — only /following, /history,
+// /saved are personal lists that need a signed-in viewer; Sidebar.tsx
+// already points signed-out visitors at /sign-in instead of these three,
+// this is the server-side backstop for anyone who navigates here directly.
+const PROTECTED_PATHS = ["/wallet", "/creator/", "/admin", "/upload", "/creator-dashboard", "/following", "/history", "/saved"];
 
 const isProtectedRoute = createRouteMatcher(
   routing.locales.flatMap((locale) => PROTECTED_PATHS.map((p) => `/${locale}${p}(.*)`))

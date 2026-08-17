@@ -29,6 +29,7 @@ import type {
   ReportVideoPayload,
   ReportVideoResponse,
   SortOption,
+  SaveResponse,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -95,6 +96,21 @@ export function getFeed(
   if (opts.country) params.set("country", opts.country);
   if (opts.sort) params.set("sort", opts.sort);
   return apiFetch<FeedResponse>(`/api/feed?${params.toString()}`, token);
+}
+
+// Same FeedResponse shape as getFeed above — no pagination, single
+// fetch (matches GET /api/channel/:username's existing pattern), all
+// three require a signed-in viewer.
+export function getFollowingFeed(token: string | null): Promise<FeedResponse> {
+  return apiFetch<FeedResponse>("/api/me/following", token);
+}
+
+export function getHistoryFeed(token: string | null): Promise<FeedResponse> {
+  return apiFetch<FeedResponse>("/api/me/history", token);
+}
+
+export function getSavedFeed(token: string | null): Promise<FeedResponse> {
+  return apiFetch<FeedResponse>("/api/me/saved", token);
 }
 
 // Fired periodically (every 10-15s of playback) and on pause/unload —
@@ -187,6 +203,14 @@ export function likeVideo(token: string | null, videoId: string): Promise<LikeRe
 
 export function unlikeVideo(token: string | null, videoId: string): Promise<LikeResponse> {
   return apiFetch<LikeResponse>(`/api/video/${videoId}/like`, token, { method: "DELETE" });
+}
+
+export function saveVideo(token: string | null, videoId: string): Promise<SaveResponse> {
+  return apiFetch<SaveResponse>(`/api/video/${videoId}/save`, token, { method: "POST" });
+}
+
+export function unsaveVideo(token: string | null, videoId: string): Promise<SaveResponse> {
+  return apiFetch<SaveResponse>(`/api/video/${videoId}/save`, token, { method: "DELETE" });
 }
 
 export function getComments(

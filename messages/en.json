@@ -122,6 +122,34 @@
     "emptyBody": "Feed will fill up as creators publish content.",
     "clearFilter": "Clear filter"
   },
+  "Trending": {
+    "title": "Trending",
+    "subtitle": "What's popular right now"
+  },
+  "Following": {
+    "title": "Following",
+    "subtitle": "Latest from creators you follow",
+    "emptyTitle": "Not following anyone yet",
+    "emptyBody": "Follow creators to see their latest videos here.",
+    "loadError": "Could not load your following feed",
+    "tryAgain": "Try again"
+  },
+  "WatchHistory": {
+    "title": "Watch History",
+    "subtitle": "Videos you've watched, most recent first",
+    "emptyTitle": "No watch history yet",
+    "emptyBody": "Videos you watch will show up here.",
+    "loadError": "Could not load your watch history",
+    "tryAgain": "Try again"
+  },
+  "SavedVideos": {
+    "title": "Saved Videos",
+    "subtitle": "Videos you've saved to watch later",
+    "emptyTitle": "No saved videos yet",
+    "emptyBody": "Tap Save on a video to add it here.",
+    "loadError": "Could not load your saved videos",
+    "tryAgain": "Try again"
+  },
   "Homepage": {
     "slogan": "Our Stories. Our Stage.",
     "searchPlaceholder": "Search creators, videos, tags..."
@@ -452,6 +480,8 @@
     "followerCountOther": "{count} followers",
     "subscribed": "Subscribed",
     "subscribe": "Subscribe",
+    "save": "Save",
+    "saved": "Saved",
     "showLess": "Show less",
     "showMore": "...more",
     "moreLikeThis": "More like this",

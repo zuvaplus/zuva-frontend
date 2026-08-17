@@ -407,6 +407,7 @@ export interface RelatedVideo {
 export interface VideoViewerState {
   has_liked: boolean;
   is_subscribed: boolean;
+  has_saved: boolean;
 }
 
 export interface VideoResponse {
@@ -454,6 +455,11 @@ export interface SubscribeResponse {
   success: boolean;
   subscribed: boolean;
   follower_count: number;
+}
+
+export interface SaveResponse {
+  success: boolean;
+  saved: boolean;
 }
 
 // ─── Reporting ────────────────────────────────────────────────
