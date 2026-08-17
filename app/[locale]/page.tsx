@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search } from "lucide-react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { COUNTRIES } from "@/lib/countries";
 import VideoGrid from "@/components/VideoGrid";
 
@@ -27,44 +25,18 @@ const CONTENT_CATEGORY_ORDER = [
 export default function HomePage() {
   const t = useTranslations("Homepage");
   const tContentCategories = useTranslations("ContentCategories");
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    router.push(`/search?q=${encodeURIComponent(q)}`);
-  }
 
   return (
     <div>
-      {/* Thin banner — deliberately compact (logo + one-line slogan,
-          not a full hero) so at least 1.5 rows of the grid below stay
-          above the fold on a standard desktop viewport. */}
+      {/* Tagline — the nav bar above already carries the Zuva logo and
+          its own search, so this is just the slogan, centered, with no
+          redundant logo/search of its own. Deliberately compact so at
+          least 1.5 rows of the grid below stay above the fold on a
+          standard desktop viewport. */}
       <div className="border-b border-gold-400/10">
-        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zuva-logo.svg" alt="Zuva" className="h-7 w-auto shrink-0" />
-          <span className="text-zinc-500 text-sm font-medium truncate">{t("slogan")}</span>
+        <div className="max-w-5xl mx-auto px-4 py-4 text-center">
+          <p className="text-zinc-500 text-sm font-medium">{t("slogan")}</p>
         </div>
-      </div>
-
-      {/* Search bar */}
-      <div className="max-w-5xl mx-auto px-4 pt-3">
-        <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto">
-          <div className="relative">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("searchPlaceholder")}
-              aria-label={t("searchPlaceholder")}
-              className="w-full bg-surface-200 border border-gold-400/15 focus:border-gold-400/40 rounded-full pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 outline-none transition-colors"
-            />
-          </div>
-        </form>
       </div>
 
       {/* Category / country bar — clicking either navigates to the
