@@ -18,6 +18,7 @@ import {
   Flame,
   Tv,
   Radio,
+  Megaphone,
 } from "lucide-react";
 import { useUserRole } from "./UserRoleProvider";
 
@@ -220,6 +221,12 @@ export default function Sidebar({ signedIn }: { signedIn: boolean }) {
             {t("creatorSignUp")}
           </Link>
         )}
+        {/* No auth/role gate — Zuva Ads is open to any visitor, unlike
+            Creator Sign Up above which hides once you're already a creator. */}
+        <Link href="/advertise" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-500 hover:text-gold-300 hover:bg-white/5 transition-colors">
+          <Megaphone size={16} />
+          {t("advertise")}
+        </Link>
       </div>
     </aside>
   );

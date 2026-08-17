@@ -12,7 +12,6 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import SiteFooter from "@/components/SiteFooter";
 
 export default function AdvertiseSuccessPage() {
   return (
@@ -39,7 +38,6 @@ export default function AdvertiseSuccessPage() {
           </Link>
         </div>
       </div>
-      <SiteFooter />
     </div>
   );
 }

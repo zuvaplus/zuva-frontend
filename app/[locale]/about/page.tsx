@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import SiteFooter from "@/components/SiteFooter";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
 export async function generateMetadata({
@@ -106,8 +105,6 @@ export default async function AboutPage() {
         </section>
 
       </div>
-
-      <SiteFooter />
     </div>
   );
 }

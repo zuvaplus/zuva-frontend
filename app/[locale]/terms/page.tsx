@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
-import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Zuva.TV",
@@ -338,8 +337,6 @@ export default function TermsPage() {
 
         </article>
       </div>
-
-      <SiteFooter />
     </div>
   );
 }

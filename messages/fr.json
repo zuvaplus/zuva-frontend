@@ -18,6 +18,7 @@
     "about": "À propos",
     "terms": "Conditions",
     "creatorSignUp": "Devenir créateur",
+    "advertise": "Publicité",
     "home": "Accueil",
     "trending": "Tendances",
     "following": "Abonnements",
@@ -57,13 +58,33 @@
     "applyNow": "Postuler maintenant",
     "notNow": "Plus tard"
   },
-  "SiteFooter": {
-    "homeAriaLabel": "Accueil Zuva",
-    "about": "À propos",
-    "privacyPolicy": "Politique de confidentialité",
-    "termsOfService": "Conditions d'utilisation",
-    "creatorSignUp": "Inscription créateur",
-    "copyright": "© {year} Zuva.TV Inc."
+  "Footer": {
+    "company": {
+      "heading": "Entreprise",
+      "about": "À propos",
+      "contact": "Nous contacter",
+      "careers": "Carrières"
+    },
+    "creators": {
+      "heading": "Créateurs",
+      "signUp": "Devenir créateur",
+      "guidelines": "Règles pour les créateurs",
+      "helpCenter": "Centre d'aide"
+    },
+    "advertisers": {
+      "heading": "Annonceurs",
+      "advertiseWithUs": "Faire de la publicité",
+      "mediaKit": "Kit média",
+      "contactSales": "Contacter les ventes"
+    },
+    "legal": {
+      "heading": "Mentions légales",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "communityGuidelines": "Règles de la communauté"
+    },
+    "copyright": "© {year} Zuva Media Inc. Tous droits réservés.",
+    "tagline": "Nos histoires. Notre scène."
   },
   "Landing": {
     "headline": "Histoires d'Afrique et des Caraïbes.",

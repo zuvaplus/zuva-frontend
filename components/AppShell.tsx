@@ -7,13 +7,19 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
 import ProfileMenu from "./ProfileMenu";
+import Footer from "./Footer";
 import { UserRoleProvider } from "./UserRoleProvider";
+
+// The footer is for public-facing pages — hidden on the creator/admin
+// tools below, where it'd just be dead weight under a dashboard UI.
+const NO_FOOTER_PATHS = ["/creator-dashboard", "/admin", "/settings"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const signedIn = isLoaded && Boolean(isSignedIn);
   const pathname = usePathname();
+  const hideFooter = NO_FOOTER_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   // Flares is a deliberately full-screen, chrome-free experience (its own
   // back arrow + Zuva mark instead) — no Navbar/Sidebar/BottomNav, and no
@@ -34,8 +40,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           signed out, while Home/Trending/Flares/Categories stay open. */}
       <Sidebar signedIn={signedIn} />
 
-      <main className={`pt-14 md:pl-60 min-h-screen ${signedIn ? "pb-20 md:pb-6" : "pb-6"}`}>
-        {children}
+      <main className={`pt-14 md:pl-60 min-h-screen flex flex-col ${signedIn ? "pb-20 md:pb-6" : "pb-6"}`}>
+        <div className="flex-1">{children}</div>
+        {!hideFooter && <Footer />}
       </main>
 
       {signedIn && <BottomNav onOpenProfileMenu={() => setProfileMenuOpen(true)} />}

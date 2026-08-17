@@ -39,7 +39,6 @@
 
 import { useRef, useState } from "react";
 import { Ban, Target, Wallet, CheckCircle2, ChevronDown } from "lucide-react";
-import SiteFooter from "@/components/SiteFooter";
 import AdvertisePaymentModal, { type PackageTier } from "@/components/AdvertisePaymentModal";
 
 interface Package {
@@ -360,8 +359,6 @@ export default function AdvertisePage() {
           — we respond within 24 hours.
         </p>
       </section>
-
-      <SiteFooter />
 
       {modalTier && (
         <AdvertisePaymentModal

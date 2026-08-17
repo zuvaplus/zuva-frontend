@@ -18,6 +18,7 @@
     "about": "About",
     "terms": "Terms",
     "creatorSignUp": "Creator Sign Up",
+    "advertise": "Advertise",
     "home": "Home",
     "trending": "Trending",
     "following": "Following",
@@ -57,13 +58,33 @@
     "applyNow": "Apply Now",
     "notNow": "Not Now"
   },
-  "SiteFooter": {
-    "homeAriaLabel": "Zuva home",
-    "about": "About",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "creatorSignUp": "Creator Sign-Up",
-    "copyright": "© {year} Zuva.TV Inc."
+  "Footer": {
+    "company": {
+      "heading": "Company",
+      "about": "About",
+      "contact": "Contact Us",
+      "careers": "Careers"
+    },
+    "creators": {
+      "heading": "Creators",
+      "signUp": "Creator Sign Up",
+      "guidelines": "Creator Guidelines",
+      "helpCenter": "Help Center"
+    },
+    "advertisers": {
+      "heading": "Advertisers",
+      "advertiseWithUs": "Advertise with Us",
+      "mediaKit": "Media Kit",
+      "contactSales": "Contact Sales"
+    },
+    "legal": {
+      "heading": "Legal",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "communityGuidelines": "Community Guidelines"
+    },
+    "copyright": "© {year} Zuva Media Inc. All rights reserved.",
+    "tagline": "Our Stories. Our Stage."
   },
   "Landing": {
     "headline": "African & Caribbean Stories.",

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
-import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Zuva.TV",
@@ -607,8 +606,6 @@ export default function PrivacyPage() {
 
         </article>
       </div>
-
-      <SiteFooter />
     </div>
   );
 }

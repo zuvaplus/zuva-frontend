@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
-import SiteFooter from "@/components/SiteFooter";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import { ALL_COUNTRIES } from "@/lib/countries";
 
@@ -164,7 +163,6 @@ function CreatorSignupForm() {
             </Link>
           </div>
         </div>
-        <SiteFooter />
       </div>
     );
   }
@@ -345,8 +343,6 @@ function CreatorSignupForm() {
           </button>
         </form>
       </div>
-
-      <SiteFooter />
     </div>
   );
 }
