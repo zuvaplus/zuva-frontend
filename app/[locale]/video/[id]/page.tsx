@@ -21,6 +21,7 @@ import {
 import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
 import CommentsSection from "@/components/CommentsSection";
 import VideoPlayerWithAds from "@/components/VideoPlayerWithAds";
+import TipModal from "@/components/TipModal";
 import { useUserRole } from "@/components/UserRoleProvider";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
@@ -252,13 +253,30 @@ function Description({ text, containsSyntheticMedia }: { text: string; containsS
 // IAB's standard "Medium Rectangle" unit. Swap this box's contents for
 // the real GAM (Google Ad Manager) slot (googletag.defineSlot(...) /
 // ad tag markup) once ad serving is wired up; nothing here should
-// survive that change except the outer sizing.
+// survive that change except the outer sizing. Same dark styling as
+// BannerAdPlaceholder below, just at this unit's own size.
 function AdPlaceholder() {
   const t = useTranslations("Video");
   return (
-    <div className="w-[300px] h-[250px] max-w-full mx-auto lg:mx-0 flex items-center justify-center bg-black border border-[rgba(255,255,255,0.1)] rounded-lg">
+    <div className="w-[300px] h-[250px] max-w-full mx-auto lg:mx-0 flex items-center justify-center bg-[#111] border border-[rgba(255,255,255,0.08)] rounded-lg">
       {/* GAM DISPLAY AD SLOT — insert the ad tag/slot definition here. */}
-      <span className="text-zinc-500 text-xs">{t("advertisementPlaceholder")}</span>
+      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{t("advertisementPlaceholder")}</span>
+    </div>
+  );
+}
+
+// Horizontal banner-ad placeholder between the tags row and comments —
+// ~90px tall at the full column width is IAB's standard "Leaderboard"
+// size. Swap this box's contents for the real GAM (Google Ad Manager)
+// banner slot (googletag.defineSlot(...) / ad tag markup) once ad
+// serving is wired up; nothing here should survive that change except
+// the outer sizing.
+function BannerAdPlaceholder() {
+  const t = useTranslations("Video");
+  return (
+    <div className="w-full h-[90px] flex items-center justify-center bg-[#111] border border-[rgba(255,255,255,0.08)] rounded-lg mb-5">
+      {/* GAM BANNER AD SLOT — insert the ad tag/slot definition here. */}
+      <span className="text-[11px] text-[rgba(255,255,255,0.3)]">{t("advertisementPlaceholder")}</span>
     </div>
   );
 }
@@ -309,6 +327,7 @@ export default function VideoPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [showTip, setShowTip] = useState(false);
 
   // Engagement state (seeded from the video response, mutated optimistically)
   const [liked, setLiked] = useState(false);
@@ -691,8 +710,15 @@ export default function VideoPlayerPage() {
           >
             <Bookmark size={16} className={saved ? "fill-current" : ""} />
           </button>
-          {/* Tip button slot — filled by the upcoming monetization task */}
-          <div className="w-16" aria-hidden />
+          {/* Same classes as FeedCard.tsx's Tip button, verbatim — kept
+              pixel-consistent with the feed grid's own tip button rather
+              than a new one-off style. */}
+          <button
+            onClick={() => setShowTip(true)}
+            className="flex items-center gap-1.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 text-gold-400 text-xs px-3 py-1.5 rounded-full font-semibold transition-all"
+          >
+            {t("tip")}
+          </button>
           <button
             onClick={() => setShowReport(true)}
             className="text-zinc-600 hover:text-red-400 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
@@ -761,6 +787,8 @@ export default function VideoPlayerPage() {
         </div>
       )}
 
+      <BannerAdPlaceholder />
+
       {/* Comments */}
       <CommentsSection videoId={video.id} initialCount={video.comment_count ?? 0} />
     </div>
@@ -806,6 +834,15 @@ export default function VideoPlayerPage() {
     </div>
 
     {showReport && <ReportModal videoId={video.id} onClose={() => setShowReport(false)} />}
+    {showTip && (
+      <TipModal
+        creatorId={creator.id}
+        contentId={video.id}
+        orientation="landscape"
+        creatorName={creatorName}
+        onClose={() => setShowTip(false)}
+      />
+    )}
     </div>
   );
 }
