@@ -38,6 +38,17 @@ const LEGAL_CONTACT = "legal@zuva.tv";
 // How long the autoplay-next overlay counts down before navigating.
 const AUTOPLAY_SECONDS = 5;
 
+// Persisted on/off preference for the whole autoplay feature (countdown
+// + auto-navigate), remembered across sessions.
+const AUTOPLAY_PREF_KEY = "zuva_autoplay_enabled";
+
+// One-shot signal for "the video about to load at this id should start
+// playing immediately" — set right before navigating via the countdown
+// or Play Now, read and cleared the moment the destination page mounts.
+// sessionStorage (not a query param) so this page doesn't need a
+// Suspense boundary for useSearchParams just for this.
+const AUTOPLAY_NEXT_KEY = "zuva_autoplay_next_video_id";
+
 function VideoSkeleton() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 animate-fade-in">
@@ -313,8 +324,52 @@ export default function VideoPlayerPage() {
   // player fires onEnded (see toggleLike-adjacent handlers below);
   // ticks down to 0, then navigates to the first "Up Next" video.
   const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
+  // Defaults true; corrected from localStorage in the effect below once
+  // mounted (can't read localStorage during the initial server render).
+  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  // True only for the one render right after arriving here via the
+  // countdown/Play Now — tells the player to start playing immediately.
+  const [autoplayThisLoad, setAutoplayThisLoad] = useState(false);
 
   const streamRef = useRef<StreamPlayerApi | undefined>(undefined);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(AUTOPLAY_PREF_KEY);
+      if (stored !== null) setAutoplayEnabled(stored === "true");
+    } catch {
+      // localStorage unavailable (private mode etc.) — keep the default.
+    }
+  }, []);
+
+  function toggleAutoplayEnabled() {
+    setAutoplayEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(AUTOPLAY_PREF_KEY, String(next));
+      } catch {
+        // best-effort — see comment above
+      }
+      return next;
+    });
+  }
+
+  // Consumes the one-shot "autoplay this video" signal for whichever id
+  // we've just navigated to — re-runs on every id change, unlike a
+  // useState lazy initializer, which only ever runs once for this
+  // component instance (client-side nav here doesn't remount it).
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(AUTOPLAY_NEXT_KEY) === id) {
+        sessionStorage.removeItem(AUTOPLAY_NEXT_KEY);
+        setAutoplayThisLoad(true);
+        return;
+      }
+    } catch {
+      // sessionStorage unavailable — just don't autoplay this load.
+    }
+    setAutoplayThisLoad(false);
+  }, [id]);
 
   // Derived from state (not a hook) — safe to compute unconditionally
   // even before data has loaded, so the effects below can depend on it.
@@ -368,20 +423,34 @@ export default function VideoPlayerPage() {
   useEffect(() => {
     if (autoplayCountdown === null) return;
     if (autoplayCountdown === 0) {
-      if (nextVideoId) router.push(`/video/${nextVideoId}`);
+      goToNextVideo();
       setAutoplayCountdown(null);
       return;
     }
     const timer = setTimeout(() => setAutoplayCountdown((c) => (c === null ? null : c - 1)), 1000);
     return () => clearTimeout(timer);
-  }, [autoplayCountdown, nextVideoId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplayCountdown]);
+
+  // Flags the destination video to autoplay on arrival, then navigates —
+  // used by both the countdown reaching 0 and Play Now, so either path
+  // into the next video starts it playing immediately.
+  function goToNextVideo() {
+    if (!nextVideoId) return;
+    try {
+      sessionStorage.setItem(AUTOPLAY_NEXT_KEY, nextVideoId);
+    } catch {
+      // best-effort — worst case the next page just doesn't autoplay
+    }
+    router.push(`/video/${nextVideoId}`);
+  }
 
   function cancelAutoplay() {
     setAutoplayCountdown(null);
   }
 
   function playNextNow() {
-    if (nextVideoId) router.push(`/video/${nextVideoId}`);
+    goToNextVideo();
   }
 
   // Watch-progress tracking — the missing signal computeFeedScore's
@@ -542,8 +611,9 @@ export default function VideoPlayerPage() {
           onPause={() => { sendProgress(); }}
           onEnded={() => {
             sendProgress();
-            if (nextVideoId) setAutoplayCountdown(AUTOPLAY_SECONDS);
+            if (autoplayEnabled && nextVideoId) setAutoplayCountdown(AUTOPLAY_SECONDS);
           }}
+          autoplayMain={autoplayThisLoad}
         />
 
         {/* Autoplay-next overlay — shows once the player fires onEnded,
@@ -704,7 +774,28 @@ export default function VideoPlayerPage() {
 
       {related_videos.length > 0 && (
         <div className="mt-6">
-          <h2 className="text-white font-bold text-xl mb-3">{t("upNext")}</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-white font-bold text-xl">{t("upNext")}</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-400 text-xs font-medium">{t("autoplayToggle")}</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={autoplayEnabled}
+                aria-label={t("autoplayToggle")}
+                onClick={toggleAutoplayEnabled}
+                className={`relative w-9 h-5 rounded-full shrink-0 transition-colors ${
+                  autoplayEnabled ? "bg-gold-400" : "bg-surface-300 border border-white/15"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                    autoplayEnabled ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
           <div className="flex flex-col gap-1">
             {related_videos.map((rv) => (
               <UpNextCard key={rv.id} video={rv} />

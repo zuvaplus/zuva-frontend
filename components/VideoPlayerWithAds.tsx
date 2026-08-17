@@ -66,6 +66,13 @@ interface VideoPlayerWithAdsProps extends Omit<StreamProps, "src"> {
   skipAds: boolean;
   city?: string;
   country?: string;
+  /** Play the main content the moment it's actually reachable (after any
+   *  pre-roll ad resolves) — for the "autoplay next video" flow on the
+   *  watch page. Imperative, not the Stream `autoplay` prop: that prop is
+   *  a one-time iframe-src parameter, not a live control (see FlareSlide.tsx's
+   *  own note on this), so it wouldn't fire again on a client-side videoId
+   *  change to this same mounted component. */
+  autoplayMain?: boolean;
 }
 
 type PlayerState = "checking" | "preroll" | "main";
@@ -221,10 +228,21 @@ export default function VideoPlayerWithAds({
   skipAds,
   city,
   country,
+  autoplayMain,
   ...streamProps
 }: VideoPlayerWithAdsProps) {
   const [playerState, setPlayerState] = useState<PlayerState>(skipAds ? "main" : "checking");
   const [ad, setAd] = useState<AdServeResponse | null>(null);
+
+  // Fires once, the moment main content actually becomes reachable
+  // (immediately if skipAds/no ad served, or right after a pre-roll
+  // finishes) — see autoplayMain's doc comment on the props interface
+  // for why this can't just be the Stream `autoplay` prop.
+  useEffect(() => {
+    if (playerState !== "main" || !autoplayMain) return;
+    streamProps.streamRef?.current?.play().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerState, autoplayMain]);
 
   const sessionIdRef = useRef<string>("");
   useEffect(() => {
