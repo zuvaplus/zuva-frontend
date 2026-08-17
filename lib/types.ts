@@ -400,6 +400,8 @@ export interface RelatedVideo {
   duration_seconds: number | null;
   view_count: number;
   created_at: string;
+  creator_username: string;
+  creator_display_name: string | null;
 }
 
 // Viewer engagement state on GET /api/video/:id — false/false for

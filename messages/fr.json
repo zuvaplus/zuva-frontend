@@ -494,6 +494,11 @@
     "showLess": "Voir moins",
     "showMore": "...plus",
     "moreLikeThis": "Vidéos similaires",
+    "upNext": "À suivre",
+    "autoplayNext": "À suivre",
+    "cancelAutoplay": "Annuler",
+    "playNow": "Lire maintenant",
+    "advertisementPlaceholder": "Publicité",
     "aiDisclosureBadge": "IA",
     "aiDisclosureBadgeTooltip": "Déclaré par le créateur : contient un contenu réaliste généré ou modifié par IA",
     "report": {

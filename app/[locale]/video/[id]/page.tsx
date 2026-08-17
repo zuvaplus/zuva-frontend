@@ -7,7 +7,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth, useUser } from "@clerk/nextjs";
 import type { StreamPlayerApi } from "@cloudflare/stream-react";
 import { Eye, Clock, Tag, Flag, X, Film, Heart, Mail, Bookmark } from "lucide-react";
-import type { VideoResponse, ReportCategory } from "@/lib/types";
+import type { VideoResponse, ReportCategory, RelatedVideo } from "@/lib/types";
 import {
   likeVideo,
   unlikeVideo,
@@ -34,6 +34,9 @@ const REPORT_CATEGORIES: ReportCategory[] = [
 ];
 
 const LEGAL_CONTACT = "legal@zuva.tv";
+
+// How long the autoplay-next overlay counts down before navigating.
+const AUTOPLAY_SECONDS = 5;
 
 function VideoSkeleton() {
   return (
@@ -234,6 +237,52 @@ function Description({ text, containsSyntheticMedia }: { text: string; containsS
   );
 }
 
+// Display-ad placeholder for the right-column sidebar — 300x250 is
+// IAB's standard "Medium Rectangle" unit. Swap this box's contents for
+// the real GAM (Google Ad Manager) slot (googletag.defineSlot(...) /
+// ad tag markup) once ad serving is wired up; nothing here should
+// survive that change except the outer sizing.
+function AdPlaceholder() {
+  const t = useTranslations("Video");
+  return (
+    <div className="w-[300px] h-[250px] max-w-full mx-auto lg:mx-0 flex items-center justify-center bg-black border border-[rgba(255,255,255,0.1)] rounded-lg">
+      {/* GAM DISPLAY AD SLOT — insert the ad tag/slot definition here. */}
+      <span className="text-zinc-500 text-xs">{t("advertisementPlaceholder")}</span>
+    </div>
+  );
+}
+
+// One row in the "Up Next" list — compact horizontal card, matches the
+// same /video/:id destination the old grid-of-cards related-videos
+// section used, just relaid out for the sidebar column.
+function UpNextCard({ video }: { video: RelatedVideo }) {
+  const creatorName = video.creator_display_name || video.creator_username;
+  return (
+    <Link
+      href={`/video/${video.id}`}
+      className="flex items-start gap-3 p-1.5 rounded-xl hover:bg-white/5 transition-colors"
+    >
+      <div className="relative w-[120px] h-[68px] shrink-0 rounded-lg overflow-hidden bg-surface-300">
+        {video.thumbnail_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={video.thumbnail_url} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-surface-200" />
+        )}
+        {video.duration_seconds != null && (
+          <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-medium px-1 py-0.5 rounded flex items-center gap-1">
+            <Clock size={9} /> {formatDuration(video.duration_seconds)}
+          </span>
+        )}
+      </div>
+      <div className="min-w-0 pt-0.5">
+        <p className="text-white text-sm font-medium line-clamp-2 leading-snug">{video.title}</p>
+        <p className="text-zinc-500 text-xs mt-1 truncate">{creatorName}</p>
+      </div>
+    </Link>
+  );
+}
+
 export default function VideoPlayerPage() {
   const t = useTranslations("Video");
   const tCategories = useTranslations("Categories");
@@ -260,7 +309,17 @@ export default function VideoPlayerPage() {
   const [saved, setSaved] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
 
+  // null = no autoplay overlay showing. Set to AUTOPLAY_SECONDS when the
+  // player fires onEnded (see toggleLike-adjacent handlers below);
+  // ticks down to 0, then navigates to the first "Up Next" video.
+  const [autoplayCountdown, setAutoplayCountdown] = useState<number | null>(null);
+
   const streamRef = useRef<StreamPlayerApi | undefined>(undefined);
+
+  // Derived from state (not a hook) — safe to compute unconditionally
+  // even before data has loaded, so the effects below can depend on it.
+  const nextVideo = data?.related_videos?.[0] ?? null;
+  const nextVideoId = nextVideo?.id ?? null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -294,6 +353,36 @@ export default function VideoPlayerPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // A new video id means a fresh player — drop any countdown left over
+  // from the previous one (there shouldn't be, since navigating away
+  // unmounts/remounts this effect's owner, but this is the belt for
+  // the client-side-nav-without-full-reload case).
+  useEffect(() => {
+    setAutoplayCountdown(null);
+  }, [id]);
+
+  // Ticks the autoplay overlay down once a second; navigates once it
+  // reaches 0. Cancel (below) just resets this back to null, which
+  // this effect's own guard clause turns into a no-op.
+  useEffect(() => {
+    if (autoplayCountdown === null) return;
+    if (autoplayCountdown === 0) {
+      if (nextVideoId) router.push(`/video/${nextVideoId}`);
+      setAutoplayCountdown(null);
+      return;
+    }
+    const timer = setTimeout(() => setAutoplayCountdown((c) => (c === null ? null : c - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [autoplayCountdown, nextVideoId, router]);
+
+  function cancelAutoplay() {
+    setAutoplayCountdown(null);
+  }
+
+  function playNextNow() {
+    if (nextVideoId) router.push(`/video/${nextVideoId}`);
+  }
 
   // Watch-progress tracking — the missing signal computeFeedScore's
   // completion rate depends on. Fired periodically (every 12s, within
@@ -428,7 +517,10 @@ export default function VideoPlayerPage() {
   const isOwnContent = !!viewerDbId && viewerDbId === video.creator_id;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 pb-24 md:pb-6 animate-fade-in">
+    <div className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-6 lg:grid lg:grid-cols-[65%_35%] lg:gap-x-6 lg:items-start animate-fade-in">
+    {/* LEFT COLUMN (~65%): player + everything that was already here —
+        title, meta, channel bar, description, tags, comments. */}
+    <div>
       {/* Player — Stream (not a raw iframe) so streamRef gives us
           imperative currentTime/duration/paused access for watch-progress
           tracking, same verified pattern as FlareSlide.tsx. controls=true
@@ -448,8 +540,42 @@ export default function VideoPlayerPage() {
           preload="metadata"
           className="w-full h-full"
           onPause={() => { sendProgress(); }}
-          onEnded={() => { sendProgress(); }}
+          onEnded={() => {
+            sendProgress();
+            if (nextVideoId) setAutoplayCountdown(AUTOPLAY_SECONDS);
+          }}
         />
+
+        {/* Autoplay-next overlay — shows once the player fires onEnded,
+            counts down, then navigates to the first "Up Next" video
+            unless the viewer cancels or jumps ahead with Play Now. */}
+        {autoplayCountdown !== null && nextVideo && (
+          <div className="absolute inset-0 z-20 bg-black/90 flex flex-col items-center justify-center gap-4 px-6 text-center">
+            <p className="text-zinc-400 text-xs uppercase tracking-wide">{t("autoplayNext")}</p>
+            <div className="flex items-center gap-3 max-w-xs">
+              {nextVideo.thumbnail_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={nextVideo.thumbnail_url} alt="" className="w-20 h-12 object-cover rounded-lg shrink-0" />
+              )}
+              <p className="text-white font-semibold text-sm text-left line-clamp-2">{nextVideo.title}</p>
+            </div>
+            <p className="text-gold-400 text-3xl font-bold tabular-nums">{autoplayCountdown}</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={cancelAutoplay}
+                className="text-zinc-300 hover:text-white text-sm font-semibold px-4 py-2 rounded-full border border-white/20 transition-colors"
+              >
+                {t("cancelAutoplay")}
+              </button>
+              <button
+                onClick={playNextNow}
+                className="bg-gold-400 hover:bg-gold-300 text-black text-sm font-bold px-5 py-2 rounded-full transition-all"
+              >
+                {t("playNow")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Title */}
@@ -567,40 +693,28 @@ export default function VideoPlayerPage() {
 
       {/* Comments */}
       <CommentsSection videoId={video.id} initialCount={video.comment_count ?? 0} />
+    </div>
 
-      {/* Related videos */}
+    {/* RIGHT COLUMN (~35%, sticky on desktop): ad placeholder + Up Next.
+        gap-x-6 on the grid above already gives this the ~24px separation
+        from the player; mt-8 only applies on mobile, where this column
+        stacks below the left column's content instead of sitting beside it. */}
+    <div className="mt-8 lg:mt-0 lg:sticky lg:top-20 lg:self-start">
+      <AdPlaceholder />
+
       {related_videos.length > 0 && (
-        <div className="mt-10">
-          <h2 className="text-zinc-400 text-sm font-semibold uppercase tracking-wide mb-3">{t("moreLikeThis")}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="mt-6">
+          <h2 className="text-white font-bold text-xl mb-3">{t("upNext")}</h2>
+          <div className="flex flex-col gap-1">
             {related_videos.map((rv) => (
-              <Link
-                key={rv.id}
-                href={`/video/${rv.id}`}
-                className="rounded-xl overflow-hidden bg-surface-200 border border-gold-400/10 hover:border-gold-400/30 transition-colors"
-              >
-                <div className="relative bg-surface-300 aspect-video">
-                  {rv.thumbnail_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={rv.thumbnail_url} alt="" className="w-full h-full object-cover" />
-                  )}
-                  {rv.duration_seconds != null && (
-                    <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[10px] font-medium px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <Clock size={10} /> {formatDuration(rv.duration_seconds)}
-                    </span>
-                  )}
-                </div>
-                <div className="p-2.5">
-                  <p className="text-white text-sm font-medium truncate">{rv.title}</p>
-                  <p className="text-zinc-500 text-[11px] mt-1">{t("viewsCount", { count: formatCount(rv.view_count) })}</p>
-                </div>
-              </Link>
+              <UpNextCard key={rv.id} video={rv} />
             ))}
           </div>
         </div>
       )}
+    </div>
 
-      {showReport && <ReportModal videoId={video.id} onClose={() => setShowReport(false)} />}
+    {showReport && <ReportModal videoId={video.id} onClose={() => setShowReport(false)} />}
     </div>
   );
 }

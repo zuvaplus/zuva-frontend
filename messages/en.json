@@ -494,6 +494,11 @@
     "showLess": "Show less",
     "showMore": "...more",
     "moreLikeThis": "More like this",
+    "upNext": "Up Next",
+    "autoplayNext": "Up next",
+    "cancelAutoplay": "Cancel",
+    "playNow": "Play Now",
+    "advertisementPlaceholder": "Advertisement",
     "aiDisclosureBadge": "AI",
     "aiDisclosureBadgeTooltip": "Creator-disclosed: contains realistic AI-generated or altered content",
     "report": {
