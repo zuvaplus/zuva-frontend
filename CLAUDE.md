@@ -96,6 +96,33 @@ Catch-all routes (`[[...sign-in]]` / `[[...sign-up]]`) are required for Clerk's 
 ### Turbopack
 Dev server uses Turbopack for fast HMR: `npm run dev` → `next dev --turbopack`
 
+**Known dev-only console noise, not a real bug**: `npm run dev` logs
+`MISSING_MESSAGE: Could not resolve 'Video.tip'` / `'Video.autoplayToggle'`
+in the browser console, firing even on unrelated pages like the homepage.
+The keys are present and correctly nested under `Video` in both
+`messages/en.json` and `messages/fr.json` — confirmed by grep and by
+inspecting the actually-rendered DOM on `/video/[id]` (the Tip button's
+`aria-label` and the Autoplay toggle's label both resolve correctly).
+Reproduces even after a full `.next` wipe + fresh `npm run dev` restart
+(ruling out stale-HMR-cache), and `npm run build` compiles with zero
+errors (ruling out a real config/key problem). Root cause: Next 16.2's
+new "Enhanced Routing" incremental/segment prefetching — as soon as a
+`<Link href="/video/:id">` (e.g. a FeedCard on the homepage) scrolls into
+view, Next speculatively compiles and partially renders that route in
+the background, and that background pass logs a next-intl error before
+resolving — this is a documented-as-unstable part of Next 16's brand-new
+prefetch subsystem (see open upstream issues
+[vercel/next.js#85489](https://github.com/vercel/next.js/issues/85489)
+and
+[vercel/next.js#85248](https://github.com/vercel/next.js/issues/85248)
+about the same prefetch machinery misbehaving), not a next-intl config
+bug in this repo. No user-facing impact — don't chase this again without
+new evidence it's actually breaking something visible. If it becomes
+worth silencing, the lowest-risk lever is `prefetch={false}` on the
+specific `Link`s pointing at `/video/[id]` (FeedCard, RelatedVideo, etc.)
+— not implemented, since that trades away real prefetch performance for
+a cosmetic dev-console fix.
+
 ### Homepage & Navigation
 - `app/[locale]/page.tsx` ("/") is the **universal homepage** — identical for
   signed-in and signed-out visitors, and identical for creators and viewers
