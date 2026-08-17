@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import type { FlareItem } from "@/lib/types";
 import { getFlaresFeed } from "@/lib/api";
+import { withSponsoredFlareSlots, isSponsoredFlareSlot } from "@/lib/utils";
 import FlareSlide from "@/components/FlareSlide";
 import FlareCommentsSheet from "@/components/FlareCommentsSheet";
 import ZuvaSunIcon from "@/components/ZuvaSunIcon";
@@ -92,6 +93,37 @@ function SlideFrame({
   );
 }
 
+// Full-screen sponsored Flare ad slide, interleaved into the swipe
+// sequence every 5th position (see withSponsoredFlareSlots). Registers
+// with the same IntersectionObserver via registerRef as a real slide so
+// it expands full-screen and drives activeIndex the same way regular
+// Flares do — it just renders no video. This is where the real
+// full-screen Flares native ad unit will be served once ad serving is
+// wired up.
+function SponsoredFlareAdSlide({
+  index,
+  registerRef,
+}: {
+  index: number;
+  registerRef: (index: number, el: HTMLDivElement | null) => void;
+}) {
+  const t = useTranslations("Flares");
+  return (
+    <div
+      ref={(el) => registerRef(index, el)}
+      data-index={index}
+      className="h-dvh w-full snap-start snap-always shrink-0 flex items-center justify-center bg-black relative"
+    >
+      <div className="relative h-full w-full max-w-[calc(100dvh*9/16)] mx-auto bg-[#111] flex flex-col items-center justify-center gap-2">
+        <span className="text-[13px] text-[rgba(255,255,255,0.3)]">{t("ad")}</span>
+        <span className="text-[11px] font-semibold" style={{ color: "#f37b0d" }}>
+          {t("sponsored")}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function FlaresPage() {
   const t = useTranslations("Flares");
   const { getToken } = useAuth();
@@ -144,31 +176,40 @@ export default function FlaresPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Ad slides interleaved every 5th position — the rendered swipe
+  // sequence (and therefore activeIndex/IntersectionObserver indices)
+  // operates on this list, not the raw fetched `flares`, since ad slides
+  // take real vertical space in the snap-scroll container too.
+  const displayItems = useMemo(() => withSponsoredFlareSlots(flares, 5), [flares]);
+  const activeItem = displayItems[activeIndex];
+
   // Mark the active slide seen + persist for next session (or a refresh
   // within this one) — server-side exclusion via the `exclude` param.
+  // Ad slides are never "seen" (they're not real content to exclude).
   useEffect(() => {
-    const flare = flares[activeIndex];
-    if (!flare) return;
-    if (!seenRef.current.includes(flare.id)) {
-      seenRef.current = [...seenRef.current, flare.id];
+    if (!activeItem || isSponsoredFlareSlot(activeItem)) return;
+    if (!seenRef.current.includes(activeItem.id)) {
+      seenRef.current = [...seenRef.current, activeItem.id];
       saveSeen(seenRef.current);
     }
-  }, [activeIndex, flares]);
+  }, [activeItem]);
 
-  // Paginate a few slides before the viewer actually runs out.
+  // Paginate a few slides before the viewer actually runs out — measured
+  // against the rendered list (ads included) so ad slides near the end
+  // don't delay the fetch.
   useEffect(() => {
     if (!hasMore || loadingMore || loading) return;
-    if (activeIndex >= flares.length - 3) {
+    if (activeIndex >= displayItems.length - 3) {
       loadPage(cursor);
     }
-  }, [activeIndex, flares.length, hasMore, loadingMore, loading, cursor, loadPage]);
+  }, [activeIndex, displayItems.length, hasMore, loadingMore, loading, cursor, loadPage]);
 
   // Drives activeIndex from real scroll position — scroll-snap (not a
   // custom touch-gesture library) handles the actual swipe physics
   // natively for touch, wheel, and keyboard alike; this just observes
   // which snapped slide is dominant.
   useEffect(() => {
-    if (!containerRef.current || flares.length === 0) return;
+    if (!containerRef.current || displayItems.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -182,7 +223,7 @@ export default function FlaresPage() {
     );
     slideRefs.current.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [flares.length]);
+  }, [displayItems.length]);
 
   function registerSlideRef(index: number, el: HTMLDivElement | null) {
     if (el) slideRefs.current.set(index, el);
@@ -230,19 +271,23 @@ export default function FlaresPage() {
           ref={containerRef}
           className="h-full w-full overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
         >
-          {flares.map((flare, index) => (
-            <SlideFrame
-              key={flare.id}
-              index={index}
-              flare={flare}
-              isLive={index >= activeIndex - WINDOW_BEFORE && index <= activeIndex + WINDOW_AFTER}
-              isActive={index === activeIndex}
-              muted={muted}
-              onToggleMute={() => setMuted((m) => !m)}
-              onOpenComments={setCommentsFlareId}
-              registerRef={registerSlideRef}
-            />
-          ))}
+          {displayItems.map((item, index) =>
+            isSponsoredFlareSlot(item) ? (
+              <SponsoredFlareAdSlide key={item.id} index={index} registerRef={registerSlideRef} />
+            ) : (
+              <SlideFrame
+                key={item.id}
+                index={index}
+                flare={item}
+                isLive={index >= activeIndex - WINDOW_BEFORE && index <= activeIndex + WINDOW_AFTER}
+                isActive={index === activeIndex}
+                muted={muted}
+                onToggleMute={() => setMuted((m) => !m)}
+                onOpenComments={setCommentsFlareId}
+                registerRef={registerSlideRef}
+              />
+            )
+          )}
         </div>
       )}
 

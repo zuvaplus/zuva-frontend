@@ -12,6 +12,7 @@ import CreatorStoryRow from "@/components/CreatorStoryRow";
 import CategoryRow from "@/components/CategoryRow";
 import VideoGrid from "@/components/VideoGrid";
 import { FeedSkeleton } from "@/components/LoadingSkeleton";
+import HomepageMastheadAd from "@/components/HomepageMastheadAd";
 
 // Matches CONTENT_CATEGORIES in zuva-backend/zuva-api.js, minus
 // "nature" and "other" — the 13 categories that get their own homepage
@@ -96,6 +97,10 @@ export default function HomePage() {
       </div>
 
       <div className="px-4 sm:px-6 py-6">
+        {/* Premium masthead takeover — above Trending, shown on both
+            signed-in and signed-out homepage. */}
+        <HomepageMastheadAd />
+
         {signedIn && <CreatorStoryRow creators={followedCreators} />}
 
         {signedIn && (

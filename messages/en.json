@@ -182,7 +182,10 @@
     "recommendedForYou": "Recommended for you",
     "trending": "Trending",
     "flares": "Flares",
-    "browseEverything": "Browse Everything"
+    "browseEverything": "Browse Everything",
+    "mastheadSponsored": "Sponsored",
+    "mastheadFeatured": "Featured Placement",
+    "mastheadSubtitle": "Premium Homepage Takeover"
   },
   "Status": {
     "unconfirmed": "Unconfirmed",
@@ -717,7 +720,9 @@
     "following": "Following",
     "follow": "Follow",
     "more": "...more",
-    "closeComments": "Close comments"
+    "closeComments": "Close comments",
+    "ad": "Ad",
+    "sponsored": "Sponsored"
   },
   "Categories": {
     "Comedy": "Comedy",

@@ -1,5 +1,26 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { FlareItem } from "@/lib/types";
+import { withSponsoredFlareSlots, isSponsoredFlareSlot } from "@/lib/utils";
+
+// Sponsored Flare-shaped placeholder, interleaved every 5th position by
+// withSponsoredFlareSlots below. Not a Link (unlike real thumbnails) —
+// placeholder state is deliberately non-clickable. This is where the
+// full-screen Flares native ad unit will be served once ad serving is
+// wired up; only the thumbnail-row appearance lives here.
+function SponsoredFlareCard() {
+  const t = useTranslations("Flares");
+  return (
+    <div className="shrink-0 flex flex-col items-center gap-2 w-[120px]">
+      <div className="flare-shape w-[120px] h-[200px] bg-[#111] flex items-center justify-center">
+        <span className="text-[11px] text-zinc-500">{t("ad")}</span>
+      </div>
+      <span className="text-[10px] font-semibold" style={{ color: "#f37b0d" }}>
+        {t("sponsored")}
+      </span>
+    </div>
+  );
+}
 
 // Horizontal-scrolling row of Flare-shaped video thumbnails for the
 // homepage. There's no per-Flare deep link into the /flares swipe
@@ -9,9 +30,15 @@ import type { FlareItem } from "@/lib/types";
 export default function FlareThumbRow({ flares }: { flares: FlareItem[] }) {
   if (flares.length === 0) return null;
 
+  const items = withSponsoredFlareSlots(flares, 5);
+
   return (
     <div className="flex items-start gap-4 overflow-x-auto scrollbar-hide pb-1">
-      {flares.map((flare) => {
+      {items.map((item) => {
+        if (isSponsoredFlareSlot(item)) {
+          return <SponsoredFlareCard key={item.id} />;
+        }
+        const flare = item;
         const creatorName = flare.creator.display_name ?? flare.creator.username;
         return (
           <Link

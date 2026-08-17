@@ -304,6 +304,15 @@ export interface FlaresFeedResponse {
   nextCursor: string | null;
 }
 
+// A sponsored-ad marker interleaved into a rendered Flares list — see
+// withSponsoredFlareSlots in lib/utils.ts. Discriminated from a real
+// FlareItem by the `isAd` flag; carries no video data since it's never
+// live content, just a placeholder slot reserved for a future native ad.
+export interface SponsoredFlareSlot {
+  isAd: true;
+  id: string;
+}
+
 export interface ChannelVideoSummary {
   id: string;
   title: string;

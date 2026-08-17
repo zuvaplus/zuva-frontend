@@ -182,7 +182,10 @@
     "recommendedForYou": "Recommandé pour vous",
     "trending": "Tendances",
     "flares": "Flares",
-    "browseEverything": "Tout parcourir"
+    "browseEverything": "Tout parcourir",
+    "mastheadSponsored": "Sponsorisé",
+    "mastheadFeatured": "Emplacement en vedette",
+    "mastheadSubtitle": "Prise en charge Premium de la page d'accueil"
   },
   "Status": {
     "unconfirmed": "Non confirmé",
@@ -717,7 +720,9 @@
     "following": "Abonné",
     "follow": "Suivre",
     "more": "...plus",
-    "closeComments": "Fermer les commentaires"
+    "closeComments": "Fermer les commentaires",
+    "ad": "Pub",
+    "sponsored": "Sponsorisé"
   },
   "Categories": {
     "Comedy": "Comédie",

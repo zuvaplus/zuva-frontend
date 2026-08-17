@@ -1,3 +1,5 @@
+import type { SponsoredFlareSlot } from "./types";
+
 /** Format a Sun balance for display: 1234567 → "1.2M ☀" */
 export function formatSuns(suns: number): string {
   if (suns >= 1_000_000) return `${(suns / 1_000_000).toFixed(1)}M`;
@@ -77,6 +79,32 @@ export function tierInfo(tier: string): { label: string; color: string } {
 /** Clamp a number between min and max */
 export function clamp(val: number, min: number, max: number): number {
   return Math.min(Math.max(val, min), max);
+}
+
+/** Interleave a SponsoredFlareSlot after every Nth real item — e.g. with
+ *  everyN=5: real, real, real, real, real, AD, real, real, ... Used by
+ *  both the homepage's Flares thumbnail row and the full /flares swipe
+ *  feed so the "every 5th position" placement rule lives in one place. */
+export function withSponsoredFlareSlots<T>(
+  items: T[],
+  everyN = 5
+): (T | SponsoredFlareSlot)[] {
+  const result: (T | SponsoredFlareSlot)[] = [];
+  let adCount = 0;
+  items.forEach((item, i) => {
+    result.push(item);
+    if ((i + 1) % everyN === 0) {
+      adCount += 1;
+      result.push({ isAd: true, id: `sponsored-flare-${adCount}` });
+    }
+  });
+  return result;
+}
+
+/** Type guard distinguishing a SponsoredFlareSlot from a real item in a
+ *  withSponsoredFlareSlots result. */
+export function isSponsoredFlareSlot(item: unknown): item is SponsoredFlareSlot {
+  return typeof item === "object" && item !== null && (item as { isAd?: unknown }).isAd === true;
 }
 
 /** Video card description snippet: first sentence or ~100 characters,
