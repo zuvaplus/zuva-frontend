@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatSuns, formatDuration, timeAgo, truncateDescription } from "@/lib/utils";
 import TipModal from "./TipModal";
+import ZuvaSunIcon from "./ZuvaSunIcon";
 
 interface FeedCardProps {
   item: FeedItem;
@@ -94,9 +95,10 @@ export default function FeedCard({ item }: FeedCardProps) {
 
             <button
               onClick={() => setShowTip(true)}
-              className="flex items-center gap-1.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 text-gold-400 text-xs px-3 py-1.5 rounded-full font-semibold transition-all"
+              aria-label={t("tip")}
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 transition-all"
             >
-              {t("tip")}
+              <ZuvaSunIcon size={16} />
             </button>
           </div>
         </div>

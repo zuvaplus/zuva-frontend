@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Search, User as UserIcon } from "lucide-react";
+import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 
 interface NavbarProps {
   onOpenProfileMenu: () => void;
@@ -30,27 +31,10 @@ export default function Navbar({ onOpenProfileMenu }: NavbarProps) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gold-400/10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3 md:gap-6">
 
-        {/* Logo — inline SVG crops zuva-logo.svg to sun only.
-             viewBox="300 100 900 900" derived from SVG geometry:
-             sun raster at x=351–1149, y=150–947 (matrix-scaled);
-             ZUVA text starts at y=1272 — safely excluded. */}
+        {/* Logo — the same ZuvaSunIcon used for every other sun on the
+             site (see that component for the zuva-logo.svg crop math). */}
         <Link href="/" aria-label="Zuva home" className="shrink-0">
-          <svg
-            viewBox="300 100 900 900"
-            width="40"
-            height="40"
-            xmlns="http://www.w3.org/2000/svg"
-            role="img"
-            aria-label="Zuva sun"
-          >
-            <image
-              href="/zuva-logo.svg"
-              x="0"
-              y="0"
-              width="1500"
-              height="1500"
-            />
-          </svg>
+          <ZuvaSunIcon size={40} />
         </Link>
 
         {isAdmin && (

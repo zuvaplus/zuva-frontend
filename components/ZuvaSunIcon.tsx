@@ -1,16 +1,8 @@
 // Server component — no client-side APIs used.
-// Mirrors ZuvaLogo geometry: all rays are wavy S-curve flames, alternating tall/short.
-// ViewBox 0 0 200 200, centre (100,100).
-
-const AMBER = "#f37b0d";
-
-// Tall wavy S-curve: two cubic bezier segments
-const TALL_RAY  = "M 100,65 C 89,59 89,50 100,44 C 111,38 111,30 100,22";
-// Short wavy S-curve: same shape, shorter reach
-const SHORT_RAY = "M 100,63 C 89,58 89,51 100,47 C 111,43 111,38 100,34";
-
-const TALL_ANGLES  = [0, 45, 90, 135, 180, 225, 270, 315];
-const SHORT_ANGLES = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5];
+// Renders the same sun mark used in Navbar.tsx next to the search bar —
+// a crop of public/zuva-logo.svg, not a separate hand-drawn icon. Every
+// sun on the site should render through this component so the logo only
+// has to change in one place.
 
 interface ZuvaSunIconProps {
   size?: number;
@@ -27,45 +19,19 @@ export default function ZuvaSunIcon({
 }: ZuvaSunIconProps) {
   return (
     <svg
-      viewBox="0 0 200 200"
+      viewBox="300 100 900 900"
       width={size}
       height={size}
-      fill="none"
-      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Zuva sun"
       className={[
         glow        ? "sun-glow"                                                          : "",
         interactive ? "cursor-pointer hover:animate-sun-pulse transition-all duration-200" : "",
         className,
       ].filter(Boolean).join(" ")}
     >
-      {/* ── Tall wavy S-curve rays ───────────────────────── */}
-      {TALL_ANGLES.map((deg) => (
-        <path
-          key={`t${deg}`}
-          d={TALL_RAY}
-          stroke={AMBER}
-          strokeWidth="6"
-          strokeLinecap="round"
-          fill="none"
-          transform={`rotate(${deg},100,100)`}
-        />
-      ))}
-
-      {/* ── Short wavy S-curve rays ──────────────────────── */}
-      {SHORT_ANGLES.map((deg) => (
-        <path
-          key={`s${deg}`}
-          d={SHORT_RAY}
-          stroke={AMBER}
-          strokeWidth="5"
-          strokeLinecap="round"
-          fill="none"
-          transform={`rotate(${deg},100,100)`}
-        />
-      ))}
-
-      {/* ── Centre disk ─────────────────────────────────── */}
-      <circle cx="100" cy="100" r="33" fill={AMBER} />
+      <image href="/zuva-logo.svg" x="0" y="0" width="1500" height="1500" />
     </svg>
   );
 }

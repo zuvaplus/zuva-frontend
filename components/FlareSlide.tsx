@@ -293,11 +293,10 @@ export default function FlareSlide({
           <span className="text-white text-xs font-semibold drop-shadow">{formatCount(commentCount)}</span>
         </button>
 
-        <button onClick={handleTipClick} className="flex flex-col items-center gap-1">
+        <button onClick={handleTipClick} aria-label={t("tip")} className="flex flex-col items-center gap-1">
           <span className="w-11 h-11 rounded-full bg-gold-400 flex items-center justify-center shadow-gold">
-            <ZuvaSunIcon size={20} interactive />
+            <ZuvaSunIcon size={22} interactive />
           </span>
-          <span className="text-white text-xs font-semibold drop-shadow">{t("tip")}</span>
         </button>
 
         <button onClick={handleShare} className="flex flex-col items-center gap-1">

@@ -90,9 +90,10 @@ export default function CreatorProfilePage() {
             {/* Tip button */}
             <button
               onClick={() => setShowTip(true)}
-              className="shrink-0 flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-black font-bold px-4 py-2.5 rounded-xl transition-all shadow-gold text-sm"
+              aria-label={t("tip")}
+              className="shrink-0 flex items-center justify-center w-11 h-11 bg-gold-400 hover:bg-gold-300 rounded-xl transition-all shadow-gold"
             >
-              <ZuvaSunIcon size={16} /> {t("tip")}
+              <ZuvaSunIcon size={20} />
             </button>
           </div>
 

@@ -22,6 +22,7 @@ import { formatDuration, formatCount, timeAgoLong } from "@/lib/utils";
 import CommentsSection from "@/components/CommentsSection";
 import VideoPlayerWithAds from "@/components/VideoPlayerWithAds";
 import TipModal from "@/components/TipModal";
+import ZuvaSunIcon from "@/components/ZuvaSunIcon";
 import { useUserRole } from "@/components/UserRoleProvider";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
@@ -715,9 +716,10 @@ export default function VideoPlayerPage() {
               than a new one-off style. */}
           <button
             onClick={() => setShowTip(true)}
-            className="flex items-center gap-1.5 bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 text-gold-400 text-xs px-3 py-1.5 rounded-full font-semibold transition-all"
+            aria-label={t("tip")}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-gold-400/15 hover:bg-gold-400/25 border border-gold-400/35 transition-all"
           >
-            {t("tip")}
+            <ZuvaSunIcon size={18} />
           </button>
           <button
             onClick={() => setShowReport(true)}
