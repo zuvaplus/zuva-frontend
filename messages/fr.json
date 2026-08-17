@@ -152,7 +152,12 @@
   },
   "Homepage": {
     "slogan": "Nos histoires. Notre scène.",
-    "searchPlaceholder": "Rechercher des créateurs, vidéos, tags..."
+    "searchPlaceholder": "Rechercher des créateurs, vidéos, tags...",
+    "seeMore": "Voir plus",
+    "recommendedForYou": "Recommandé pour vous",
+    "trending": "Tendances",
+    "flares": "Flares",
+    "browseEverything": "Tout parcourir"
   },
   "Status": {
     "unconfirmed": "Non confirmé",

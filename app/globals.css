@@ -142,3 +142,11 @@ input[type="range"].gold-range::-webkit-slider-thumb {
   height: 100%;
   border: none;
 }
+
+/* ── Flare-shaped thumbnails ────────────────────────────
+   Shared by the homepage's Flare video thumbnail row (120x200) and
+   the signed-in creator story-avatar row (56x80) — same subtle
+   taller-than-wide, narrowing-toward-the-top shape at two sizes. */
+.flare-shape {
+  clip-path: polygon(50% 0%, 80% 25%, 100% 60%, 85% 100%, 15% 100%, 0% 60%, 20% 25%);
+}

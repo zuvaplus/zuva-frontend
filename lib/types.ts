@@ -462,6 +462,19 @@ export interface SaveResponse {
   saved: boolean;
 }
 
+// ─── Homepage: followed-creator story row ────────────────────
+export interface FollowedCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+export interface FollowedCreatorsResponse {
+  success: boolean;
+  creators: FollowedCreator[];
+}
+
 // ─── Reporting ────────────────────────────────────────────────
 // Must match REPORT_CATEGORIES in zuva-backend/zuva-api.js.
 export type ReportCategory =

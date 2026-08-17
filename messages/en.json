@@ -152,7 +152,12 @@
   },
   "Homepage": {
     "slogan": "Our Stories. Our Stage.",
-    "searchPlaceholder": "Search creators, videos, tags..."
+    "searchPlaceholder": "Search creators, videos, tags...",
+    "seeMore": "See more",
+    "recommendedForYou": "Recommended for you",
+    "trending": "Trending",
+    "flares": "Flares",
+    "browseEverything": "Browse Everything"
   },
   "Status": {
     "unconfirmed": "Unconfirmed",

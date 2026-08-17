@@ -30,6 +30,7 @@ import type {
   ReportVideoResponse,
   SortOption,
   SaveResponse,
+  FollowedCreatorsResponse,
 } from "./types";
 
 // Browser: use relative paths — Next.js rewrites proxy them to the backend.
@@ -111,6 +112,10 @@ export function getHistoryFeed(token: string | null): Promise<FeedResponse> {
 
 export function getSavedFeed(token: string | null): Promise<FeedResponse> {
   return apiFetch<FeedResponse>("/api/me/saved", token);
+}
+
+export function getFollowedCreators(token: string | null): Promise<FollowedCreatorsResponse> {
+  return apiFetch<FollowedCreatorsResponse>("/api/me/followed-creators", token);
 }
 
 // Fired periodically (every 10-15s of playback) and on pause/unload —
