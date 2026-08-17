@@ -29,19 +29,31 @@
  *    supplies them yet from the watch page (see Part 3 integration) —
  *    the backend serves country-agnostic ads until that's built.
  *
- * NEXT_PUBLIC_BACKEND_URL is the env var used for the GET /api/ads/serve
- * and POST /api/ads/impression calls below (same var every other
- * component in this repo uses for backend calls — see lib/api.ts).
+ * The GET /api/ads/serve and POST /api/ads/impression calls below use
+ * relative "/api/..." paths, proxied server-side by next.config.mjs's
+ * rewrite — the same pattern every other component in this repo uses
+ * (see lib/api.ts's BASE_URL comment) specifically so the browser never
+ * needs a real backend origin or CORS config. An earlier version of this
+ * file called an absolute NEXT_PUBLIC_BACKEND_URL directly from the
+ * browser instead, which silently broke ad serving in production: if
+ * that build-time env var wasn't baked correctly into the deployed
+ * client bundle, it fell back to "http://localhost:3000" inside every
+ * real visitor's browser — unreachable, and failing silently by design
+ * (ads must never block content — see the catch block below).
  */
 
 import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import { Stream } from "@cloudflare/stream-react";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
-
 // A skip below this many seconds doesn't count as an impression — see
 // handleSkip below. A completed view always counts regardless of length.
 const MIN_VIEW_SECONDS_FOR_IMPRESSION = 5;
+
+// Image creatives have no native playback clock (unlike video, which
+// uses the element's own currentTime/onEnded) — this is the total
+// display duration used to drive ImagePrerollPlayer's manual countdown
+// when the creative doesn't specify its own duration_seconds.
+const DEFAULT_IMAGE_AD_DISPLAY_SECONDS = 8;
 
 interface AdServeResponse {
   campaign_id: string;
@@ -91,11 +103,66 @@ interface ImpressionOutcome {
 }
 
 // ============================================================
-//  Pre-roll ad player — raw <video>, not Cloudflare Stream (the
+//  Shared pre-roll chrome — "Ad" pill, skip button/countdown, and the
+//  optional "Learn More" click-through. Identical for the video and
+//  image variants below; only how `canSkip`/`remaining` get computed
+//  (video's own currentTime vs. an image's manual timer) differs.
+// ============================================================
+function PrerollChrome({
+  canSkip,
+  remaining,
+  onSkip,
+  clickThroughUrl,
+  onLearnMore,
+}: {
+  canSkip: boolean;
+  remaining: number | null;
+  onSkip: () => void;
+  clickThroughUrl: string | null;
+  onLearnMore: () => void;
+}) {
+  return (
+    <>
+      {/* Top right — "Ad" pill */}
+      <div className="absolute top-3 right-3 bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
+        Ad
+      </div>
+
+      {/* Bottom left — countdown / skip */}
+      <div className="absolute bottom-3 left-3">
+        {canSkip ? (
+          <button
+            onClick={onSkip}
+            className="bg-black/70 hover:bg-black/85 text-white text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg border border-white/20 transition-colors"
+          >
+            Skip Ad →
+          </button>
+        ) : (
+          <div className="bg-black/70 text-white text-xs sm:text-sm font-medium px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg">
+            Ad{remaining !== null ? ` • ${remaining}s` : ""}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom right — Learn More */}
+      {clickThroughUrl && (
+        <button
+          onClick={onLearnMore}
+          className="absolute bottom-3 right-3 bg-gold-400 hover:bg-gold-300 text-black text-xs sm:text-sm font-bold px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-colors"
+        >
+          Learn More
+        </button>
+      )}
+    </>
+  );
+}
+
+// ============================================================
+//  Video pre-roll — raw <video>, not Cloudflare Stream (the
 //  creative's file_url is already a direct playable URL). No
 //  controls, no seeking, no pause — standard pre-roll behavior.
 // ============================================================
-function PrerollPlayer({
+function VideoPrerollPlayer({
   ad,
   onComplete,
   onError,
@@ -184,36 +251,98 @@ function PrerollPlayer({
         // custom overlay below is the entire UI.
       />
 
-      {/* Top right — "Ad" pill */}
-      <div className="absolute top-3 right-3 bg-gold-400 text-black text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
-        Ad
-      </div>
+      <PrerollChrome
+        canSkip={canSkip}
+        remaining={remaining}
+        onSkip={handleSkip}
+        clickThroughUrl={ad.click_through_url}
+        onLearnMore={handleLearnMore}
+      />
+    </div>
+  );
+}
 
-      {/* Bottom left — countdown / skip */}
-      <div className="absolute bottom-3 left-3">
-        {canSkip ? (
-          <button
-            onClick={handleSkip}
-            className="bg-black/70 hover:bg-black/85 text-white text-xs sm:text-sm font-semibold px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg border border-white/20 transition-colors"
-          >
-            Skip Ad →
-          </button>
-        ) : (
-          <div className="bg-black/70 text-white text-xs sm:text-sm font-medium px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg">
-            Ad{remaining !== null ? ` • ${remaining}s` : ""}
-          </div>
-        )}
-      </div>
+// ============================================================
+//  Image pre-roll — a still creative has no native playback clock
+//  (unlike <video>'s currentTime/onEnded), so this drives its own
+//  countdown with a manual timer: skippable once elapsed >=
+//  skip_after_seconds, auto-completes at duration_seconds (or
+//  DEFAULT_IMAGE_AD_DISPLAY_SECONDS if the creative didn't set one)
+//  if the viewer never clicks skip.
+// ============================================================
+function ImagePrerollPlayer({
+  ad,
+  onComplete,
+  onError,
+}: {
+  ad: AdServeResponse;
+  onComplete: (outcome: ImpressionOutcome) => void;
+  onError: () => void;
+}) {
+  const clickedRef = useRef(false);
+  const firedRef = useRef(false); // guards against the auto-complete timer racing a manual skip
+  const [elapsed, setElapsed] = useState(0);
 
-      {/* Bottom right — Learn More */}
-      {ad.click_through_url && (
-        <button
-          onClick={handleLearnMore}
-          className="absolute bottom-3 right-3 bg-gold-400 hover:bg-gold-300 text-black text-xs sm:text-sm font-bold px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-colors"
-        >
-          Learn More
-        </button>
-      )}
+  const totalSeconds = ad.duration_seconds ?? DEFAULT_IMAGE_AD_DISPLAY_SECONDS;
+  const skipAfter = ad.skip_after_seconds;
+  const canSkip = elapsed >= skipAfter;
+  const remaining = Math.max(0, Math.ceil(totalSeconds - elapsed));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed((prev) => prev + 0.1);
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (firedRef.current || elapsed < totalSeconds) return;
+    firedRef.current = true;
+    onComplete({
+      wasSkipped: false,
+      skipTimeSeconds: null,
+      completed: true,
+      clicked: clickedRef.current,
+      meetsMinimumView: true, // a completion is always a valid view
+    });
+  }, [elapsed, totalSeconds, onComplete]);
+
+  function handleSkip() {
+    if (firedRef.current) return;
+    firedRef.current = true;
+    onComplete({
+      wasSkipped: true,
+      skipTimeSeconds: Math.round(elapsed),
+      completed: false,
+      clicked: clickedRef.current,
+      meetsMinimumView: elapsed >= MIN_VIEW_SECONDS_FOR_IMPRESSION,
+    });
+  }
+
+  function handleLearnMore() {
+    clickedRef.current = true;
+    if (ad.click_through_url) {
+      window.open(ad.click_through_url, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  return (
+    <div className="relative w-full h-full bg-black">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={ad.file_url}
+        alt=""
+        className="w-full h-full object-contain"
+        onError={onError}
+      />
+
+      <PrerollChrome
+        canSkip={canSkip}
+        remaining={remaining}
+        onSkip={handleSkip}
+        clickThroughUrl={ad.click_through_url}
+        onLearnMore={handleLearnMore}
+      />
     </div>
   );
 }
@@ -272,7 +401,7 @@ export default function VideoPlayerWithAds({
         if (city) params.set("city", city);
         if (country) params.set("country", country);
 
-        const res = await fetch(`${BACKEND_URL}/api/ads/serve?${params.toString()}`, {
+        const res = await fetch(`/api/ads/serve?${params.toString()}`, {
           signal: controller.signal,
         });
         if (!res.ok) throw new Error(`ad serve failed (${res.status})`);
@@ -280,11 +409,10 @@ export default function VideoPlayerWithAds({
         const data: { ad: AdServeResponse | null } = await res.json();
         if (cancelled) return;
 
-        // Only "video" creatives have a defined pre-roll UI in this
-        // task's spec — an "image" creative has nowhere to render in a
-        // video pre-roll slot, so it's treated the same as no ad at all
-        // (main video plays, no impression fired, since nothing was shown).
-        if (data.ad && data.ad.type === "video") {
+        // Both "video" and "image" creatives have a pre-roll UI (see
+        // VideoPrerollPlayer/ImagePrerollPlayer below) — anything else
+        // (or no ad at all) just plays the main video with no impression.
+        if (data.ad && (data.ad.type === "video" || data.ad.type === "image")) {
           setAd(data.ad);
           setPlayerState("preroll");
         } else {
@@ -316,7 +444,7 @@ export default function VideoPlayerWithAds({
     // Fire-and-forget — never awaited, never blocks the transition to
     // the main video. Errors are swallowed; a missed impression ping
     // is not something to surface to the viewer.
-    fetch(`${BACKEND_URL}/api/ads/impression`, {
+    fetch(`/api/ads/impression`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -352,8 +480,9 @@ export default function VideoPlayerWithAds({
   }
 
   if (playerState === "preroll" && ad) {
+    const PrerollComponent = ad.type === "image" ? ImagePrerollPlayer : VideoPrerollPlayer;
     return (
-      <PrerollPlayer
+      <PrerollComponent
         key={ad.creative_id}
         ad={ad}
         onComplete={handlePrerollComplete}
