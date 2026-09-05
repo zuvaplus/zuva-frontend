@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { UploadCloud, Film, Image as ImageIcon, CheckCircle2, XCircle, Captions, Plus, Trash2, Flame } from "lucide-react";
 import type { UploadedVideo, UploadProcessingStatus, CaptionLanguage, ContentCategory } from "@/lib/types";
 import { getUploadStatus, uploadCaptionTrack } from "@/lib/api";
+import CameraRecorder from "@/components/CameraRecorder";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
 
@@ -28,8 +29,12 @@ const DOC_DISCUSSION_CONTENT_CATEGORIES: ContentCategory[] = [
 ];
 
 const MAX_VIDEO_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
-const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/avi"];
-const ACCEPTED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi"];
+// video/webm added for the camera recorder below — MediaRecorder produces
+// webm on desktop/Android (see CameraRecorder's pickMimeType), and
+// Cloudflare Stream accepts it exactly like mp4/mov/avi, so there's no
+// reason to also reject a .webm file picked manually from the file input.
+const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-msvideo", "video/avi", "video/webm"];
+const ACCEPTED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".webm"];
 
 // Must match FLARE_MAX_DURATION_SECONDS in zuva-backend/zuva-api.js. This
 // client-side check is a fast-fail convenience only — the backend is the
@@ -136,6 +141,9 @@ export default function VideoUploadForm({
   const [containsSyntheticMedia, setContainsSyntheticMedia] = useState<boolean | null>(null);
   const [tags, setTags]               = useState("");
   const [isFlare, setIsFlare]         = useState(false);
+  // Only surfaced once isFlare is on and no video has been chosen yet —
+  // regular long-form uploads keep the original single dropzone unchanged.
+  const [uploadMode, setUploadMode]   = useState<"upload" | "record">("upload");
 
   const [fileError, setFileError]   = useState<string | null>(null);
   const [error, setError]           = useState<string | null>(null);
@@ -246,13 +254,13 @@ export default function VideoUploadForm({
     setPendingCaptions((prev) => prev.filter((c) => c.id !== id));
   }
 
-  async function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
+  // Shared by the file picker and CameraRecorder — a recorded clip is
+  // just a File by the time it gets here (see handleRecordedVideo below),
+  // so from this point on there's no distinction between "picked" and
+  // "recorded" video at all, satisfying the task's own framing of
+  // treating them identically once handed off.
+  async function validateAndSetVideoFile(file: File) {
     setFileError(null);
-    if (!file) {
-      setVideoFile(null);
-      return;
-    }
     if (!isAcceptedVideoFile(file)) {
       setFileError(t("errors.unsupportedType"));
       setVideoFile(null);
@@ -267,7 +275,11 @@ export default function VideoUploadForm({
     // bandwidth. This is a convenience check only; the backend validates
     // against Cloudflare's own reported duration once processing confirms
     // it, since a client-side estimate isn't authoritative (see
-    // probeVideoDuration's comment).
+    // probeVideoDuration's comment). A recording is already capped at
+    // FLARE_MAX_DURATION_SECONDS by CameraRecorder's own auto-stop, so
+    // this should always pass for recorded clips — kept as a real check
+    // anyway rather than skipped, since it's the same trustworthy source
+    // of truth (the file's own reported duration) either way.
     if (isFlare) {
       const duration = await probeVideoDuration(file);
       if (duration !== null && duration > FLARE_MAX_DURATION_SECONDS) {
@@ -277,6 +289,20 @@ export default function VideoUploadForm({
       }
     }
     setVideoFile(file);
+  }
+
+  async function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setFileError(null);
+      setVideoFile(null);
+      return;
+    }
+    await validateAndSetVideoFile(file);
+  }
+
+  async function handleRecordedVideo(file: File) {
+    await validateAndSetVideoFile(file);
   }
 
   // Re-check an already-selected file if the creator flips the toggle
@@ -364,6 +390,7 @@ export default function VideoUploadForm({
     setProcessing(null);
     setPollGaveUp(false);
     setVideoFile(null);
+    setUploadMode("upload");
     setThumbnailFile(null);
     setTitle("");
     setDescription("");
@@ -488,23 +515,68 @@ export default function VideoUploadForm({
       </button>
 
       <Field label={isFlare ? t("fields.videoFileFlare") : t("fields.videoFile")}>
-        <label
-          htmlFor="video-file"
-          className={`flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-4 py-8 cursor-pointer transition-colors
-            ${videoFile ? "border-gold-400/40 bg-gold-400/5" : "border-gold-400/20 hover:border-gold-400/40"}`}
-        >
-          <Film size={24} className="text-gold-400" />
-          <span className="text-sm text-zinc-300 text-center">
-            {videoFile ? videoFile.name : isFlare ? t("chooseVideoFlare") : t("chooseVideo")}
-          </span>
-          <input
-            id="video-file"
-            type="file"
-            accept="video/mp4,video/quicktime,video/x-msvideo,.mp4,.mov,.avi"
-            onChange={handleVideoChange}
-            className="hidden"
-          />
-        </label>
+        {isFlare && videoFile ? (
+          // One unified "chosen video" summary regardless of whether the
+          // file came from the picker or CameraRecorder below — from this
+          // point the form genuinely can't tell the two apart, which is
+          // the point (see validateAndSetVideoFile's comment).
+          <div className="flex items-center justify-between gap-3 border border-gold-400/40 bg-gold-400/5 rounded-xl px-4 py-3.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Film size={20} className="text-gold-400 shrink-0" />
+              <span className="text-sm text-zinc-300 truncate">{videoFile.name}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setVideoFile(null); setFileError(null); }}
+              className="text-zinc-500 hover:text-red-400 text-xs font-semibold shrink-0 transition-colors"
+            >
+              {t("changeVideo")}
+            </button>
+          </div>
+        ) : (
+          <>
+            {isFlare && (
+              <div className="flex gap-2 mb-3">
+                {(["upload", "record"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setUploadMode(mode)}
+                    className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all
+                      ${uploadMode === mode
+                        ? "bg-gold-400 text-black shadow-gold"
+                        : "bg-surface-100 text-zinc-400 border border-gold-400/15 hover:border-gold-400/30"
+                      }`}
+                  >
+                    {mode === "upload" ? t("uploadTab") : t("recordTab")}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {(!isFlare || uploadMode === "upload") ? (
+              <label
+                htmlFor="video-file"
+                className={`flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-4 py-8 cursor-pointer transition-colors
+                  ${videoFile ? "border-gold-400/40 bg-gold-400/5" : "border-gold-400/20 hover:border-gold-400/40"}`}
+              >
+                <Film size={24} className="text-gold-400" />
+                <span className="text-sm text-zinc-300 text-center">
+                  {videoFile ? videoFile.name : isFlare ? t("chooseVideoFlare") : t("chooseVideo")}
+                </span>
+                <input
+                  id="video-file"
+                  type="file"
+                  accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,.mp4,.mov,.avi,.webm"
+                  onChange={handleVideoChange}
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <CameraRecorder maxDurationSeconds={FLARE_MAX_DURATION_SECONDS} onRecorded={handleRecordedVideo} />
+            )}
+          </>
+        )}
         {fileError && <p className="text-red-400 text-xs mt-2">{fileError}</p>}
       </Field>
 

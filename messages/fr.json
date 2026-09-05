@@ -368,7 +368,20 @@
     "uploadAnother": "Mettre en ligne une autre vidéo",
     "postAFlare": "Publier un Flare",
     "postAFlareHint": "Vidéo verticale courte, {seconds} secondes maximum",
-    "chooseVideoFlare": "Cliquez pour choisir une vidéo verticale (MP4, MOV, AVI — jusqu'à 90s)",
+    "chooseVideoFlare": "Cliquez pour choisir une vidéo verticale (MP4, MOV, AVI, WebM — jusqu'à 90s)",
+    "uploadTab": "Mettre en ligne",
+    "recordTab": "Enregistrer",
+    "changeVideo": "Changer de vidéo",
+    "camera": {
+      "permissionDenied": "L'accès à la caméra a été refusé. Autorisez l'accès à la caméra et au microphone dans les paramètres de votre navigateur pour enregistrer un Flare, ou passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "noCameraFound": "Aucune caméra n'a été détectée sur cet appareil. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "unsupported": "L'enregistrement par caméra n'est pas pris en charge par ce navigateur. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "recordButton": "Enregistrer",
+      "stopButton": "Arrêter",
+      "reRecord": "Recommencer",
+      "useRecording": "Utiliser cet enregistrement",
+      "recordingHint": "Enregistrement de {seconds}s maximum"
+    },
     "fields": {
       "videoFile": "Fichier vidéo",
       "videoFileFlare": "Vidéo du Flare",
