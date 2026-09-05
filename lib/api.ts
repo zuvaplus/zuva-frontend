@@ -19,6 +19,7 @@ import type {
   CaptionLanguage,
   CaptionsListResponse,
   FlaresFeedResponse,
+  FlareStoryRowResponse,
   VideoResponse,
   EarningsResponse,
   FiatCurrency,
@@ -301,6 +302,13 @@ export function getFlaresFeed(
   if (opts.exclude?.length) params.set("exclude", opts.exclude.join(","));
   const qs = params.toString();
   return apiFetch<FlaresFeedResponse>(`/api/flares/feed${qs ? `?${qs}` : ""}`, token);
+}
+
+// Followed creators who've posted a Flare in the last 7 days, most recent
+// first — backs the Stories-style row atop /flares. Distinct from
+// getFollowedCreators (all-time follow order, no Flare awareness).
+export function getFlareStoryRow(token: string | null): Promise<FlareStoryRowResponse> {
+  return apiFetch<FlareStoryRowResponse>("/api/flares/story-row", token);
 }
 
 // Fired on swipe-away, loop detection, and periodically during playback —

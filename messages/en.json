@@ -356,8 +356,7 @@
       "tooLarge": "File is too large. Maximum upload size is 2GB.",
       "unreadableResponse": "Upload succeeded but the response could not be read.",
       "uploadFailedStatus": "Upload failed ({status})",
-      "uploadFailedNetwork": "Upload failed. Please check your connection and try again.",
-      "flareTooLong": "Flares must be {max} seconds or under — this video is {actual}s."
+      "uploadFailedNetwork": "Upload failed. Please check your connection and try again."
     },
     "uploadedTitle": "Video uploaded!",
     "uploadedMessage": "Video uploaded successfully and is now live.",
@@ -366,25 +365,8 @@
     "processingVideo": "Processing video…",
     "stillProcessing": "Still processing — this can take a few minutes for larger files. Check My Videos shortly.",
     "uploadAnother": "Upload Another Video",
-    "postAFlare": "Post a Flare",
-    "postAFlareHint": "Short-form vertical video, {seconds} seconds max",
-    "chooseVideoFlare": "Click to choose a vertical video (MP4, MOV, AVI, WebM — up to 90s)",
-    "uploadTab": "Upload",
-    "recordTab": "Record",
-    "changeVideo": "Change video",
-    "camera": {
-      "permissionDenied": "Camera access was denied. Allow camera and microphone access in your browser settings to record a Flare, or switch to Upload to choose a video file instead.",
-      "noCameraFound": "No camera was found on this device. Switch to Upload to choose a video file instead.",
-      "unsupported": "Camera recording isn't supported in this browser. Switch to Upload to choose a video file instead.",
-      "recordButton": "Record",
-      "stopButton": "Stop",
-      "reRecord": "Re-record",
-      "useRecording": "Use This Recording",
-      "recordingHint": "Records up to {seconds}s"
-    },
     "fields": {
       "videoFile": "Video File",
-      "videoFileFlare": "Flare Video",
       "title": "Title",
       "description": "Description",
       "category": "Category",
@@ -756,7 +738,46 @@
     "more": "...more",
     "closeComments": "Close comments",
     "ad": "Ad",
-    "sponsored": "Sponsored"
+    "sponsored": "Sponsored",
+    "yourFlare": "Your Flare",
+    "followHint": "Follow creators to see their Flares here",
+    "camera": {
+      "permissionDenied": "Camera access was denied. Allow camera and microphone access in your browser settings to record a Flare, or switch to Upload to choose a video file instead.",
+      "noCameraFound": "No camera was found on this device. Switch to Upload to choose a video file instead.",
+      "unsupported": "Camera recording isn't supported in this browser. Switch to Upload to choose a video file instead.",
+      "recordButton": "Record",
+      "stopButton": "Stop",
+      "reRecord": "Re-record",
+      "useRecording": "Use This Recording",
+      "recordingHint": "Records up to {seconds}s"
+    },
+    "create": {
+      "title": "New Flare",
+      "close": "Close",
+      "uploadTab": "Upload",
+      "recordTab": "Record",
+      "changeVideo": "Change video",
+      "chooseVideo": "Tap to choose a vertical video (MP4, MOV, AVI, WebM — up to {seconds}s)",
+      "captionPlaceholder": "Add a caption (optional)",
+      "aiDisclosure": {
+        "question": "Does this Flare contain realistic AI-generated or altered content that could be mistaken for real footage or real events?",
+        "hint": "AI-written captions and clearly animated or stylized content do not require this.",
+        "yes": "Yes",
+        "no": "No"
+      },
+      "post": "Post Flare",
+      "posting": "Posting…",
+      "errors": {
+        "unsupportedType": "Unsupported file type. Please choose an MP4, MOV, AVI, or WebM video.",
+        "tooLarge": "File is too large. Maximum upload size is 2GB.",
+        "tooLong": "Flares must be {max} seconds or under — this video is {actual}s.",
+        "videoRequired": "Record or choose a video first.",
+        "disclosureRequired": "Answer the AI-content question before posting.",
+        "unreadableResponse": "Upload succeeded but the response could not be read.",
+        "uploadFailedStatus": "Upload failed ({status})",
+        "uploadFailedNetwork": "Upload failed. Please check your connection and try again."
+      }
+    }
   },
   "Categories": {
     "Comedy": "Comedy",

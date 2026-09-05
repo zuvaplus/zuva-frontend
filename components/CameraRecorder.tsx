@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * In-app camera recording for the Flares upload flow — the "Record" tab
- * alongside VideoUploadForm's existing file-picker "Upload" tab. Mirrors
- * Instagram/TikTok's own record-preview-confirm flow: live camera →
- * recording → local preview (Re-record or confirm) → the confirmed clip
- * is handed back to the parent as a plain File, which VideoUploadForm
- * then runs through the exact same validation/upload path a picked file
- * already goes through (see handleRecordedVideo in that file) — this
- * component has no awareness of uploading at all.
+ * In-app camera recording for the Flares creation bottom sheet — the
+ * "Record" tab alongside FlareCreateSheet's file-picker "Upload" tab.
+ * Mirrors Instagram/TikTok's own record-preview-confirm flow: live
+ * camera → recording → local preview (Re-record or confirm) → the
+ * confirmed clip is handed back to the parent as a plain File, which
+ * FlareCreateSheet then runs through the exact same validation/upload
+ * path a picked file already goes through — this component has no
+ * awareness of uploading at all.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -46,7 +46,7 @@ export default function CameraRecorder({
   maxDurationSeconds: number;
   onRecorded: (file: File) => void;
 }) {
-  const t = useTranslations("VideoUpload.camera");
+  const t = useTranslations("Flares.camera");
 
   const [state, setState] = useState<RecorderState>("requesting");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

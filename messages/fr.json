@@ -356,8 +356,7 @@
       "tooLarge": "Le fichier est trop volumineux. La taille maximale est de 2 Go.",
       "unreadableResponse": "La mise en ligne a réussi, mais la réponse n'a pas pu être lue.",
       "uploadFailedStatus": "Échec de la mise en ligne ({status})",
-      "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez.",
-      "flareTooLong": "Les Flares doivent durer {max} secondes maximum — cette vidéo dure {actual}s."
+      "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez."
     },
     "uploadedTitle": "Vidéo mise en ligne !",
     "uploadedMessage": "Vidéo mise en ligne avec succès et déjà en direct.",
@@ -366,25 +365,8 @@
     "processingVideo": "Traitement de la vidéo…",
     "stillProcessing": "Traitement toujours en cours — cela peut prendre quelques minutes pour les fichiers volumineux. Vérifiez « Mes vidéos » sous peu.",
     "uploadAnother": "Mettre en ligne une autre vidéo",
-    "postAFlare": "Publier un Flare",
-    "postAFlareHint": "Vidéo verticale courte, {seconds} secondes maximum",
-    "chooseVideoFlare": "Cliquez pour choisir une vidéo verticale (MP4, MOV, AVI, WebM — jusqu'à 90s)",
-    "uploadTab": "Mettre en ligne",
-    "recordTab": "Enregistrer",
-    "changeVideo": "Changer de vidéo",
-    "camera": {
-      "permissionDenied": "L'accès à la caméra a été refusé. Autorisez l'accès à la caméra et au microphone dans les paramètres de votre navigateur pour enregistrer un Flare, ou passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
-      "noCameraFound": "Aucune caméra n'a été détectée sur cet appareil. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
-      "unsupported": "L'enregistrement par caméra n'est pas pris en charge par ce navigateur. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
-      "recordButton": "Enregistrer",
-      "stopButton": "Arrêter",
-      "reRecord": "Recommencer",
-      "useRecording": "Utiliser cet enregistrement",
-      "recordingHint": "Enregistrement de {seconds}s maximum"
-    },
     "fields": {
       "videoFile": "Fichier vidéo",
-      "videoFileFlare": "Vidéo du Flare",
       "title": "Titre",
       "description": "Description",
       "category": "Catégorie",
@@ -756,7 +738,46 @@
     "more": "...plus",
     "closeComments": "Fermer les commentaires",
     "ad": "Pub",
-    "sponsored": "Sponsorisé"
+    "sponsored": "Sponsorisé",
+    "yourFlare": "Votre Flare",
+    "followHint": "Suivez des créateurs pour voir leurs Flares ici",
+    "camera": {
+      "permissionDenied": "L'accès à la caméra a été refusé. Autorisez l'accès à la caméra et au microphone dans les paramètres de votre navigateur pour enregistrer un Flare, ou passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "noCameraFound": "Aucune caméra n'a été détectée sur cet appareil. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "unsupported": "L'enregistrement par caméra n'est pas pris en charge par ce navigateur. Passez à l'onglet « Mettre en ligne » pour choisir un fichier vidéo à la place.",
+      "recordButton": "Enregistrer",
+      "stopButton": "Arrêter",
+      "reRecord": "Recommencer",
+      "useRecording": "Utiliser cet enregistrement",
+      "recordingHint": "Enregistrement de {seconds}s maximum"
+    },
+    "create": {
+      "title": "Nouveau Flare",
+      "close": "Fermer",
+      "uploadTab": "Mettre en ligne",
+      "recordTab": "Enregistrer",
+      "changeVideo": "Changer de vidéo",
+      "chooseVideo": "Touchez pour choisir une vidéo verticale (MP4, MOV, AVI, WebM — jusqu'à {seconds}s)",
+      "captionPlaceholder": "Ajouter une légende (facultatif)",
+      "aiDisclosure": {
+        "question": "Ce Flare contient-il un contenu réaliste généré ou modifié par IA qui pourrait être confondu avec des images ou événements réels ?",
+        "hint": "Les légendes écrites par IA et le contenu clairement animé ou stylisé ne nécessitent pas cette déclaration.",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "post": "Publier le Flare",
+      "posting": "Publication…",
+      "errors": {
+        "unsupportedType": "Type de fichier non pris en charge. Choisissez une vidéo MP4, MOV, AVI ou WebM.",
+        "tooLarge": "Le fichier est trop volumineux. La taille maximale est de 2 Go.",
+        "tooLong": "Les Flares doivent durer {max} secondes maximum — cette vidéo dure {actual}s.",
+        "videoRequired": "Enregistrez ou choisissez d'abord une vidéo.",
+        "disclosureRequired": "Répondez à la question sur le contenu IA avant de publier.",
+        "unreadableResponse": "La mise en ligne a réussi, mais la réponse n'a pas pu être lue.",
+        "uploadFailedStatus": "Échec de la mise en ligne ({status})",
+        "uploadFailedNetwork": "Échec de la mise en ligne. Vérifiez votre connexion et réessayez."
+      }
+    }
   },
   "Categories": {
     "Comedy": "Comédie",

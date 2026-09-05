@@ -304,6 +304,23 @@ export interface FlaresFeedResponse {
   nextCursor: string | null;
 }
 
+// Followed creators who've posted a Flare in the last 7 days, most recent
+// first — backs the Instagram-Stories-style row atop /flares. Distinct
+// from FollowedCreator (all follows, no Flare awareness).
+export interface FlareStoryCreator {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  latest_flare_id: string;
+  latest_flare_at: string;
+}
+
+export interface FlareStoryRowResponse {
+  success: boolean;
+  creators: FlareStoryCreator[];
+}
+
 // A sponsored-ad marker interleaved into a rendered Flares list — see
 // withSponsoredFlareSlots in lib/utils.ts. Discriminated from a real
 // FlareItem by the `isAd` flag; carries no video data since it's never
